@@ -42,6 +42,8 @@ Decisions:
   show Indian weddings; the rest are generic. Replace before any client review.
 - Sample film clip is the MDN CC0 `flower.mp4`; real previews should be about 10 s, muted, in a local folder.
 - Page transitions use a Motion fade through `template.tsx`, not React ViewTransition yet.
+- Verified at 390px and 1440px with headless Chrome: no horizontal overflow, no console errors. On this machine
+  port 3000 is held by another process, so `next dev` runs on http://localhost:3001.
 
 Known gaps / next up:
 - Step 2: Navbar (Vendors mega-menu with six categories, centre logo, search, Saved, List Your Business),
