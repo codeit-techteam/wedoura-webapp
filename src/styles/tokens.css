@@ -1,0 +1,118 @@
+/*
+  Wedoura design tokens. Source of truth: docs/reference/brief.md.
+  Tailwind v4 reads @theme and generates utilities (bg-ivory, text-mute,
+  font-serif, tracking-label, ease-wedoura ...). Keep every colour, type
+  size, easing and duration here; components never hard-code them.
+*/
+
+@theme {
+  /* Colour: mostly black and white, photographs supply the colour. */
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-ivory: #f6f2ea;
+  --color-ink: #161616;
+  --color-mute: #6b665d;
+  --color-line: #ddd6c8;
+  --color-gold: #a8864a; /* small marks only; 3.5:1 on white, fails AA for body text */
+  --color-black: #000000;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* No shadows, square corners. */
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --radius-*: initial;
+  --radius-none: 0;
+  --radius-full: 9999px; /* only for round icon buttons */
+
+  /* Type: Cormorant Garamond for headlines, Jost for body and labels.
+     The font variables are set by next/font in src/styles/fonts.ts. */
+  --font-*: initial;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  /* Type scale, mobile first. Body is never under 16px. */
+  --text-*: initial;
+  --text-display: clamp(2.75rem, 2rem + 4.5vw, 6rem);
+  --text-display--line-height: 1.02;
+  --text-h1: clamp(2.5rem, 1.75rem + 3.6vw, 4.5rem);
+  --text-h1--line-height: 1.05;
+  --text-h2: clamp(2.125rem, 1.5rem + 2.8vw, 3.75rem);
+  --text-h2--line-height: 1.08;
+  --text-h3: clamp(1.625rem, 1.3rem + 1.2vw, 2.125rem);
+  --text-h3--line-height: 1.15;
+  --text-lead: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  --text-lead--line-height: 1.45;
+  --text-body: 1rem;
+  --text-body--line-height: 1.7;
+  --text-body-lg: 1.0625rem;
+  --text-body-lg--line-height: 1.7;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.6;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.4;
+  --text-label-lg: 0.75rem;
+  --text-label-lg--line-height: 1.4;
+
+  --tracking-*: initial;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wordmark: 0.42em;
+  --tracking-label: 0.28em;
+  --tracking-nav: 0.24em;
+  --tracking-caps: 0.08em;
+
+  /* Rhythm. --spacing stays 0.25rem so p-4, gap-6 ... work as usual. */
+  --spacing-section: clamp(5rem, 11vw, 9.5rem);
+  --spacing-section-sm: clamp(3.5rem, 7vw, 6rem);
+  --spacing-gutter: clamp(1rem, 3.5vw, 3rem);
+  --container-site: 85rem; /* 1360px */
+  --container-prose: 42rem;
+
+  /* Breakpoints the brief designs for: 390 (base), 768, 1440. */
+  --breakpoint-*: initial;
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 90rem;
+
+  /* Motion. One easing, long and quiet. */
+  --ease-*: initial;
+  --ease-wedoura: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-linear: linear;
+
+  --animate-*: initial;
+}
+
+/* next/font variables, mapped inline so the utilities resolve on any node. */
+@theme inline {
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-jost), Jost, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Motion constants from the brief, readable from CSS and from JS
+   (see src/lib/motion.ts). Reduced motion zeroes the movement. */
+:root {
+  --motion-rise: 24px;
+  --motion-duration: 0.9s;
+  --motion-duration-zoom: 1.2s;
+  --motion-zoom: 1.04;
+  --motion-parallax: 6%;
+  --motion-page: 0.45s;
+  --tap-target: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-rise: 0px;
+    --motion-duration: 0.01s;
+    --motion-duration-zoom: 0.01s;
+    --motion-zoom: 1;
+    --motion-parallax: 0%;
+    --motion-page: 0.01s;
+  }
+}
