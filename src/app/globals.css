@@ -7,9 +7,12 @@
     color: var(--color-ink);
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: calc(var(--nav-h) + 1rem);
+    /* Clip, not hidden: no scroll container, so position: sticky keeps
+       working. Stops horizontal rails leaking into the page scroll area. */
+    overflow-x: clip;
   }
 
-  /* Jost 400 on phones, where 300 gets thin; 300 from tablets up. */
+  /* DM Sans 400 everywhere; 500 is for emphasis only. 17px -> 18px at md. */
   body {
     font-family: var(--font-sans);
     font-weight: 400;
@@ -17,21 +20,23 @@
     line-height: var(--text-body--line-height);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
   }
 
   @media (min-width: 48rem) {
     body {
-      font-weight: 300;
       font-size: var(--text-body-lg);
     }
   }
 
+  /* Instrument Serif ships one weight; headlines are regular, tight. */
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-serif);
-    font-weight: 300;
+    font-weight: 400;
+    letter-spacing: var(--tracking-tight);
     text-wrap: balance;
   }
 
@@ -96,8 +101,8 @@
 
 @utility nav-link {
   font-family: var(--font-sans);
-  font-size: var(--text-label);
-  line-height: var(--text-label--line-height);
+  font-size: var(--text-label-lg); /* 15px */
+  line-height: var(--text-label-lg--line-height);
   font-weight: 400;
   letter-spacing: var(--tracking-nav);
   text-transform: uppercase;
@@ -118,6 +123,27 @@
 
 @utility hairline {
   border-top: 1px solid var(--color-line);
+}
+
+/* Rails hide the native scrollbar; drag, arrows and a progress line remain. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Links whose underline draws in from the left on hover or focus. */
+@utility link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 1px;
+  transition: background-size var(--motion-duration-chrome) var(--ease-wedoura);
+  &:hover,
+  &:focus-visible {
+    background-size: 100% 1px;
+  }
 }
 
 @utility tap {

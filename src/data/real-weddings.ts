@@ -5,7 +5,7 @@ export const realWeddings: RealWedding[] = [
   {
     slug: "sample-udaipur-lake-wedding",
     title: "Three days by the lake",
-    couple: "A. & R. (sample story)",
+    couple: "A. & R.",
     city: "udaipur",
     date: "2026-02-14",
     excerpt: "Sample story. A mehendi on the terrace, pheras at sunrise and a dinner that ran until the birds started.",
@@ -28,15 +28,15 @@ export const realWeddings: RealWedding[] = [
       },
     ],
     credits: [
-      { role: "Photography", vendorSlug: "aperture-marigold-sample", name: "Aperture & Marigold (sample)" },
-      { role: "Decor", vendorSlug: "petal-and-thread-sample", name: "Petal & Thread (sample)" },
+      { role: "Photography", vendorSlug: "aperture-marigold-sample", name: "Aperture & Marigold" },
+      { role: "Decor", vendorSlug: "petal-and-thread-sample", name: "Petal & Thread" },
     ],
     featured: true,
   },
   {
     slug: "sample-goa-beach-wedding",
     title: "Barefoot in Goa",
-    couple: "M. & S. (sample story)",
+    couple: "M. & S.",
     city: "goa",
     date: "2025-12-06",
     excerpt: "Sample story. Forty guests, one house, and a ceremony on the lawn as the tide came in.",
@@ -46,14 +46,14 @@ export const realWeddings: RealWedding[] = [
       { title: "The lawn", text: ["Sample copy. Vows at five, dinner at seven, dancing by nine."], photos: [photos.p27, photos.p08] },
     ],
     credits: [
-      { role: "Venue", vendorSlug: "courtyard-house-sample", name: "The Courtyard House (sample)" },
-      { role: "Catering", vendorSlug: "coastal-table-sample", name: "Coastal Table (sample)" },
+      { role: "Venue", vendorSlug: "courtyard-house-sample", name: "The Courtyard House" },
+      { role: "Catering", vendorSlug: "coastal-table-sample", name: "Coastal Table" },
     ],
   },
   {
     slug: "sample-jaipur-dusk-wedding",
     title: "Pheras at dusk",
-    couple: "N. & K. (sample story)",
+    couple: "N. & K.",
     city: "jaipur",
     date: "2025-11-22",
     excerpt: "Sample story. A pink-and-white mandap, a baraat with twelve dhols and a very long night.",
@@ -63,8 +63,8 @@ export const realWeddings: RealWedding[] = [
       { title: "The mandap", text: ["Sample copy. Built in a day from marigold and muslin."], photos: [photos.p20, photos.p29] },
     ],
     credits: [
-      { role: "Films", vendorSlug: "saffron-frames-sample", name: "Saffron Frames (sample)" },
-      { role: "Music", vendorSlug: "dhol-and-brass-sample", name: "Dhol & Brass (sample)" },
+      { role: "Films", vendorSlug: "saffron-frames-sample", name: "Saffron Frames" },
+      { role: "Music", vendorSlug: "dhol-and-brass-sample", name: "Dhol & Brass" },
     ],
   },
 ];

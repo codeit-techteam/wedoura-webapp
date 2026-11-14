@@ -29,7 +29,7 @@ export function Heading({ level = 2, size, children, className, id }: Props) {
   const Tag = `h${level}` as const;
   const visual = size ?? ((`h${level}` in sizes ? `h${level}` : "h3") as Size);
   return (
-    <Tag id={id} className={cn("font-serif font-light", sizes[visual], className)}>
+    <Tag id={id} className={cn("font-serif", sizes[visual], className)}>
       {children}
     </Tag>
   );

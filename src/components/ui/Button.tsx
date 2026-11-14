@@ -29,8 +29,8 @@ const styles: Record<Variant, Record<Tone, string>> = {
     white: "border border-white text-white px-8 py-4 hover:bg-white hover:text-ink",
   },
   link: {
-    ink: "min-w-0 border-b border-gold pb-1 text-ink hover:text-mute",
-    white: "min-w-0 border-b border-white/70 pb-1 text-white hover:border-white",
+    ink: "link-draw min-w-0 pb-1 text-ink",
+    white: "link-draw min-w-0 pb-1 text-white",
   },
 };
 

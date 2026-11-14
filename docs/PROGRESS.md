@@ -19,6 +19,44 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-14 · Session 4: design overhaul (type, layout, motion) — homepage v2
+
+Done:
+- Typography: Instrument Serif replaces Cormorant (regular weight, tracking −0.02em, display up to 120px,
+  section titles up to 72px); DM Sans replaces Jost (400, 500 for emphasis; body 17/18px). Nothing under 14px;
+  nav links 15px; labels 14px with reduced tracking; muted text darkened to #4A4640. Container is 1680px with
+  24→40px gutters; photo bands use the 1920px near-full-bleed container. Styleguide copy updated.
+- Homepage v2, photo-dominant, one headline per section: crossfading three-photo hero with slow zoom, line-mask
+  headline, search and category quick links, content easing back on scroll; six full-width category tiles that
+  widen on hover (snap carousel on phones); featured vendors as category tabs (sliding underline) over a
+  near-edge grid of 3/4 cards with save buttons and hover photo-cycling; real weddings as a pinned horizontal
+  scroll with a progress line (swipe carousel on phones/reduced motion); films dark section where the first
+  film grows to near full-screen while pinned; six-city photo mosaic with uneven tiles; slim three-line Why
+  band; three large blog cards; FAQ; List-your-business band.
+- Motion: `MaskedHeading` (line-by-line mask reveal), `ImageReveal` (clip-path wipe + settle), `RailProgress`
+  (thin line replacing hidden scrollbars, `no-scrollbar`), `link-draw` underline draw-in; transform, opacity
+  and clip-path only; carousels/static fallbacks under reduced motion.
+- Data: 5 new sample vendors (12 total, every category ≥2); "(sample)" stripped from names, prices, couples and
+  film titles (the footer note remains); the remote flower clip removed — films are poster-only (`previewSrc`/
+  `fullSrc` empty, components hide the player and let the poster breathe) until real clips land in
+  `public/photos/incoming`.
+- Bug fixed during verification: `FilmPreview`'s `sr-only` figcaption (absolutely positioned) resolved against
+  the page root because the figure was unpositioned, silently widening the root scroll area by 277px at 390px.
+  The figure is now `relative`, and `overflow-x: clip` on html/body guards against rail leaks without breaking
+  `position: sticky`.
+
+Decisions:
+- Pinned sections render their desktop variant only from `md` and fall back to carousels under reduced motion.
+- Full-page screenshots flatten the pinned sections into blank stretches; that is a capture artifact, not a
+  layout gap. This session captures only `docs/screenshots/home-v2/home-full-{390,1440}.png` by design.
+- Old home components (CategoriesShowcase, VendorRail, WeddingsEditorial, FilmsBand, CitiesIndex) deleted.
+
+Known gaps / next up:
+- Step 4, the vendor profile; `/vendors` must read `category`, `city` and `q`.
+- Real film clips and the client's logo; restyle pass over the inner placeholder pages with the new type.
+- The screenshot suite's non-home checks still reference v1 behaviours (vendors-panel capture etc.) and should
+  be re-run and pruned next session.
+
 ### 2026-11-14 · Session 3: photographs, copy, git hygiene and the homepage
 
 Done:

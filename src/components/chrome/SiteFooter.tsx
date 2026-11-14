@@ -100,7 +100,7 @@ export function SiteFooter() {
 
       {/* Closing gesture: the wordmark set very large across the bottom. */}
       <div aria-hidden="true" className="overflow-hidden">
-        <p className="-mb-[0.18em] text-center font-serif text-mega font-light tracking-caps text-ink/90 uppercase select-none">
+        <p className="-mb-[0.18em] text-center font-serif text-mega tracking-caps text-ink/90 uppercase select-none">
           Wedoura
         </p>
       </div>

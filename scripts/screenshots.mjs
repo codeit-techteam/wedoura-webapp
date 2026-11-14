@@ -206,7 +206,7 @@ await session(1920, 1000, false, async (page, shot) => {
 const HOME_OUT = join(OUT, "home");
 mkdirSync(HOME_OUT, { recursive: true });
 const HOME_SECTIONS = [
-  ["hero", "main > section:first-of-type"],
+  ["hero", 'section[aria-label="Welcome"]'],
   ["categories", 'section[aria-label="Vendor categories"]'],
   ["featured-vendors", 'section[aria-label="Featured vendors"]'],
   ["real-weddings", 'section[aria-label="Real weddings"]'],

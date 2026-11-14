@@ -30,7 +30,7 @@ export function MobileMenu({ open, onClose, onSearch, categories }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
   useFocusTrap(rootRef, open, closeRef);
 
-  const big = "inline-flex tap items-center font-serif text-menu font-light text-ink";
+  const big = "inline-flex tap items-center font-serif text-menu text-ink";
 
   return (
     <AnimatePresence>

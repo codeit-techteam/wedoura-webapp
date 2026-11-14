@@ -83,7 +83,7 @@ export function SearchOverlay({ open, onClose, categories, cities }: Props) {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Photographers in Udaipur"
-                className="w-full min-w-0 bg-transparent font-serif text-search font-light outline-none placeholder:text-mute/50"
+                className="w-full min-w-0 bg-transparent font-serif text-search outline-none placeholder:text-mute/50"
               />
               <button type="submit" aria-label="Search" className="inline-flex tap items-center justify-center transition-chrome hover:opacity-70">
                 <Icon name="arrow-right" size={28} />

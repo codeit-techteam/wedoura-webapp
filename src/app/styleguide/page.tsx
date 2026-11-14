@@ -117,8 +117,8 @@ export default async function StyleguidePage() {
             <Label>02</Label>
             <Heading className="mt-3">Type</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Cormorant Garamond, light and regular, with one italic word for emphasis. Jost for body and labels: 400 on
-              phones, where 300 gets thin, and 300 from tablets up. Body text never drops below 16px.
+              Instrument Serif, regular with one italic word for emphasis, set large and tight. DM Sans for body and
+              labels: 400 everywhere, 500 for emphasis. Body text never drops below 17px; nothing is under 14px.
             </Text>
           </Reveal>
           <div className="mt-12">
@@ -149,7 +149,7 @@ export default async function StyleguidePage() {
             </Specimen>
             <Specimen label="Body">
               <Text className="max-w-prose">
-                Body text is Jost, 400 at 16px on phones and 300 at 17px from tablets up, with a line height of 1.7.
+                Body text is DM Sans 400, 17px on phones and 18px from tablets up, with a line height of 1.6.
                 Paragraphs stay under 42rem so lines remain comfortable. Sample content on the site is always
                 labelled as sample.
               </Text>

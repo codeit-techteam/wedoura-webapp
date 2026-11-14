@@ -18,7 +18,9 @@ type Props = {
 /**
  * Motion 5: a short muted preview that plays while in view and pauses off
  * screen, with a "Watch the film" button that opens the full film.
- * Under reduced motion the poster stays still.
+ * With no clip yet (empty previewSrc), the poster breathes with a slow zoom
+ * instead; with no fullSrc, the button and player are hidden.
+ * Under reduced motion everything stays still.
  */
 export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
   const ref = useRef<HTMLElement>(null);
@@ -27,6 +29,8 @@ export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
   const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const hasPreview = film.previewSrc.length > 0;
+  const hasFull = film.fullSrc.length > 0;
 
   // The effect only drives the element; `playing` follows the video's own
   // play/pause events so the poster fades out exactly when frames appear.
@@ -59,43 +63,54 @@ export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
   const ratio = `${film.poster.width} / ${film.poster.height}`;
 
   return (
-    <figure ref={ref} className={cn("group", className)}>
+    <figure ref={ref} className={cn("group relative", className)}>
       <div className="relative overflow-hidden bg-ink" style={{ aspectRatio: ratio }}>
-        <Photo photo={film.poster} sizes={sizes} mode="cover" />
-        <video
-          ref={videoRef}
-          src={film.previewSrc}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-          tabIndex={-1}
-          onPlaying={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-          onEmptied={() => setPlaying(false)}
+        <Photo
+          photo={film.poster}
+          sizes={sizes}
+          mode="cover"
           className={cn(
-            "absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-wedoura",
-            playing ? "opacity-100" : "opacity-0",
+            // No clip yet: the poster breathes while in view instead.
+            !hasPreview && !reduce && "transition-transform duration-6000 ease-wedoura",
+            !hasPreview && !reduce && inView && "scale-106",
           )}
         />
+        {hasPreview && (
+          <video
+            ref={videoRef}
+            src={film.previewSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            tabIndex={-1}
+            onPlaying={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onEmptied={() => setPlaying(false)}
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-wedoura",
+              playing ? "opacity-100" : "opacity-0",
+            )}
+          />
+        )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/60 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-4 p-5 text-white md:flex-row md:items-end md:justify-between md:p-8">
           <div className="min-w-0">
             {eyebrow && <p className="label text-white/80">{eyebrow}</p>}
             <p className="mt-1 font-serif text-h3 leading-tight text-balance">{film.title}</p>
           </div>
-          <Button variant="outline" tone="white" onClick={() => setOpen(true)} className="shrink-0 px-5">
-            Watch the film
-          </Button>
+          {hasFull && (
+            <Button variant="outline" tone="white" onClick={() => setOpen(true)} className="shrink-0 px-5">
+              Watch the film
+            </Button>
+          )}
         </div>
       </div>
-      <figcaption className="sr-only">
-        {film.title}, {Math.round(film.durationSec)} second sample film
-      </figcaption>
+      <figcaption className="sr-only">{film.title}, sample film</figcaption>
 
       <AnimatePresence>
-        {open && (
+        {open && hasFull && (
           <motion.div
             role="dialog"
             aria-modal="true"
