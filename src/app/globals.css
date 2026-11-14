@@ -147,6 +147,32 @@
   transition-timing-function: var(--ease-wedoura);
 }
 
+/* The hero's small scroll cue: a thin vertical line that draws itself and a
+   quiet label. Removed entirely under reduced motion. */
+.scroll-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+.scroll-cue::after {
+  content: "";
+  width: 1px;
+  height: 3.5rem;
+  background: var(--color-white);
+  opacity: 0.7;
+  transform-origin: top;
+  animation: scroll-cue-draw 2.4s var(--ease-wedoura) infinite;
+}
+@keyframes scroll-cue-draw {
+  0% { transform: scaleY(0); }
+  45% { transform: scaleY(1); transform-origin: top; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue::after { animation: none; }
+}
+
 /* Navbar theme over a dark hero: any page that renders an element with
    data-nav-dark gets a transparent, white-text navbar until it scrolls or
    opens a panel. Pure CSS, so it survives client navigation. */

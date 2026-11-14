@@ -51,8 +51,8 @@ export function SiteFooter() {
           <div>
             <Wordmark size="footer" />
             <Text tone="mute" className="mt-5 max-w-xs">
-              Wedding vendors across India, shown through their work. Browse, shortlist, then write to the people
-              who will be there on the day.
+              Wedding vendors across India. See their real work, shortlist the ones you love, and talk to them
+              directly.
             </Text>
             <ul className="mt-8 flex items-center gap-2" aria-label="Social">
               {socials.map((social) => (
@@ -97,6 +97,13 @@ export function SiteFooter() {
           <Label>Sample content while the site is being built.</Label>
         </div>
       </Container>
+
+      {/* Closing gesture: the wordmark set very large across the bottom. */}
+      <div aria-hidden="true" className="overflow-hidden">
+        <p className="-mb-[0.18em] text-center font-serif text-mega font-light tracking-caps text-ink/90 uppercase select-none">
+          Wedoura
+        </p>
+      </div>
     </footer>
   );
 }

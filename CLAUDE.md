@@ -17,6 +17,8 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
 
 ## Rules that matter
 
+- **Never run `git commit` or `git push`.** The user commits and pushes themselves. Leave all work in the
+  working tree.
 - **Never open `docs/reference/*.html` whole.** They are 2 MB of base64 images. Use `docs/reference/extracted/`
   (`tokens.md`, `*.markup.html`, `*.css`, `*.js`). Mockups are for tone and section ideas; the brief wins on values.
 - **Data flows one way.** Pages and components import content only from `@/lib/api` (async functions). Only
@@ -68,7 +70,8 @@ src/app            routes (layout, template, styleguide, placeholders for every 
 src/components/ui  Heading, Label, Text, Button, Hairline, Container, Section, Icon
 src/components/chrome  Navbar (+SiteHeader), VendorsPanel, SearchOverlay, MobileMenu, BottomBar, SiteFooter, Wordmark, Placeholder
 src/components/media   Photo, PhotoCard, CardRow, FilmPreview
-src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer
+src/components/home    HeroSearch, CategoriesShowcase, VendorRail, WeddingsEditorial, FilmsBand, CitiesIndex, FaqAccordion
+src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis)
 src/data           typed sample content (types.ts, photos.ts generated)
 src/lib            api.ts (data access), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
 src/styles         tokens.css, fonts.ts

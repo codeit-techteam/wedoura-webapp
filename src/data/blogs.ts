@@ -9,7 +9,7 @@ export const blogPosts: BlogPost[] = [
     category: "Planning",
     date: "2026-01-10",
     readMinutes: 6,
-    cover: photos.p01,
+    cover: photos.p13,
     body: [
       {
         paragraphs: [
@@ -21,7 +21,7 @@ export const blogPosts: BlogPost[] = [
         paragraphs: [
           "Sample copy. Studios send different teams. Make sure the person whose work you liked is the person who turns up.",
         ],
-        photo: photos.p08,
+        photo: photos.p14,
       },
     ],
   },
@@ -32,7 +32,7 @@ export const blogPosts: BlogPost[] = [
     category: "Venues",
     date: "2025-12-18",
     readMinutes: 8,
-    cover: photos.p12,
+    cover: photos.p24,
     body: [{ paragraphs: ["Sample copy. Udaipur works for eighty guests or eight hundred, but not with the same venue."] }],
   },
   {
@@ -42,7 +42,7 @@ export const blogPosts: BlogPost[] = [
     category: "Decor",
     date: "2025-11-30",
     readMinutes: 4,
-    cover: photos.p09,
-    body: [{ paragraphs: ["Sample copy. Afternoon light is hard. Shade first, then colour."], photo: photos.p05 }],
+    cover: photos.p37,
+    body: [{ paragraphs: ["Sample copy. Afternoon light is hard. Shade first, then colour."], photo: photos.p36 }],
   },
 ];

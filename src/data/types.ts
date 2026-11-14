@@ -11,6 +11,8 @@ export interface Photo {
   width: number;
   height: number;
   alt: string;
+  /** Photographer and source for sample images, e.g. "Alok Verma / Unsplash". */
+  credit?: string;
   blurDataURL: string;
 }
 

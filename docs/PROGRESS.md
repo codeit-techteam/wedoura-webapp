@@ -8,7 +8,7 @@ Update this file at the end of every session. Build order follows `docs/referenc
 |---|---|---|
 | 1 | Foundations: scaffold, tokens, styleguide page, base components | ✅ Done (2026-11-14) |
 | 2 | Navbar, mobile bar, footer | ✅ Done (2026-11-14) |
-| 3 | Homepage | ⬜ |
+| 3 | Homepage | ✅ Done (2026-11-14) |
 | 4 | Vendor profile | ⬜ |
 | 5 | Vendor listing | ⬜ |
 | 6 | Real weddings listing and story page | ⬜ |
@@ -18,6 +18,53 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 10 | Polish pass: motion, speed, accessibility, small screens | ⬜ |
 
 ## Session log
+
+### 2026-11-14 · Session 3: photographs, copy, git hygiene and the homepage
+
+Done:
+- Git: the three local commits were rewritten to remove the Claude attribution trailer (nothing was pushed;
+  authorship unchanged). `.claude/settings.json` sets `includeCoAuthoredBy: false`, and CLAUDE.md now says
+  Claude never commits or pushes; the user does both.
+- Photographs: all 17 generic placeholders replaced with 46 Indian wedding photographs (p01–p46) from Unsplash
+  and Pexels, each reviewed before use: ceremonies (mandaps, pheras, haldi, Bengali rites), portraits, decor,
+  venues (fort and palace courtyards, poolside, seaside) and details (mehndi, jewellery, garlands).
+  `alt.json` entries are now `{ alt, credit }`; `scripts/photos.mjs` passes `credit` through and `Photo` has an
+  optional `credit` field. Sources and licences are tabled in `public/photos/README.md`. All sample data
+  re-pointed to fitting photos (venue vendor gets venues, decor gets mandaps, and so on); the Iceland honeymoon
+  destination became Rajasthan to fit the photo set.
+- Copy: every visible line rewritten in a plain, warm voice for couples. "The work, seen whole", "Made for
+  your phone" and similar design-language lines are gone from the hero, promises, footer, metadata and
+  styleguide. Promises are now: see the real work first; talk to the person, not a desk; no made-up numbers.
+- Homepage (step 3), ten sections, each with its own composition: full-screen hero with a bottom-left headline
+  over a corner gradient (focal point per photo via `objectPosition`), a Where/Who/Search bar docked at the
+  hero's base routing to `/vendors?city=&category=`, and a small scroll cue; categories as a serif index that
+  crossfades a photograph on hover/focus (snap-scroll cards on phones); featured vendors as a drag-and-snap
+  rail of triptychs with arrow buttons from `md`; real weddings as one cover story (parallax, headline
+  overlapping the image edge, photographer credit) plus two offset stories; a films band on ink (the one dark
+  section) with previews that play muted in view; cities as a serif list with a pointer-following photo
+  (two-column grid on phones); Why Wedoura as three numbered statements beside the haldi photograph with a
+  caption and credit line; the blog as a hairline editorial list; an FAQ accordion (`id="faq"`, smooth
+  height animation, first use of `getSiteFaq`); and a full-width List-your-business band.
+- Motion: Lenis 1.3.27 smooth scrolling driven from Motion's frame loop (`SmoothScroll` in the root layout);
+  Lenis ≥1.3.26 disables itself under reduced motion, `anchors: true` keeps `/#faq` working. Reveals stagger
+  inside sections; parallax only on the wedding cover; `--text-mega` token added for the footer's oversized
+  WEDOURA wordmark, which now closes the page.
+- Screenshots: `scripts/screenshots.mjs` gained a home session (full pages at 390/1440 plus one capture per
+  section into `docs/screenshots/home/`, overflow and FAQ checks). Page loads now wait for `load` instead of
+  `networkidle0` because the sample film URL can hold connections open. 43/43 checks pass, no console errors.
+
+Decisions:
+- Hero photo is p23 (palace terraces, quiet sky top-left) with `objectPosition "64% 38%"`; legibility comes
+  from a bottom-up gradient plus a left-edge gradient rather than one full-frame wash.
+- Photos are served at 2000px on the long edge, JPEG quality 80 (mozjpeg), portraits capped at 2400px tall.
+- Films still use the CC0 flower clip for preview and full film; posters are now venue photographs, so the
+  playing preview will not match its poster until real clips arrive.
+
+Known gaps / next up:
+- Step 4, the vendor profile. `/vendors` (step 5) must read `category`, `city` and `q` — the hero search,
+  vendors panel, cities and categories sections all link with those params.
+- Real film clips (about 10 s, local files); logo file from the client.
+- The styleguide still shows the old card samples; refresh it when components settle.
 
 ### 2026-11-14 · Session 2: foundation fixes and site chrome
 

@@ -11,7 +11,7 @@ export const films: Film[] = [
     title: "A lake-palace morning (sample film)",
     previewSrc: SAMPLE_CLIP,
     fullSrc: SAMPLE_CLIP,
-    poster: photos.p12,
+    poster: photos.p24,
     durationSec: 15,
   },
   {
@@ -19,7 +19,7 @@ export const films: Film[] = [
     title: "Barefoot in Goa (sample film)",
     previewSrc: SAMPLE_CLIP,
     fullSrc: SAMPLE_CLIP,
-    poster: photos.p16,
+    poster: photos.p08,
     durationSec: 15,
   },
   {
@@ -27,7 +27,7 @@ export const films: Film[] = [
     title: "Pheras at dusk (sample film)",
     previewSrc: SAMPLE_CLIP,
     fullSrc: SAMPLE_CLIP,
-    poster: photos.p10,
+    poster: photos.p21,
     durationSec: 15,
   },
 ];

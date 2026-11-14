@@ -3,17 +3,20 @@ import { BottomBar } from "@/components/chrome/BottomBar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { MotionProvider } from "@/components/motion/MotionProvider";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { cormorant, jost } from "@/styles/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  ),
   title: {
     default: "Wedoura · Wedding vendors across India",
     template: "%s · Wedoura",
   },
   description:
-    "Photographers, films, venues, makeup, decor, catering and entertainment for weddings across India. Browse the work, then send an inquiry.",
+    "Find wedding photographers, venues, makeup artists, decorators, caterers and musicians across India. See their real work, then talk to them directly.",
   openGraph: {
     type: "website",
     siteName: "Wedoura",
@@ -33,12 +36,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${cormorant.variable} ${jost.variable} h-full`}>
       <body className="flex min-h-full flex-col bg-white text-ink">
         <MotionProvider>
-          <SiteHeader />
-          <div className="flex flex-1 flex-col pb-bottombar">
-            <div className="flex flex-1 flex-col">{children}</div>
-            <SiteFooter />
-          </div>
-          <BottomBar />
+          <SmoothScroll>
+            <SiteHeader />
+            <div className="flex flex-1 flex-col pb-bottombar">
+              <div className="flex flex-1 flex-col">{children}</div>
+              <SiteFooter />
+            </div>
+            <BottomBar />
+          </SmoothScroll>
         </MotionProvider>
       </body>
     </html>

@@ -9,22 +9,22 @@ export const realWeddings: RealWedding[] = [
     city: "udaipur",
     date: "2026-02-14",
     excerpt: "Sample story. A mehendi on the terrace, pheras at sunrise and a dinner that ran until the birds started.",
-    cover: photos.p12,
+    cover: photos.p24,
     chapters: [
       {
         title: "The terrace",
         text: ["Sample copy. The mehendi took over the rooftop, with the city going gold behind it."],
-        photos: [photos.p02, photos.p01],
+        photos: [photos.p35, photos.p36],
       },
       {
         title: "Sunrise pheras",
         text: ["Sample copy. The ceremony began at six, before the heat, with the lake flat as glass."],
-        photos: [photos.p09, photos.p10],
+        photos: [photos.p19, photos.p33],
       },
       {
         title: "Dinner",
         text: ["Sample copy. Long tables in the courtyard, a brass band, and no speeches."],
-        photos: [photos.p17, photos.p06],
+        photos: [photos.p09, photos.p42],
       },
     ],
     credits: [
@@ -40,10 +40,10 @@ export const realWeddings: RealWedding[] = [
     city: "goa",
     date: "2025-12-06",
     excerpt: "Sample story. Forty guests, one house, and a ceremony on the lawn as the tide came in.",
-    cover: photos.p11,
+    cover: photos.p38,
     chapters: [
-      { title: "The house", text: ["Sample copy. Everyone stayed under one roof for the week."], photos: [photos.p14, photos.p04] },
-      { title: "The lawn", text: ["Sample copy. Vows at five, dinner at seven, dancing by nine."], photos: [photos.p16, photos.p06] },
+      { title: "The house", text: ["Sample copy. Everyone stayed under one roof for the week."], photos: [photos.p11, photos.p46] },
+      { title: "The lawn", text: ["Sample copy. Vows at five, dinner at seven, dancing by nine."], photos: [photos.p27, photos.p08] },
     ],
     credits: [
       { role: "Venue", vendorSlug: "courtyard-house-sample", name: "The Courtyard House (sample)" },
@@ -57,10 +57,10 @@ export const realWeddings: RealWedding[] = [
     city: "jaipur",
     date: "2025-11-22",
     excerpt: "Sample story. A pink-and-white mandap, a baraat with twelve dhols and a very long night.",
-    cover: photos.p10,
+    cover: photos.p21,
     chapters: [
-      { title: "The baraat", text: ["Sample copy. It started two streets away and took an hour to arrive."], photos: [photos.p17, photos.p03] },
-      { title: "The mandap", text: ["Sample copy. Built in a day from marigold and muslin."], photos: [photos.p09, photos.p05] },
+      { title: "The baraat", text: ["Sample copy. It started two streets away and took an hour to arrive."], photos: [photos.p42, photos.p10] },
+      { title: "The mandap", text: ["Sample copy. Built in a day from marigold and muslin."], photos: [photos.p20, photos.p29] },
     ],
     credits: [
       { role: "Films", vendorSlug: "saffron-frames-sample", name: "Saffron Frames (sample)" },

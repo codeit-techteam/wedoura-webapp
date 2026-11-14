@@ -26,15 +26,15 @@ export const siteFaq: Faq[] = [
 
 export const promises: SitePromise[] = [
   {
-    title: "The work, shown whole",
-    text: "Photographs appear at their own proportions. No squares, no heavy crops, no badges in the way.",
+    title: "See the real work first",
+    text: "Whole weddings and full portfolios, not a highlight reel. You decide from the work itself.",
   },
   {
-    title: "Straight to the vendor",
-    text: "Inquiries and WhatsApp messages go directly to the person who will do the work.",
+    title: "Talk to the person, not a desk",
+    text: "Your message or WhatsApp goes straight to the vendor who will be there on your day.",
   },
   {
-    title: "Made for your phone",
-    text: "Fast pages, big pictures and short films, built for browsing between everything else.",
+    title: "No made-up numbers",
+    text: "No paid rankings, no invented reviews, no inflated counts. If we cannot stand behind a number, we do not show it.",
   },
 ];

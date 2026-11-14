@@ -3,7 +3,7 @@ import { Placeholder } from "@/components/chrome/Placeholder";
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Every photograph on Wedoura, shown whole, with the full-screen viewer.",
+  description: "Photographs from weddings across India, with the full-screen viewer.",
 };
 
 export default function Page() {

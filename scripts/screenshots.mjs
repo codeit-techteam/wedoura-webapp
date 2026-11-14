@@ -1,4 +1,4 @@
-// Captures the site chrome at 390px and 1440px into docs/screenshots and
+﻿// Captures the site chrome at 390px and 1440px into docs/screenshots and
 // checks keyboard behaviour and reduced motion along the way.
 // Needs a running dev or start server and a local Chrome.
 //   BASE_URL=http://localhost:3001 npm run screenshots
@@ -66,7 +66,7 @@ async function click(page, selector) {
 const navHidden = (page) => page.$eval("header.site-nav", (el) => el.dataset.hidden === "true");
 
 await session(1440, 900, false, async (page, shot) => {
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
+  await page.goto(`${BASE}/`, { waitUntil: "load" });
   await sleep(1200);
   await shot("navbar-hero");
 
@@ -122,7 +122,7 @@ await session(1440, 900, false, async (page, shot) => {
   await shot("footer");
 
   await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
-  await page.reload({ waitUntil: "networkidle0" });
+  await page.reload({ waitUntil: "load" });
   await scroll(page, 0);
   await click(page, 'button[aria-controls="vendors-panel"]');
   await sleep(300);
@@ -135,7 +135,7 @@ await session(1440, 900, false, async (page, shot) => {
 });
 
 await session(390, 844, true, async (page, shot) => {
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
+  await page.goto(`${BASE}/`, { waitUntil: "load" });
   await sleep(1200);
   await shot("navbar-hero");
   await scroll(page, 1400);
@@ -192,7 +192,7 @@ await session(390, 844, true, async (page, shot) => {
 });
 
 await session(1920, 1000, false, async (page, shot) => {
-  await page.goto(`${BASE}/styleguide`, { waitUntil: "networkidle0" });
+  await page.goto(`${BASE}/styleguide`, { waitUntil: "load" });
   await scroll(page, 700);
   await shot("container-wide-screen");
   const box = await page.$eval("main .container-site", (el) => {
@@ -201,6 +201,80 @@ await session(1920, 1000, false, async (page, shot) => {
   });
   check(`1920 container centred (${box.width}px wide, ${box.left}/${box.right} margins)`, Math.abs(box.left - box.right) <= 1);
 });
+
+// Homepage: full pages and one capture per section into docs/screenshots/home.
+const HOME_OUT = join(OUT, "home");
+mkdirSync(HOME_OUT, { recursive: true });
+const HOME_SECTIONS = [
+  ["hero", "main > section:first-of-type"],
+  ["categories", 'section[aria-label="Vendor categories"]'],
+  ["featured-vendors", 'section[aria-label="Featured vendors"]'],
+  ["real-weddings", 'section[aria-label="Real weddings"]'],
+  ["films", 'section[aria-label="Wedding films"]'],
+  ["cities", 'section[aria-label="Browse by city"]'],
+  ["why-wedoura", 'section[aria-label="Why Wedoura"]'],
+  ["blog", 'section[aria-label="From the blog"]'],
+  ["faq", "#faq"],
+  ["list-your-business", 'section[aria-label="List your business"]'],
+];
+
+async function homeSession(width, height, mobile) {
+  await session(width, height, mobile, async (page) => {
+    await page.goto(`${BASE}/`, { waitUntil: "load" });
+    await sleep(1000);
+    // Walk the page so lazy images load and the reveals have played.
+    await page.evaluate(async () => {
+      const step = window.innerHeight * 0.7;
+      for (let y = 0; y < document.body.scrollHeight; y += step) {
+        window.scrollTo({ top: y, behavior: "instant" });
+        await new Promise((r) => setTimeout(r, 180));
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+    await sleep(900);
+    await page.screenshot({ path: join(HOME_OUT, `home-full-${width}.png`), fullPage: true });
+    console.log("saved", `home/home-full-${width}.png`);
+
+    let index = 0;
+    for (const [name, selector] of HOME_SECTIONS) {
+      index += 1;
+      const el = await page.$(selector);
+      check(`${width} home section present: ${name}`, !!el);
+      if (!el) continue;
+      await page.evaluate(
+        (sel) => document.querySelector(sel)?.scrollIntoView({ behavior: "instant", block: "start" }),
+        selector,
+      );
+      await sleep(900);
+      const n = String(index).padStart(2, "0");
+      const path = join(HOME_OUT, `home-${n}-${name}-${width}.png`);
+      try {
+        await el.screenshot({ path });
+      } catch {
+        await page.screenshot({ path });
+      }
+      console.log("saved", `home/home-${n}-${name}-${width}.png`);
+    }
+
+    check(
+      `${width} home no horizontal overflow`,
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    );
+
+    // FAQ accordion: the second item opens on click.
+    await page.evaluate(() => document.querySelector("#faq")?.scrollIntoView({ behavior: "instant" }));
+    await sleep(600);
+    await page.$eval("#faq-button-1", (el) => el.click());
+    await sleep(700);
+    check(
+      `${width} FAQ accordion opens`,
+      (await page.$eval("#faq-button-1", (el) => el.getAttribute("aria-expanded"))) === "true",
+    );
+  });
+}
+
+await homeSession(1440, 900, false);
+await homeSession(390, 844, true);
 
 await browser.close();
 const failed = checks.filter(([, ok]) => !ok);

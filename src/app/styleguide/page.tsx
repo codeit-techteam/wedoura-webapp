@@ -124,7 +124,7 @@ export default async function StyleguidePage() {
           <div className="mt-12">
             <Specimen label="Display">
               <Heading level={2} size="display">
-                Weddings, <em>seen whole</em>.
+                A day worth <em>remembering</em>.
               </Heading>
             </Specimen>
             <Specimen label="H1">

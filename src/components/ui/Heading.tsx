@@ -23,7 +23,7 @@ type Props = {
 
 /**
  * Serif headline. Wrap one word in <em> for the italic emphasis the brief asks for:
- * <Heading>Weddings, <em>seen whole</em>.</Heading>
+ * <Heading>A day worth <em>remembering</em>.</Heading>
  */
 export function Heading({ level = 2, size, children, className, id }: Props) {
   const Tag = `h${level}` as const;
