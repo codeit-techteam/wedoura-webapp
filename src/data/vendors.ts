@@ -114,6 +114,11 @@ export const vendors: Vendor[] = [
     venue: {
       capacity: { min: 80, max: 250 },
       spaces: ["Sea lawn", "Inner courtyard", "Chapel hall", "Pool deck"],
+      tour: [
+        { id: "courtyard", name: "The courtyard", panorama: "/360/sample-01.jpg", links: ["lawn", "hall"] },
+        { id: "lawn", name: "The lawn", panorama: "/360/sample-02.jpg", links: ["courtyard", "hall"] },
+        { id: "hall", name: "The hall", panorama: "/360/sample-03.jpg", links: ["courtyard", "lawn"] },
+      ],
     },
   },
   {
@@ -229,7 +234,15 @@ export const vendors: Vendor[] = [
     startingPriceINR: 750000,
     faq: sampleFaq,
     whatsapp: SAMPLE_WHATSAPP,
-    venue: { capacity: { min: 120, max: 400 }, spaces: ["Main courtyard", "Darbar hall", "Rooftop terrace"] },
+    venue: {
+      capacity: { min: 120, max: 400 },
+      spaces: ["Main courtyard", "Darbar hall", "Rooftop terrace"],
+      tour: [
+        { id: "courtyard", name: "The courtyard", panorama: "/360/sample-01.jpg", links: ["lawn", "hall"] },
+        { id: "lawn", name: "The lawn", panorama: "/360/sample-02.jpg", links: ["courtyard", "hall"] },
+        { id: "hall", name: "The hall", panorama: "/360/sample-03.jpg", links: ["courtyard", "lawn"] },
+      ],
+    },
   },
   {
     slug: "kohl-and-rose",

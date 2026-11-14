@@ -13,6 +13,7 @@ npm run typecheck    # next typegen && tsc --noEmit
 npm run photos       # regenerate src/data/photos.ts from public/photos + alt.json
 npm run extract-reference  # regenerate docs/reference/extracted from the mockups
 node scripts/screenshots-core.mjs  # core-page screenshots + behaviour checks (needs next start on 3001)
+node scripts/audit.mjs     # full crawl + interaction + keyboard + CLS audit (needs next start on 3001)
 BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboard/reduced-motion checks (needs a running server)
 ```
 
@@ -86,7 +87,8 @@ src/components/media   Photo, PhotoCard, CardRow, FilmPreview, PhotoGrid (uncrop
 src/components/cards   VendorCard, StoryCard, ArticleCard, PhotoTile  (the one card per content type)
 src/components/browse  Rail, UnderlineTabs, FilterBar+FilterSelect, BottomSheet, LoadMore, VendorBrowser,
                        WeddingBrowser, SavedList  (URL-param driven; see src/lib/url-state.ts)
-src/components/profile VendorProfile, StickySubnav, StickyActionBar, InquiryForm, AlbumList
+src/components/profile VendorProfile, StickySubnav, StickyActionBar, InquiryForm, AlbumList, VenueTour (360),
+                       VendorSignupForm, AuthForms (login+contact), StudioScreens
 src/components/home    HeroV2, HeroSearch, CategoryTiles, FeaturedTabs, WeddingsScroller, FilmsShowcase,
                        CityMosaic, RailProgress
 src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis),

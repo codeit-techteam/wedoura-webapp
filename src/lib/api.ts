@@ -193,6 +193,32 @@ export async function getPromises(): Promise<SitePromise[]> {
   return promises;
 }
 
+/** The gallery wall: every photo, linked to a vendor whose work it appears in. */
+export interface GalleryItem {
+  photo: Photo;
+  vendor?: { slug: string; name: string };
+  category?: CategorySlug;
+}
+
+export async function getGalleryItems(): Promise<GalleryItem[]> {
+  const byPhoto = new Map<string, { slug: string; name: string; category: CategorySlug }>();
+  for (const vendor of vendors) {
+    for (const photo of [vendor.cover, ...vendor.bestPhotos, ...vendor.portfolio]) {
+      if (!byPhoto.has(photo.id)) {
+        byPhoto.set(photo.id, { slug: vendor.slug, name: vendor.name, category: vendor.category });
+      }
+    }
+  }
+  return photoList.map((photo) => {
+    const owner = byPhoto.get(photo.id);
+    return {
+      photo,
+      vendor: owner ? { slug: owner.slug, name: owner.name } : undefined,
+      category: owner?.category,
+    };
+  });
+}
+
 /** Everything the navbar search suggests from: cities, categories, vendors. */
 export interface SearchIndex {
   cities: { slug: string; name: string }[];

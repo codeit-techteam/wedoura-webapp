@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Photo } from "@/components/media/Photo";
+import { SaveButton } from "@/components/ui/SaveButton";
 import type { RealWedding } from "@/data/types";
 import { cn } from "@/lib/cn";
 
@@ -21,7 +22,8 @@ export function StoryCard({ wedding, cityName, sizes, variant = "large", classNa
   const credit = photographerOf(wedding);
   const large = variant === "large";
   return (
-    <Link href={`/real-weddings/${wedding.slug}`} className={cn("group block", className)}>
+    <div className={cn("relative", className)}>
+      <Link href={`/real-weddings/${wedding.slug}`} className="group block">
       <div
         className={cn(
           "relative overflow-hidden bg-ivory",
@@ -50,6 +52,8 @@ export function StoryCard({ wedding, cityName, sizes, variant = "large", classNa
           </p>
         </div>
       </div>
-    </Link>
+      </Link>
+      <SaveButton slug={wedding.slug} name={wedding.title} kind="story" className="absolute top-2 right-2" />
+    </div>
   );
 }

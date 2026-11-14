@@ -12,12 +12,39 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 4 | Vendor profile | ✅ Done (2026-11-14) |
 | 5 | Vendor listing | ✅ Done (2026-11-14) |
 | 6 | Real weddings listing and story page | ✅ Done (2026-11-14) |
-| 7 | Blogs, gallery, honeymoon, saved, simple pages | ⬜ |
-| 8 | Vendor signup, login and studio screens | ⬜ |
-| 9 | Venue profile with the 360-degree view | ⬜ |
-| 10 | Polish pass: motion, speed, accessibility, small screens | ⬜ |
+| 7 | Blogs, gallery, honeymoon, saved, simple pages | ✅ Done (2026-11-14) |
+| 8 | Vendor signup, login and studio screens | ✅ Done (2026-11-14) |
+| 9 | Venue profile with the 360-degree view | ✅ Done (2026-11-14, placeholder imagery) |
+| 10 | Polish pass: motion, speed, accessibility, small screens | ✅ Done (2026-11-14, see docs/AUDIT.md) |
 
 ## Session log
+
+### 2026-11-14 · Session 6: remaining pages, 360° tour, full audit (steps 7–10)
+
+Done:
+- **Pages, all on existing shared components.** /blogs (category tabs + ArticleCards) and /blogs/[slug]
+  (prose column, large images, share, related); /gallery (uncropped wall, category filter, viewer with a
+  "By {vendor}" link — PhotoGrid/PhotoViewer gained an optional per-photo `links` map); /honeymoon
+  (PhotoTile grid, linkable `?place=` detail panel with highlights); /saved (Vendors | Stories tabs — the
+  saved store now holds both kinds, `story:`-prefixed; StoryCard gained the save overlay); /list-your-
+  business (pitch with a live example VendorCard + four-step `VendorSignupForm` with per-step validation
+  and success screen); /login + /contact (`AuthForms`); /vendor-studio (`StudioScreens`: profile, cover
+  picks, albums, films, pricing, sample inquiries, all URL-tabbed); /about, /privacy-policy, /terms
+  (prose, marked sample); a designed full-bleed 404. `Placeholder.tsx` deleted — nothing placeholder-shaped
+  remains.
+- **360° tour.** Photo Sphere Viewer 5.15.1 (core + virtual tour + gyroscope), loaded only when "Step
+  inside" is tapped on a still; arrows between three named spaces, a space strip, drag, gyroscope,
+  full screen, fade transitions. Both venues have tour data. Imagery is three clearly captioned
+  placeholder equirects in `public/360/` (README says what to supply).
+- **Audit (docs/AUDIT.md).** `scripts/audit.mjs`: crawls all 35 pages at 1440 and 390 (status, title,
+  overflow, image dimensions, console), exercises every interactive pattern, keyboard/focus, and a
+  layout-shift probe — 37/37 pass, no console errors, CLS ≈ 0.0001 everywhere. Lighthouse: 100/100/100
+  a11y/best-practices/SEO on home, profile and story; perf 77/80/86 under mobile throttling after fixes
+  (hero SSR-visible first slide, zoom settles inward instead of growing the LCP element, covers at q75).
+
+Known gaps / next up (also in AUDIT.md):
+- Real equirectangular 360 photos, real film clips, client logo; backend to make forms live.
+- Replace sample legal copy before launch.
 
 ### 2026-11-14 · Session 5: shared components, finished navbar, core pages (steps 4–6)
 

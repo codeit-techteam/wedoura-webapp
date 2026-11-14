@@ -54,7 +54,7 @@ export default async function RealWeddingPage({ params }: PageProps<"/real-weddi
       {/* Opener: full-bleed parallax cover. */}
       <section data-nav-dark className="relative -mt-nav bg-ink text-white">
         <Parallax className="h-[82vh]">
-          <Photo photo={wedding.cover} sizes="100vw" mode="cover" priority quality={90} />
+          <Photo photo={wedding.cover} sizes="100vw" mode="cover" priority quality={75} />
         </Parallax>
         <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/85 via-ink/20 to-ink/25" />
         <Container className="absolute inset-x-0 bottom-0 pb-10 md:pb-14">

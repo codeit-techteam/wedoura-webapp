@@ -59,15 +59,33 @@ function write(next: readonly string[]) {
   window.dispatchEvent(new Event(EVENT));
 }
 
+export type SavedKind = "vendor" | "story";
+
+/** Stories are stored with a "story:" prefix; bare entries are vendors. */
+function keyFor(slug: string, kind: SavedKind): string {
+  return kind === "story" ? `story:${slug}` : slug;
+}
+
 export function useSaved(): readonly string[] {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+export function useSavedVendors(): readonly string[] {
+  return useSaved().filter((s) => !s.startsWith("story:"));
+}
+
+export function useSavedStories(): readonly string[] {
+  return useSaved()
+    .filter((s) => s.startsWith("story:"))
+    .map((s) => s.slice("story:".length));
 }
 
 export function useSavedCount(): number {
   return useSaved().length;
 }
 
-export function toggleSaved(slug: string) {
+export function toggleSaved(slug: string, kind: SavedKind = "vendor") {
+  const key = keyFor(slug, kind);
   const current = getSnapshot();
-  write(current.includes(slug) ? current.filter((s) => s !== slug) : [...current, slug]);
+  write(current.includes(key) ? current.filter((s) => s !== key) : [...current, key]);
 }

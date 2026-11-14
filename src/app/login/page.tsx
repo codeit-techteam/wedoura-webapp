@@ -1,13 +1,32 @@
 import type { Metadata } from "next";
-import { Placeholder } from "@/components/chrome/Placeholder";
+import Link from "next/link";
+import { MaskedHeading } from "@/components/motion/MaskedHeading";
+import { LoginForm } from "@/components/profile/AuthForms";
+import { Container } from "@/components/ui/Container";
 
 export const metadata: Metadata = {
-  title: "Vendor login",
-  description: "Sign in to your studio.",
+  title: "Vendor Login",
+  description: "Sign in to your Wedoura vendor profile.",
 };
 
-export default function Page() {
+export default function LoginPage() {
   return (
-    <Placeholder eyebrow="Vendor login" title="Vendor login" step={8} />
+    <main className="flex min-h-[70vh] items-center pb-section-sm">
+      <Container className="w-full">
+        <div className="mx-auto max-w-md border border-line bg-white p-8 md:p-12">
+          <MaskedHeading as="h1" className="font-serif text-h2" lines={[<>Welcome back.</>]} />
+          <p className="mt-3 text-small text-mute">Screens only until the backend arrives; any valid input works.</p>
+          <div className="mt-8">
+            <LoginForm />
+          </div>
+          <p className="mt-8 border-t border-line pt-5 text-small text-mute">
+            Not on Wedoura yet?{" "}
+            <Link href="/list-your-business" className="link-draw text-ink">
+              List your business
+            </Link>
+          </p>
+        </div>
+      </Container>
+    </main>
   );
 }

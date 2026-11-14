@@ -10,6 +10,7 @@ import { AlbumList } from "@/components/profile/AlbumList";
 import { InquiryForm } from "@/components/profile/InquiryForm";
 import { StickyActionBar } from "@/components/profile/StickyActionBar";
 import { StickySubnav, type SubnavSection } from "@/components/profile/StickySubnav";
+import { VenueTour } from "@/components/profile/VenueTour";
 import { Accordion } from "@/components/ui/Accordion";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Container } from "@/components/ui/Container";
@@ -45,7 +46,7 @@ export function VendorProfile({ vendor, categoryName, cityName, similar }: Props
     <main className="pb-24 md:pb-20">
       {/* Cover */}
       <section data-nav-dark className="relative -mt-nav flex min-h-[75vh] flex-col justify-end bg-ink text-white">
-        <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={90} objectPosition="50% 45%" />
+        <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={75} objectPosition="50% 45%" />
         <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/85 via-ink/25 to-ink/20" />
         <Container className="relative pb-10 md:pb-14">
           <Breadcrumb
@@ -87,27 +88,35 @@ export function VendorProfile({ vendor, categoryName, cityName, similar }: Props
                 <p className="mt-2 font-serif text-h3">
                   {vendor.venue.capacity.min} to {vendor.venue.capacity.max} guests
                 </p>
-                <div className="mt-8 border border-line bg-white p-6">
-                  <Label>360° view</Label>
-                  <p className="mt-2 text-small text-mute">
-                    A walk-through of the main spaces will sit here once the venue supplies it.
-                  </p>
+                <div className="mt-8">
+                  <Label>Spaces</Label>
+                  <ul className="mt-4 grid grid-cols-2 gap-2">
+                    {vendor.venue.spaces.map((space, i) => (
+                      <li key={space} className="relative aspect-4/3">
+                        <PhotoTile
+                          photo={vendor.portfolio[i % vendor.portfolio.length]}
+                          title={space}
+                          sizes="(min-width: 48rem) 20vw, 50vw"
+                          titleClassName="text-lead p-4"
+                        />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
               <div>
-                <Label>Spaces</Label>
-                <ul className="mt-4 grid grid-cols-2 gap-2">
-                  {vendor.venue.spaces.map((space, i) => (
-                    <li key={space} className="relative aspect-4/3">
-                      <PhotoTile
-                        photo={vendor.portfolio[i % vendor.portfolio.length]}
-                        title={space}
-                        sizes="(min-width: 48rem) 30vw, 50vw"
-                        titleClassName="text-lead p-4"
-                      />
-                    </li>
-                  ))}
-                </ul>
+                <Label>360° view</Label>
+                <div className="mt-4">
+                  {vendor.venue.tour && vendor.venue.tour.length > 0 ? (
+                    <VenueTour spaces={vendor.venue.tour} still={vendor.cover} venueName={vendor.name} />
+                  ) : (
+                    <div className="border border-line bg-white p-6">
+                      <p className="text-small text-mute">
+                        A walk-through of the main spaces will sit here once the venue supplies it.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </Container>

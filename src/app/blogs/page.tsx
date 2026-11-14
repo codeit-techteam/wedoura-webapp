@@ -1,13 +1,29 @@
 import type { Metadata } from "next";
-import { Placeholder } from "@/components/chrome/Placeholder";
+import { Suspense } from "react";
+import { BlogBrowser } from "@/components/browse/BlogBrowser";
+import { MaskedHeading } from "@/components/motion/MaskedHeading";
+import { Container } from "@/components/ui/Container";
+import { getBlogPosts } from "@/lib/api";
 
 export const metadata: Metadata = {
-  title: "Blogs",
-  description: "Planning notes, venue guides and ideas that photograph well.",
+  title: "Blog",
+  description: "Planning guides, venue notes and ideas worth saving, from people who work weddings every week.",
 };
 
-export default function Page() {
+export default async function BlogsPage() {
+  const posts = await getBlogPosts();
+  const categories = [...new Set(posts.map((p) => p.category))];
+
   return (
-    <Placeholder eyebrow="Blogs" title="From the blog" step={7} />
+    <main className="pb-section-sm">
+      <Container className="pt-10 md:pt-16">
+        <MaskedHeading as="h1" className="font-serif text-h1" lines={[<>Worth reading before you book.</>]} />
+      </Container>
+      <Container width="wide" className="mt-10">
+        <Suspense fallback={null}>
+          <BlogBrowser posts={posts} categories={categories} />
+        </Suspense>
+      </Container>
+    </main>
   );
 }

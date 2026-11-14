@@ -2,11 +2,12 @@
 
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
-import { toggleSaved, useSaved } from "@/lib/saved";
+import { toggleSaved, useSaved, type SavedKind } from "@/lib/saved";
 
 type Props = {
   slug: string;
   name: string;
+  kind?: SavedKind;
   /** white sits on photographs; ink on plain backgrounds. */
   tone?: "white" | "ink";
   className?: string;
@@ -15,13 +16,13 @@ type Props = {
 };
 
 /** The one save button. Backed by the shared shortlist store. */
-export function SaveButton({ slug, name, tone = "white", className, withLabel = false }: Props) {
+export function SaveButton({ slug, name, kind = "vendor", tone = "white", className, withLabel = false }: Props) {
   const saved = useSaved();
-  const isSaved = saved.includes(slug);
+  const isSaved = saved.includes(kind === "story" ? `story:${slug}` : slug);
   return (
     <button
       type="button"
-      onClick={() => toggleSaved(slug)}
+      onClick={() => toggleSaved(slug, kind)}
       aria-label={isSaved ? `Remove ${name} from saved` : `Save ${name}`}
       aria-pressed={isSaved}
       className={cn(
