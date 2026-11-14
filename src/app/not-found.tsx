@@ -1,15 +1,20 @@
-import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Container } from "@/components/ui/Container";
+import { Heading } from "@/components/ui/Heading";
+import { Label } from "@/components/ui/Label";
 
 export default function NotFound() {
   return (
-    <main className="container-site flex flex-1 flex-col items-start justify-center py-section">
-      <p className="label text-gold">404</p>
-      <h1 className="mt-4 text-h1">
-        This page has <em>wandered off</em>.
-      </h1>
-      <Link href="/" className="label mt-10 inline-flex tap items-center border-b border-gold pb-1">
-        Back to the homepage
-      </Link>
+    <main className="flex flex-1 flex-col">
+      <Container className="flex flex-1 flex-col items-start justify-center py-section">
+        <Label>404</Label>
+        <Heading level={1} size="h1" className="mt-4">
+          This page has <em>wandered off</em>.
+        </Heading>
+        <Button href="/" variant="link" className="mt-10">
+          Back to the homepage
+        </Button>
+      </Container>
     </main>
   );
 }

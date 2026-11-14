@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CardRow } from "@/components/media/CardRow";
 import { FilmPreview } from "@/components/media/FilmPreview";
 import { Photo } from "@/components/media/Photo";
 import { PhotoCard } from "@/components/media/PhotoCard";
@@ -27,7 +28,7 @@ const colours = [
   { name: "Ink", token: "ink", hex: "#161616", role: "Text, solid buttons" },
   { name: "Mute", token: "mute", hex: "#6B665D", role: "Secondary text, labels" },
   { name: "Line", token: "line", hex: "#DDD6C8", role: "Hairline rules" },
-  { name: "Gold", token: "gold", hex: "#A8864A", role: "Small marks only. 3.5:1 on white, so never body text" },
+  { name: "Gold", token: "gold", hex: "#A8864A", role: "Marks, rules and icons only. 3.5:1 on white, so never text" },
 ];
 
 const swatch: Record<string, string> = {
@@ -68,7 +69,7 @@ export default async function StyleguidePage() {
     <main>
       <header className="border-b border-line">
         <Container className="py-section-sm">
-          <Label tone="gold">Wedoura foundations</Label>
+          <Label>Wedoura foundations</Label>
           <Heading level={1} size="display" className="mt-4">
             Style<em>guide</em>
           </Heading>
@@ -90,10 +91,10 @@ export default async function StyleguidePage() {
       <Section id="colour">
         <Container>
           <Reveal>
-            <Label tone="gold">01</Label>
+            <Label>01</Label>
             <Heading className="mt-3">Colour</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Mostly black and white. The photographs supply the colour. One accent, used for small marks.
+              Mostly black and white. The photographs supply the colour. One accent, gold, for marks, rules and icons. It is never used for text, not even small labels.
             </Text>
           </Reveal>
           <ul className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-6">
@@ -113,11 +114,11 @@ export default async function StyleguidePage() {
       <Section id="type" tone="ivory">
         <Container>
           <Reveal>
-            <Label tone="gold">02</Label>
+            <Label>02</Label>
             <Heading className="mt-3">Type</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Cormorant Garamond, light and regular, with one italic word for emphasis. Jost 300 to 500 for body
-              and labels. Body text never drops below 16px.
+              Cormorant Garamond, light and regular, with one italic word for emphasis. Jost for body and labels: 400 on
+              phones, where 300 gets thin, and 300 from tablets up. Body text never drops below 16px.
             </Text>
           </Reveal>
           <div className="mt-12">
@@ -148,7 +149,7 @@ export default async function StyleguidePage() {
             </Specimen>
             <Specimen label="Body">
               <Text className="max-w-prose">
-                Body text is Jost at 300, 16px on phones and 17px from tablets up, with a line height of 1.7.
+                Body text is Jost, 400 at 16px on phones and 300 at 17px from tablets up, with a line height of 1.7.
                 Paragraphs stay under 42rem so lines remain comfortable. Sample content on the site is always
                 labelled as sample.
               </Text>
@@ -162,7 +163,7 @@ export default async function StyleguidePage() {
               <div className="flex flex-wrap gap-x-10 gap-y-3">
                 <Label tone="ink">Photography & Films</Label>
                 <Label>Udaipur · Rajasthan</Label>
-                <Label tone="gold">Featured</Label>
+                <Label>Featured</Label>
               </div>
             </Specimen>
           </div>
@@ -173,7 +174,7 @@ export default async function StyleguidePage() {
       <Section id="spacing">
         <Container>
           <Reveal>
-            <Label tone="gold">03</Label>
+            <Label>03</Label>
             <Heading className="mt-3">Spacing and rules</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
               Sections breathe with a clamp from 80px to 152px. Hairlines separate; the ink rule heads a section.
@@ -215,7 +216,7 @@ export default async function StyleguidePage() {
       <Section id="buttons" tone="ivory">
         <Container>
           <Reveal>
-            <Label tone="gold">04</Label>
+            <Label>04</Label>
             <Heading className="mt-3">Buttons</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
               Three kinds. Every one is at least 44px tall, uses the label style and changes colour over 0.3s.
@@ -248,22 +249,55 @@ export default async function StyleguidePage() {
       <Section id="photos">
         <Container>
           <Reveal>
-            <Label tone="gold">05</Label>
+            <Label>05</Label>
             <Heading className="mt-3">Photo cards</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Every photograph is shown whole at its own aspect ratio, with a blurred placeholder while it loads
-              so nothing shifts. Hover or press for the slow zoom.
+              Two layouts. A card row shares one aspect ratio across the row, chosen per row, so edges line up.
+              Galleries use no ratio: every photograph is shown whole at its own proportions. Both load behind a
+              blurred placeholder so nothing shifts. Hover or press for the slow zoom.
             </Text>
           </Reveal>
-          <ul className="mt-12 grid items-start gap-8 md:grid-cols-3">
+
+          <Label className="mt-14">Card row · 4/5 · three columns</Label>
+          <CardRow ratio="4/5" columns={3} mobileColumns={2} className="mt-5">
             {cards.map((photo, i) => (
               <Reveal as="li" key={photo.id} delay={i * 0.08}>
                 <PhotoCard
                   photo={photo}
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  eyebrow={`${photo.width > photo.height ? "Landscape" : "Portrait"} · ${photo.width}×${photo.height}`}
+                  sizes="(min-width: 48rem) 33vw, 50vw"
+                  eyebrow="Photography & Films"
                   title="Sample Studio"
-                  meta="Udaipur · Photography & Films"
+                  meta="Udaipur"
+                  href="#photos"
+                />
+              </Reveal>
+            ))}
+          </CardRow>
+
+          <Label className="mt-14">Card row · 3/2 · two columns</Label>
+          <CardRow ratio="3/2" columns={2} className="mt-5">
+            {cards.slice(0, 2).map((photo, i) => (
+              <Reveal as="li" key={photo.id} delay={i * 0.08}>
+                <PhotoCard
+                  photo={photo}
+                  sizes="(min-width: 48rem) 50vw, 100vw"
+                  eyebrow="Real wedding"
+                  title="Three days by the lake"
+                  meta="A. & R. (sample story)"
+                  href="#photos"
+                />
+              </Reveal>
+            ))}
+          </CardRow>
+
+          <Label className="mt-14">Gallery · no ratio, each photo whole</Label>
+          <ul className="mt-5 grid items-start gap-6 md:grid-cols-3">
+            {cards.map((photo, i) => (
+              <Reveal as="li" key={photo.id} delay={i * 0.08}>
+                <PhotoCard
+                  photo={photo}
+                  sizes="(min-width: 48rem) 33vw, 100vw"
+                  eyebrow={`${photo.width > photo.height ? "Landscape" : "Portrait"} · ${photo.width}×${photo.height}`}
                   href="#photos"
                 />
               </Reveal>
@@ -276,7 +310,7 @@ export default async function StyleguidePage() {
       <Section id="motion" tone="ivory">
         <Container>
           <Reveal>
-            <Label tone="gold">06</Label>
+            <Label>06</Label>
             <Heading className="mt-3">Motion</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
               Five patterns, one easing, nothing flashy. All of it switches off when the device asks for reduced
@@ -286,7 +320,7 @@ export default async function StyleguidePage() {
           <ol className="mt-12">
             {motionList.map(([n, title, text, component]) => (
               <li key={n} className="grid gap-2 border-t border-line py-6 md:grid-cols-[4rem_14rem_1fr_auto] md:gap-8">
-                <Label tone="gold">{n}</Label>
+                <Label>{n}</Label>
                 <p className="font-serif text-h3 leading-none">{title}</p>
                 <Text tone="mute">{text}</Text>
                 <code className="font-sans text-small text-mute">{component}</code>

@@ -12,6 +12,7 @@ npm run lint         # eslint .  (next lint no longer exists in Next 16)
 npm run typecheck    # next typegen && tsc --noEmit
 npm run photos       # regenerate src/data/photos.ts from public/photos + alt.json
 npm run extract-reference  # regenerate docs/reference/extracted from the mockups
+BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboard/reduced-motion checks (needs a running server)
 ```
 
 ## Rules that matter
@@ -22,14 +23,21 @@ npm run extract-reference  # regenerate docs/reference/extracted from the mockup
   `src/lib/api.ts` imports from `src/data`. ESLint enforces this; `@/data/types` is allowed anywhere.
 - **Tokens only.** Colours, type sizes, tracking, easing and spacing live in `src/styles/tokens.css` and are used
   as Tailwind utilities (`bg-ivory`, `text-h2`, `tracking-label`, `ease-wedoura`, `py-section`). No hex values or
-  magic numbers in components. Custom utilities: `label`, `hairline`, `tap`, `container-site`.
+  magic numbers in components. Custom utilities: `label`, `nav-link`, `wordmark`, `hairline`, `tap`,
+  `container-site` (1360px), `container-wide` (1600px), `transition-chrome` (0.3s chrome changes).
 - **Photographs are shown whole.** Use `<Photo>` (next/image, blur placeholder, intrinsic aspect ratio). `mode="cover"`
   is only for hero and cover images. Every image needs `sizes` and alt text. Sizes come from the data, never guessed.
-- **Design guardrails.** White and ivory backgrounds, ink text, gold only for small marks (fails AA as body text).
+- **Two card layouts.** `<CardRow ratio="4/5">` gives every card in a row one aspect ratio, chosen per row; cards
+  inside inherit it. Galleries use no ratio so each photo keeps its own proportions.
+- **Design guardrails.** White and ivory backgrounds, ink text. Gold is for marks, rules and icons only, never
+  text, not even labels (3.5:1 on white). Body is Jost 400 on phones and 300 from `md` up.
   Square corners, hairlines, no shadows, no loud colour, no pop-ups, no auto-advancing carousels.
   Body text at least 16px; tap targets at least 44px (`tap`). Visible focus (gold outline) stays on.
 - **No invented numbers.** No ratings, review counts or statistics. Sample content says "(sample)" or "Sample copy".
 - **Mobile first.** Design at 390px, then 768px (`md:`), then 1440px (`xl:`). Bottom nav on mobile.
+- **Chrome.** The navbar is sticky and goes transparent with white text over any page element carrying
+  `data-nav-dark` (CSS `:has()` rule in `globals.css`). A page with a full-bleed dark hero pulls it under the
+  navbar with `-mt-nav`. Overlays (search, menu) use `useFocusTrap`; Escape closes every panel.
 - **Forms are screens only.** Validate, show a success state, send nothing.
 
 ## Motion (five patterns, use these, nothing else)
@@ -56,14 +64,16 @@ the root layout plus the CSS media query switch motion off. Motion components ar
 ## Layout
 
 ```
-src/app            routes (layout, template, styleguide, ...)
-src/components/ui  Heading, Label, Text, Button, Hairline, Container, Section
-src/components/media   Photo, PhotoCard, FilmPreview
+src/app            routes (layout, template, styleguide, placeholders for every route in the brief)
+src/components/ui  Heading, Label, Text, Button, Hairline, Container, Section, Icon
+src/components/chrome  Navbar (+SiteHeader), VendorsPanel, SearchOverlay, MobileMenu, BottomBar, SiteFooter, Wordmark, Placeholder
+src/components/media   Photo, PhotoCard, CardRow, FilmPreview
 src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer
 src/data           typed sample content (types.ts, photos.ts generated)
-src/lib            api.ts (data access), motion.ts, cn.ts
+src/lib            api.ts (data access), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
 src/styles         tokens.css, fonts.ts
 public/photos      placeholder photographs + alt.json (replace, then npm run photos)
+docs/screenshots   chrome captures from scripts/screenshots.mjs
 ```
 
 ## Definition of done

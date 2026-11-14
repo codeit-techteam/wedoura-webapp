@@ -92,6 +92,10 @@ export async function getGalleryPhotos(): Promise<Photo[]> {
   return photoList;
 }
 
+export async function getPhoto(id: string): Promise<Photo | undefined> {
+  return photoList.find((p) => p.id === id);
+}
+
 export async function getDestinations(): Promise<Destination[]> {
   return destinations;
 }

@@ -13,7 +13,7 @@
   --color-ink: #161616;
   --color-mute: #6b665d;
   --color-line: #ddd6c8;
-  --color-gold: #a8864a; /* small marks only; 3.5:1 on white, fails AA for body text */
+  --color-gold: #a8864a; /* marks, rules and icons only; never text (3.5:1 on white) */
   --color-black: #000000;
   --color-transparent: transparent;
   --color-current: currentColor;
@@ -24,7 +24,7 @@
   --drop-shadow-*: initial;
   --radius-*: initial;
   --radius-none: 0;
-  --radius-full: 9999px; /* only for round icon buttons */
+  --radius-full: 9999px; /* only for round icon buttons and count badges */
 
   /* Type: Cormorant Garamond for headlines, Jost for body and labels.
      The font variables are set by next/font in src/styles/fonts.ts. */
@@ -43,6 +43,8 @@
   --text-h2--line-height: 1.08;
   --text-h3: clamp(1.625rem, 1.3rem + 1.2vw, 2.125rem);
   --text-h3--line-height: 1.15;
+  --text-menu: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem);
+  --text-menu--line-height: 1.1;
   --text-lead: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
   --text-lead--line-height: 1.45;
   --text-body: 1rem;
@@ -55,6 +57,12 @@
   --text-label--line-height: 1.4;
   --text-label-lg: 0.75rem;
   --text-label-lg--line-height: 1.4;
+  --text-wordmark: 1.375rem;
+  --text-wordmark--line-height: 1;
+  --text-wordmark-lg: 1.625rem;
+  --text-wordmark-lg--line-height: 1;
+  --text-search: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
+  --text-search--line-height: 1.2;
 
   --tracking-*: initial;
   --tracking-tight: -0.01em;
@@ -68,7 +76,8 @@
   --spacing-section: clamp(5rem, 11vw, 9.5rem);
   --spacing-section-sm: clamp(3.5rem, 7vw, 6rem);
   --spacing-gutter: clamp(1rem, 3.5vw, 3rem);
-  --container-site: 85rem; /* 1360px */
+  --container-site: 85rem; /* 1360px, centred on wider screens */
+  --container-wide: 100rem; /* 1600px, photo-heavy bands */
   --container-prose: 42rem;
 
   /* Breakpoints the brief designs for: 390 (base), 768, 1440. */
@@ -77,6 +86,7 @@
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;
   --breakpoint-xl: 90rem;
+  --breakpoint-2xl: 100rem;
 
   /* Motion. One easing, long and quiet. */
   --ease-*: initial;
@@ -88,22 +98,35 @@
   --animate-*: initial;
 }
 
-/* next/font variables, mapped inline so the utilities resolve on any node. */
+/* next/font variables and responsive chrome sizes, mapped inline so the
+   utilities resolve against the element they are used on. */
 @theme inline {
   --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --font-sans: var(--font-jost), Jost, "Helvetica Neue", Arial, sans-serif;
+  --spacing-nav: var(--nav-h);
+  --spacing-bottombar: var(--bottombar-h);
 }
 
-/* Motion constants from the brief, readable from CSS and from JS
-   (see src/lib/motion.ts). Reduced motion zeroes the movement. */
+/* Chrome sizes and motion constants from the brief, readable from CSS and
+   from JS (see src/lib/motion.ts). Reduced motion zeroes the movement. */
 :root {
+  --nav-h: 3.75rem;
+  --bottombar-h: calc(3.5rem + env(safe-area-inset-bottom, 0px));
   --motion-rise: 24px;
   --motion-duration: 0.9s;
   --motion-duration-zoom: 1.2s;
+  --motion-duration-chrome: 0.3s;
   --motion-zoom: 1.04;
   --motion-parallax: 6%;
   --motion-page: 0.45s;
   --tap-target: 44px;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --nav-h: 4.5rem;
+    --bottombar-h: 0px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -111,6 +134,7 @@
     --motion-rise: 0px;
     --motion-duration: 0.01s;
     --motion-duration-zoom: 0.01s;
+    --motion-duration-chrome: 0.01s;
     --motion-zoom: 1;
     --motion-parallax: 0%;
     --motion-page: 0.01s;

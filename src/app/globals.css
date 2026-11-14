@@ -6,12 +6,13 @@
     background: var(--color-white);
     color: var(--color-ink);
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 5rem;
+    scroll-padding-top: calc(var(--nav-h) + 1rem);
   }
 
+  /* Jost 400 on phones, where 300 gets thin; 300 from tablets up. */
   body {
     font-family: var(--font-sans);
-    font-weight: 300;
+    font-weight: 400;
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
     text-rendering: optimizeLegibility;
@@ -20,6 +21,7 @@
 
   @media (min-width: 48rem) {
     body {
+      font-weight: 300;
       font-size: var(--text-body-lg);
     }
   }
@@ -92,6 +94,28 @@
   text-transform: uppercase;
 }
 
+@utility nav-link {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: 400;
+  letter-spacing: var(--tracking-nav);
+  text-transform: uppercase;
+}
+
+/* The WEDOURA wordmark. When centred, the component adds a text-indent equal
+   to the tracking so the mark sits optically centred. A logo image replaces
+   this later. */
+@utility wordmark {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--text-wordmark);
+  line-height: var(--text-wordmark--line-height);
+  letter-spacing: var(--tracking-wordmark);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 @utility hairline {
   border-top: 1px solid var(--color-line);
 }
@@ -106,4 +130,28 @@
   max-width: var(--container-site);
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
+}
+
+@utility container-wide {
+  width: 100%;
+  max-width: var(--container-wide);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Chrome transitions (navbar show/hide, colour changes). The reduced-motion
+   block above collapses the duration. */
+@utility transition-chrome {
+  transition-property: transform, background-color, color, border-color, opacity;
+  transition-duration: var(--motion-duration-chrome);
+  transition-timing-function: var(--ease-wedoura);
+}
+
+/* Navbar theme over a dark hero: any page that renders an element with
+   data-nav-dark gets a transparent, white-text navbar until it scrolls or
+   opens a panel. Pure CSS, so it survives client navigation. */
+body:has([data-nav-dark]) .site-nav:not([data-scrolled="true"]):not([data-open="true"]) {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-white);
 }
