@@ -9,15 +9,63 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 1 | Foundations: scaffold, tokens, styleguide page, base components | ✅ Done (2026-11-14) |
 | 2 | Navbar, mobile bar, footer | ✅ Done (2026-11-14) |
 | 3 | Homepage | ✅ Done (2026-11-14) |
-| 4 | Vendor profile | ⬜ |
-| 5 | Vendor listing | ⬜ |
-| 6 | Real weddings listing and story page | ⬜ |
+| 4 | Vendor profile | ✅ Done (2026-11-14) |
+| 5 | Vendor listing | ✅ Done (2026-11-14) |
+| 6 | Real weddings listing and story page | ✅ Done (2026-11-14) |
 | 7 | Blogs, gallery, honeymoon, saved, simple pages | ⬜ |
 | 8 | Vendor signup, login and studio screens | ⬜ |
 | 9 | Venue profile with the 360-degree view | ⬜ |
 | 10 | Polish pass: motion, speed, accessibility, small screens | ⬜ |
 
 ## Session log
+
+### 2026-11-14 · Session 5: shared components, finished navbar, core pages (steps 4–6)
+
+Done:
+- **Component audit.** Every repeating pattern now exists exactly once, props- and data-driven; the homepage was
+  refactored onto the shared set with no visual change. The system:
+  - `cards/`: `VendorCard` (photo-cycling, save), `StoryCard` (large/small), `ArticleCard`, `PhotoTile`.
+  - `browse/`: `Rail` (snap + hidden scrollbar + progress line + arrows), `UnderlineTabs` (URL-param driven,
+    sliding underline), `FilterBar`+`FilterSelect` (desktop row / mobile `BottomSheet`), `LoadMore`,
+    `VendorBrowser`, `WeddingBrowser`, `SavedList`.
+  - `ui/`: `SaveButton`, `SectionHeader`, `Accordion` (replaces FaqAccordion), `EmptyState`, `Skeleton` +
+    `SkeletonCardGrid`, `Breadcrumb`, `ShareButtons`.
+  - `media/PhotoGrid`: uncropped masonry columns opening the shared `PhotoViewer`.
+  - `profile/`: `VendorProfile`, `StickySubnav` (scrollspy), `StickyActionBar`, `InquiryForm`, `AlbumList`.
+- **Shared behaviour.** `src/lib/url-state.ts` (`useParamState`, `useClearParams`): tabs, filters, sort and
+  search all read/write URL query params — states are linkable, back works. One saved store feeds every save
+  button, the navbar count and /saved. Filter/tab swaps crossfade (0.25s) with a skeleton when pending; every
+  list has a designed empty state.
+- **Navbar finished.** Active-page underline (was already in), Saved live count, and search with live
+  suggestions (vendors → profile, cities and categories → filtered /vendors) from a `getSearchIndex()` data
+  call, keyboard navigable; submit still lands on /vendors?q=.
+- **Pages.** /vendors (sticky filter bar: category/city/budget/sort, result count, 4-across grid, load more,
+  bottom-sheet filters on phones; category and city views are the same page with params); /vendors/[slug]
+  (full-bleed cover, scrollspy subnav, uncropped portfolio with viewer, albums as own sequences, films, about
+  + key facts, pricing, FAQ, validated inquiry form with success state, sticky price/Save/WhatsApp/inquiry
+  bar, similar-vendors rail); /venues/[slug] (same profile + capacity, spaces tiles and a 360° placeholder;
+  /vendors/[venue] redirects here); /real-weddings (featured story, style tabs + city filter, grid, load
+  more); /real-weddings/[slug] (parallax opener, chapters with photographs at mixed sizes, the film when
+  linked, "The team" credits linking to profiles, share buttons, more-stories rail); /saved.
+- **Data.** `startingPriceINR` on all vendors (budget bands under ₹1L / ₹1–5L / over ₹5L), `style` + optional
+  `filmId` on weddings, 3 new stories (6 total, all cities covered), api gains q/budget/sort filtering,
+  `getSimilarVendors`, `getWeddingStyles`, `getSearchIndex`, `getFilm`.
+- **Verification.** Lint, typecheck, build pass (39 static pages). `scripts/screenshots-core.mjs`: 6 full-page
+  screenshots in `docs/screenshots/core/` plus 12 behaviour checks (URL filters, select→URL, save→navbar
+  count, subnav, viewer, search suggestions) — all pass, no console errors, no horizontal overflow.
+
+Decisions / gotchas:
+- Next's image-optimizer cache (`.next/cache/images`) survives rebuilds and served session-2 photos for reused
+  filenames (p04/p07/p14). Deleted once; noted in CLAUDE.md.
+- /vendors stays a static page; filtering runs client-side over the full sample set with the URL as the source
+  of truth. Swap the inner filtering for an api/server call when the backend lands.
+- Venue vendors prerender only under /venues/[slug]; /vendors/[slug] redirects on demand.
+- Profile scrollspy falls back to the first section near the top of the page.
+
+Known gaps / next up:
+- Step 7: blogs, gallery, honeymoon and the simple pages (ArticleCard and PhotoGrid are ready for them).
+- Step 8 forms (vendor signup, login, studio); reuse `InquiryForm` patterns.
+- Real 360° embed decision for step 9; real film clips still pending.
 
 ### 2026-11-14 · Session 4: design overhaul (type, layout, motion) — homepage v2
 

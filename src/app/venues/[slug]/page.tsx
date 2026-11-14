@@ -1,22 +1,53 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Placeholder } from "@/components/chrome/Placeholder";
-import { getVendors, getVenue } from "@/lib/api";
+import type { VendorCardData } from "@/components/cards/VendorCard";
+import { VendorProfile } from "@/components/profile/VendorProfile";
+import { getCategories, getCities, getSimilarVendors, getVendors, getVenue } from "@/lib/api";
 
 export async function generateStaticParams() {
-  const venues = await getVendors({ category: "venues" });
-  return venues.map((v) => ({ slug: v.slug }));
+  const vendors = await getVendors({ category: "venues" });
+  return vendors.map((v) => ({ slug: v.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/venues/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const venue = await getVenue(slug);
-  return venue ? { title: venue.name, description: venue.summary } : { title: "Venue" };
+  if (!venue) return { title: "Venue" };
+  return {
+    title: venue.name,
+    description: venue.summary,
+    openGraph: { images: [venue.cover.src] },
+  };
 }
 
 export default async function VenuePage({ params }: PageProps<"/venues/[slug]">) {
   const { slug } = await params;
   const venue = await getVenue(slug);
   if (!venue) notFound();
-  return <Placeholder eyebrow="Venue" title={venue.name} step={9} />;
+
+  const [categories, cities, similarVendors] = await Promise.all([
+    getCategories(),
+    getCities(),
+    getSimilarVendors(slug),
+  ]);
+  const cityNames = new Map(cities.map((c) => [c.slug, c.name]));
+  const categoryNames = new Map(categories.map((c) => [c.slug, c.name]));
+
+  const similar: VendorCardData[] = similarVendors.map((v) => ({
+    slug: v.slug,
+    name: v.name,
+    category: v.category,
+    cityName: cityNames.get(v.city) ?? v.city,
+    startingPrice: v.pricing[0]?.price,
+    photos: v.bestPhotos,
+  }));
+
+  return (
+    <VendorProfile
+      vendor={venue}
+      categoryName={categoryNames.get(venue.category) ?? venue.category}
+      cityName={cityNames.get(venue.city) ?? venue.city}
+      similar={similar}
+    />
+  );
 }

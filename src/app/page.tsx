@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { CategoryTiles } from "@/components/home/CategoryTiles";
 import { CityMosaic } from "@/components/home/CityMosaic";
-import { FaqAccordion } from "@/components/home/FaqAccordion";
-import { FeaturedTabs, type TabVendor } from "@/components/home/FeaturedTabs";
+import { Accordion } from "@/components/ui/Accordion";
+import { FeaturedTabs } from "@/components/home/FeaturedTabs";
 import { FilmsShowcase } from "@/components/home/FilmsShowcase";
 import { HeroV2 } from "@/components/home/HeroV2";
 import { WeddingsScroller } from "@/components/home/WeddingsScroller";
@@ -47,7 +48,7 @@ export default async function HomePage() {
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
   const heroPhotos = [heroA, heroB, heroC].filter((p) => p !== undefined);
 
-  const tabVendors: TabVendor[] = vendors.map((vendor) => ({
+  const tabVendors = vendors.map((vendor) => ({
     slug: vendor.slug,
     name: vendor.name,
     category: vendor.category,
@@ -84,10 +85,12 @@ export default async function HomePage() {
           </Button>
         </Container>
         <Container width="wide">
-          <FeaturedTabs
-            vendors={tabVendors}
-            tabs={categories.map((c) => ({ slug: c.slug, name: c.shortName }))}
-          />
+          <Suspense fallback={null}>
+            <FeaturedTabs
+              vendors={tabVendors}
+              tabs={categories.map((c) => ({ slug: c.slug, name: c.shortName }))}
+            />
+          </Suspense>
         </Container>
       </section>
 
@@ -170,7 +173,7 @@ export default async function HomePage() {
               <Heading size="h2">Questions couples ask us</Heading>
             </Reveal>
             <Reveal delay={0.1}>
-              <FaqAccordion items={faq} />
+              <Accordion items={faq} />
             </Reveal>
           </div>
         </Container>

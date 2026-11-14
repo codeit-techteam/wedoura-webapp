@@ -1,45 +1,15 @@
 "use client";
 
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import Link from "next/link";
 import { useRef } from "react";
 import { RailProgress } from "@/components/home/RailProgress";
-import { Photo } from "@/components/media/Photo";
+import { StoryCard } from "@/components/cards/StoryCard";
 import type { RealWedding } from "@/data/types";
 
 type Props = {
   weddings: RealWedding[];
   cityNames: Record<string, string>;
 };
-
-function photographerOf(wedding: RealWedding): string | undefined {
-  return wedding.credits.find((c) => c.role === "Photography" || c.role === "Films")?.name;
-}
-
-function StoryCard({ wedding, cityName, sizes }: { wedding: RealWedding; cityName?: string; sizes: string }) {
-  const credit = photographerOf(wedding);
-  return (
-    <Link href={`/real-weddings/${wedding.slug}`} className="group block">
-      <div className="relative aspect-4/3 overflow-hidden bg-ivory md:aspect-auto md:h-[72vh]">
-        <Photo
-          photo={wedding.cover}
-          mode="cover"
-          sizes={sizes}
-          className="transition-transform duration-1200 ease-wedoura group-hover:scale-104"
-        />
-        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-ink/75 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-6 text-white md:p-10">
-          <p className="label text-white/80">{cityName}</p>
-          <p className="mt-2 font-serif text-h2 leading-none">{wedding.title}</p>
-          <p className="mt-3 text-small text-white/85">
-            {wedding.couple}
-            {credit ? ` · Photographs by ${credit}` : ""}
-          </p>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 /**
  * Real weddings. Desktop: a pinned section where vertical scrolling moves a

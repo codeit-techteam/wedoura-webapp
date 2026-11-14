@@ -86,6 +86,8 @@ export interface Vendor {
   about: string[];
   keyFacts: { label: string; value: string }[];
   pricing: PriceLine[];
+  /** Numeric rupees for the first price line; drives budget filter and sort. */
+  startingPriceINR?: number;
   faq: Faq[];
   whatsapp: string; // E.164, sample numbers only
   featured?: boolean;
@@ -117,6 +119,10 @@ export interface RealWedding {
   date: string; // ISO date
   excerpt: string;
   cover: Photo;
+  /** e.g. "Palace", "Beach", "Garden"; drives the style filter. */
+  style: string;
+  /** Optional film shown inside the story. */
+  filmId?: string;
   chapters: StoryChapter[];
   credits: VendorCredit[];
   featured?: boolean;

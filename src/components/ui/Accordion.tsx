@@ -1,24 +1,29 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import type { Faq } from "@/data/types";
 import { EASE } from "@/lib/motion";
 
-type Props = { items: Faq[] };
+type Props = {
+  items: Faq[];
+  /** Index opened initially; null for all closed. */
+  defaultOpen?: number | null;
+};
 
-/** The site FAQ as an accordion with smooth open and close. */
-export function FaqAccordion({ items }: Props) {
-  const [open, setOpen] = useState<number | null>(0);
+/** Question-and-answer accordion with smooth open and close. */
+export function Accordion({ items, defaultOpen = 0 }: Props) {
+  const [open, setOpen] = useState<number | null>(defaultOpen);
+  const uid = useId();
 
   return (
     <ul className="border-t border-line">
       {items.map((item, i) => {
         const isOpen = open === i;
-        const panelId = `faq-panel-${i}`;
-        const buttonId = `faq-button-${i}`;
+        const panelId = `${uid}-panel-${i}`;
+        const buttonId = `${uid}-button-${i}`;
         return (
           <li key={item.question} className="border-b border-line">
             <h3>
