@@ -188,6 +188,23 @@ Known gaps / next up:
 - Real film clips (the films section and a working player return automatically), real 360 photos, logo.
 - The homepage films showcase still shows breathing posters; decide whether to hide it until clips exist.
 
+### 2026-11-16 · Blog article layout
+
+Done:
+- **`/blogs/[slug]`** hero uses in-flow copy (no absolute overlap), stronger
+  gradient, white standfirst band. Article column: static `Heading` (fixed
+  MaskedHeading beside-text bug), prose-width figures with aspect-aware max-width
+  + captions.
+- **`src/data/blogs.ts`** expanded three posts with fuller copy and landscape /
+  portrait inline photos at sensible sizes.
+
+### 2026-11-16 · Hero search strip
+
+Done:
+- Removed visible **Where / Who** labels; pickers show **Anywhere** and **All
+  vendors** on one line in a shorter `h-14` bar. Mobile sheets titled City /
+  Category only.
+
 ### 2026-11-16 · Vendors filter strap
 
 Done:

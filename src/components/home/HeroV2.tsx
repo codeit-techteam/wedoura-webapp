@@ -106,7 +106,7 @@ export function HeroV2({ photos, cities, categories }: Props) {
           ]}
         />
         <motion.p
-          className="mt-4 max-w-xl text-sublead text-white/90 text-balance"
+          className="mt-5 max-w-xl text-sublead text-white/90 text-balance md:mt-6"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.35 }}
@@ -114,7 +114,7 @@ export function HeroV2({ photos, cities, categories }: Props) {
           India&apos;s best wedding people, chosen from their real work.
         </motion.p>
         <motion.div
-          className="mt-8 flex w-full flex-col items-center"
+          className="mt-8 flex w-full flex-col items-center md:mt-10"
           initial={reduce ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.5 }}

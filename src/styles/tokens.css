@@ -92,6 +92,7 @@
   --container-site: 105rem; /* 1680px, centred on wider screens */
   --container-wide: 120rem; /* near full-bleed photo bands */
   --container-prose: 44rem;
+  --container-article: 56rem; /* long-form reading, wider than legal prose */
   --container-hero-search: 55rem; /* 880px, the hero search bar */
 
   /* Breakpoints the brief designs for: 390 (base), 768, 1440. */
