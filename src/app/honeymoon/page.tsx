@@ -6,7 +6,7 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
-import { getDestinations } from "@/lib/api";
+import { listDestinations } from "@/lib/api";
 import { pickParams } from "@/lib/url";
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function HoneymoonPage({ searchParams }: PageProps<"/honeymoon">) {
   const params = pickParams(await searchParams, ["place"]);
-  const destinations = await getDestinations();
+  const destinations = await listDestinations();
   const selected = destinations.find((d) => d.slug === params.place) ?? null;
 
   return (

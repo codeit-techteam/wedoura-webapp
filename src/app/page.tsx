@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { UnderlineTabs } from "@/components/browse/UnderlineTabs";
-import { VendorCard, type VendorCardData } from "@/components/cards/VendorCard";
+import { VendorCard } from "@/components/cards/VendorCard";
 import { CategoryTiles } from "@/components/home/CategoryTiles";
 import { CityMosaic } from "@/components/home/CityMosaic";
 import { Accordion } from "@/components/ui/Accordion";
@@ -16,15 +16,15 @@ import { Container } from "@/components/ui/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Section } from "@/components/ui/Section";
 import {
-  getBlogPosts,
-  getCategories,
-  getCities,
-  getFilms,
   getPhoto,
   getPromises,
-  getRealWeddings,
   getSiteFaq,
-  getVendors,
+  listArticles,
+  listCategoriesWithCounts,
+  listCitiesWithCounts,
+  listFilms,
+  listVendors,
+  listWeddings,
 } from "@/lib/api";
 import { pickParams } from "@/lib/url";
 
@@ -32,34 +32,29 @@ const monthYear = new Intl.DateTimeFormat("en-IN", { month: "long", year: "numer
 
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const params = pickParams(await searchParams, ["category"]);
-  const [heroA, heroB, heroC, bandPhoto, whyPhoto, categories, cities, vendors, weddings, films, promises, posts, faq] =
+  const [heroA, heroB, heroC, bandPhoto, whyPhoto, categories, cities, featured, weddingsPage, films, promises, articles, faq] =
     await Promise.all([
       getPhoto("p23"),
       getPhoto("p21"),
       getPhoto("p24"),
       getPhoto("p31"),
       getPhoto("p35"),
-      getCategories(),
-      getCities(),
-      getVendors({ category: params.category || undefined }),
-      getRealWeddings(),
-      getFilms(),
+      listCategoriesWithCounts(),
+      listCitiesWithCounts(),
+      // Two full rows of four from 1280px, featured first.
+      listVendors({ category: params.category || undefined, limit: 8 }),
+      listWeddings(),
+      listFilms(),
       getPromises(),
-      getBlogPosts(),
+      listArticles({ limit: 3 }),
       getSiteFaq(),
     ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
   const heroPhotos = [heroA, heroB, heroC].filter((p) => p !== undefined);
-
-  // Two full rows of four from 1280px.
-  const featuredVendors: VendorCardData[] = vendors.slice(0, 8).map((vendor) => ({
-    slug: vendor.slug,
-    name: vendor.name,
-    category: vendor.category,
-    cityName: cityNames[vendor.city] ?? vendor.city,
-    startingPrice: vendor.pricing[0]?.price,
-    photos: vendor.bestPhotos,
-  }));
+  const weddings = weddingsPage.items;
+  const posts = articles.items;
+  // The films section exists only while there is something to play.
+  const playableFilms = films.filter((f) => f.previewSrc.length > 0 || f.fullSrc.length > 0);
 
   return (
     <main>
@@ -97,7 +92,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             params={params}
           />
           <ul className="mt-6 grid grid-cols-2 gap-2 gap-y-8 md:mt-8 lg:grid-cols-3 min-[80rem]:grid-cols-4">
-            {featuredVendors.map((vendor) => (
+            {featured.items.map((vendor) => (
               <li key={vendor.slug}>
                 <VendorCard vendor={vendor} />
               </li>
@@ -117,8 +112,9 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         <WeddingsScroller weddings={weddings} cityNames={cityNames} />
       </section>
 
-      {/* 5 · Films: the one dark section, first film grows on scroll. */}
-      <FilmsShowcase films={films} />
+      {/* 5 · Films: the one dark section, first film grows on scroll.
+          Hidden entirely until real clips exist. */}
+      {playableFilms.length > 0 && <FilmsShowcase films={playableFilms} />}
 
       {/* 6 · Cities: an uneven photo mosaic. */}
       <section aria-label="Browse by city" className="py-section-sm md:py-section">

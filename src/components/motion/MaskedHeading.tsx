@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { EASE } from "@/lib/motion";
 
@@ -38,14 +38,20 @@ export function MaskedHeading({ lines, as = "h2", className, delay = 0 }: Props)
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.09, delayChildren: delay } } }}
     >
       {lines.map((line, i) => (
-        // pb/mb give Instrument Serif descenders (g, y, p) room inside the
-        // clip without loosening the visual line spacing. Font descent is
-        // ~0.3em; the line box alone leaves only a few px below the baseline.
-        <span key={i} className="block overflow-hidden pb-[0.3em] -mb-[0.3em]">
-          <motion.span className="block will-change-transform" variants={lineVariants}>
-            {line}
-          </motion.span>
-        </span>
+        // The space keeps the text content and accessible name readable
+        // ("Why couples choose", not "Why coupleschoose"); between block
+        // spans it never renders visually.
+        <Fragment key={i}>
+          {i > 0 && " "}
+          {/* pb/mb give Instrument Serif descenders (g, y, p) room inside the
+              clip without loosening the visual line spacing. Font descent is
+              ~0.3em; the line box alone leaves only a few px below the baseline. */}
+          <span className="block overflow-hidden pb-[0.3em] -mb-[0.3em]">
+            <motion.span className="block will-change-transform" variants={lineVariants}>
+              {line}
+            </motion.span>
+          </span>
+        </Fragment>
       ))}
     </Tag>
   );

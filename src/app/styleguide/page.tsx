@@ -13,7 +13,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Label } from "@/components/ui/Label";
 import { Section } from "@/components/ui/Section";
 import { Text } from "@/components/ui/Text";
-import { getFilms, getGalleryPhotos } from "@/lib/api";
+import { listFilms, listGalleryPhotos } from "@/lib/api";
 import { ViewerDemo } from "./ViewerDemo";
 
 export const metadata: Metadata = {
@@ -58,7 +58,8 @@ function Specimen({ label, children }: { label: string; children: React.ReactNod
 }
 
 export default async function StyleguidePage() {
-  const [photos, films] = await Promise.all([getGalleryPhotos(), getFilms()]);
+  const [gallery, films] = await Promise.all([listGalleryPhotos(1, 200), listFilms()]);
+  const photos = gallery.items.map((i) => i.photo);
   const landscape = photos.filter((p) => p.width > p.height);
   const portrait = photos.filter((p) => p.height > p.width);
   const cover = landscape[0];

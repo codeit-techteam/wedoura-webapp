@@ -7,7 +7,7 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getCities, getRealWeddings, getWeddingStyles } from "@/lib/api";
+import { listCitiesWithCounts, listWeddings, listWeddingStyles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
 
 export const metadata: Metadata = {
@@ -21,14 +21,14 @@ const PATHNAME = "/real-weddings";
 export default async function RealWeddingsPage({ searchParams }: PageProps<"/real-weddings">) {
   const params = pickParams(await searchParams, ["style", "city", "show"]);
   const [allWeddings, filtered, styles, cities] = await Promise.all([
-    getRealWeddings(),
-    getRealWeddings({ style: params.style, city: params.city }),
-    getWeddingStyles(),
-    getCities(),
+    listWeddings(),
+    listWeddings({ style: params.style, city: params.city }),
+    listWeddingStyles(),
+    listCitiesWithCounts(),
   ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-  const featured = allWeddings.find((w) => w.featured) ?? allWeddings[0];
-  const rest = filtered.filter((w) => w.slug !== featured?.slug);
+  const featured = allWeddings.items.find((w) => w.featured) ?? allWeddings.items[0];
+  const rest = filtered.items.filter((w) => w.slug !== featured?.slug);
 
   const shown = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
   const visible = rest.slice(0, shown);

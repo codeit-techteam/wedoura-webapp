@@ -8,27 +8,27 @@ import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Container } from "@/components/ui/Container";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { Text } from "@/components/ui/Text";
-import { getBlogPost, getBlogPosts } from "@/lib/api";
+import { getArticle, listArticles } from "@/lib/api";
 
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
 export async function generateStaticParams() {
-  const posts = await getBlogPosts();
-  return posts.map((p) => ({ slug: p.slug }));
+  const { items } = await listArticles();
+  return items.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/blogs/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const post = await getArticle(slug);
   if (!post) return { title: "Article" };
   return { title: post.title, description: post.excerpt, openGraph: { images: [post.cover.src] } };
 }
 
 export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]">) {
   const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const post = await getArticle(slug);
   if (!post) notFound();
-  const related = (await getBlogPosts()).filter((p) => p.slug !== slug).slice(0, 3);
+  const related = (await listArticles()).items.filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
     <main className="pb-section-sm">

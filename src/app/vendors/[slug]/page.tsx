@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import type { VendorCardData } from "@/components/cards/VendorCard";
 import { VendorProfile } from "@/components/profile/VendorProfile";
-import { getCategories, getCities, getSimilarVendors, getVendor, getVendors } from "@/lib/api";
+import { getVendor, listSimilar, listVendors } from "@/lib/api";
 
 export async function generateStaticParams() {
-  const vendors = await getVendors();
-  return vendors.filter((v) => !v.venue).map((v) => ({ slug: v.slug }));
+  // Published, non-venue listings only; unpublished profiles 404.
+  const { items } = await listVendors({ limit: 999 });
+  return items.filter((v) => v.category !== "venues").map((v) => ({ slug: v.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/vendors/[slug]">): Promise<Metadata> {
@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: PageProps<"/vendors/[slug]">)
   if (!vendor) return { title: "Vendor" };
   return {
     title: vendor.name,
-    description: vendor.summary,
-    openGraph: { images: [vendor.cover.src] },
+    description: vendor.tagline,
+    openGraph: vendor.cover ? { images: [vendor.cover.src] } : undefined,
   };
 }
 
@@ -26,29 +26,6 @@ export default async function VendorPage({ params }: PageProps<"/vendors/[slug]"
   if (!vendor) notFound();
   if (vendor.venue) redirect(`/venues/${vendor.slug}`);
 
-  const [categories, cities, similarVendors] = await Promise.all([
-    getCategories(),
-    getCities(),
-    getSimilarVendors(slug),
-  ]);
-  const cityNames = new Map(cities.map((c) => [c.slug, c.name]));
-  const categoryNames = new Map(categories.map((c) => [c.slug, c.name]));
-
-  const similar: VendorCardData[] = similarVendors.map((v) => ({
-    slug: v.slug,
-    name: v.name,
-    category: v.category,
-    cityName: cityNames.get(v.city) ?? v.city,
-    startingPrice: v.pricing[0]?.price,
-    photos: v.bestPhotos,
-  }));
-
-  return (
-    <VendorProfile
-      vendor={vendor}
-      categoryName={categoryNames.get(vendor.category) ?? vendor.category}
-      cityName={cityNames.get(vendor.city) ?? vendor.city}
-      similar={similar}
-    />
-  );
+  const similar = await listSimilar(slug);
+  return <VendorProfile vendor={vendor} similar={similar} />;
 }

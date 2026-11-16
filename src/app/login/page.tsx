@@ -15,7 +15,10 @@ export default function LoginPage() {
       <Container className="w-full">
         <div className="mx-auto max-w-md border border-line bg-white p-8 md:p-12">
           <MaskedHeading as="h1" className="font-serif text-h2" lines={[<>Welcome back.</>]} />
-          <p className="mt-3 text-small text-mute">Screens only until the backend arrives; any valid input works.</p>
+          <p className="mt-3 text-small text-mute">
+            Sign in with the email and password from your application. To look around, the demo login
+            vendor@gmail.com / 123456 always works.
+          </p>
           <div className="mt-8">
             <LoginForm />
           </div>

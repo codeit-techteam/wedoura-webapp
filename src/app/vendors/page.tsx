@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { FilterBar, FilterSelect } from "@/components/browse/FilterBar";
 import { LoadMore } from "@/components/browse/LoadMore";
-import { VendorCard, type VendorCardData } from "@/components/cards/VendorCard";
+import { VendorCard } from "@/components/cards/VendorCard";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BUDGET_BANDS, VENDOR_SORTS, getCategories, getCities, getVendors } from "@/lib/api";
+import { BUDGET_BANDS, VENDOR_SORTS, budgetToRange, listCategoriesWithCounts, listCitiesWithCounts, listVendors } from "@/lib/api";
 import { clearedHref, patchedHref, pickParams } from "@/lib/url";
 
 export const metadata: Metadata = {
@@ -15,37 +15,38 @@ export const metadata: Metadata = {
 };
 
 const PAGE = 8;
-const FILTER_KEYS = ["q", "category", "city", "budget", "sort"];
+const BASE_KEYS = ["q", "category", "city", "budget", "sort"];
 const PATHNAME = "/vendors";
 
 export default async function VendorsPage({ searchParams }: PageProps<"/vendors">) {
-  const params = pickParams(await searchParams, [...FILTER_KEYS, "show"]);
-  const [vendors, categories, cities] = await Promise.all([
-    getVendors({
-      q: params.q,
-      category: params.category,
-      city: params.city,
-      budget: params.budget,
-      sort: params.sort,
-    }),
-    getCategories(),
-    getCities(),
-  ]);
-  const cityNames = new Map(cities.map((c) => [c.slug, c.name]));
+  const sp = await searchParams;
+  const [categories, cities] = await Promise.all([listCategoriesWithCounts(), listCitiesWithCounts()]);
+
+  // Category-specific filters come from the active category's definitions.
+  const baseParams = pickParams(sp, [...BASE_KEYS, "show"]);
+  const activeCategory = categories.find((c) => c.slug === baseParams.category);
+  const fieldDefs = activeCategory?.fields.filter((f) => f.filterable && f.options?.length) ?? [];
+  const fieldKeys = fieldDefs.map((f) => f.key);
+  const params = pickParams(sp, [...BASE_KEYS, "show", ...fieldKeys]);
 
   const shown = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
-  const visible = vendors.slice(0, shown);
-  const cards: VendorCardData[] = visible.map((v) => ({
-    slug: v.slug,
-    name: v.name,
-    category: v.category,
-    cityName: cityNames.get(v.city) ?? v.city,
-    startingPrice: v.pricing[0]?.price,
-    photos: v.bestPhotos,
-  }));
+  const fields: Record<string, string> = {};
+  for (const key of fieldKeys) if (params[key]) fields[key] = params[key];
 
-  const activeCount = FILTER_KEYS.filter((k) => k !== "sort" && params[k]).length;
-  const count = `${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`;
+  const result = await listVendors({
+    q: params.q,
+    category: params.category,
+    city: params.city,
+    ...budgetToRange(params.budget),
+    sort: params.sort,
+    page: 1,
+    limit: shown,
+    fields,
+  });
+
+  const activeCount =
+    ["q", "category", "city", "budget"].filter((k) => params[k]).length + fieldKeys.filter((k) => params[k]).length;
+  const count = `${result.total} vendor${result.total === 1 ? "" : "s"}`;
 
   return (
     <main>
@@ -59,7 +60,7 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
       <FilterBar
         count={count}
         activeCount={activeCount}
-        clearHref={clearedHref(PATHNAME, params, [...FILTER_KEYS, "show"])}
+        clearHref={clearedHref(PATHNAME, params, [...BASE_KEYS, "show", ...fieldKeys])}
         className="sticky top-0 z-30 md:top-nav"
       >
         <FilterSelect
@@ -97,11 +98,23 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           params={params}
           className="md:w-48"
         />
+        {fieldDefs.map((def) => (
+          <FilterSelect
+            key={def.key}
+            param={def.key}
+            label={def.label}
+            options={(def.options ?? []).map((o) => ({ value: o, label: o }))}
+            allLabel="Any"
+            pathname={PATHNAME}
+            params={params}
+            className="md:w-44"
+          />
+        ))}
       </FilterBar>
 
       <div className="container-wide py-10 md:py-14">
         {params.q && <p className="mb-8 font-serif text-h3">Results for &ldquo;{params.q}&rdquo;</p>}
-        {cards.length === 0 ? (
+        {result.items.length === 0 ? (
           <EmptyState
             title="No vendors match those filters yet."
             text="Try a wider budget, another city, or clear the filters to see everyone."
@@ -109,7 +122,7 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           />
         ) : (
           <ul className="grid grid-cols-2 gap-2 gap-y-8 lg:grid-cols-3 min-[80rem]:grid-cols-4">
-            {cards.map((vendor, i) => (
+            {result.items.map((vendor, i) => (
               <li key={vendor.slug}>
                 <VendorCard vendor={vendor} priority={i < 4} />
               </li>
@@ -117,8 +130,8 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           </ul>
         )}
         <LoadMore
-          shown={cards.length}
-          total={vendors.length}
+          shown={result.items.length}
+          total={result.total}
           moreHref={patchedHref(PATHNAME, params, { show: String(shown + PAGE) })}
           noun="vendors"
         />

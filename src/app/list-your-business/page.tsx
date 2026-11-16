@@ -5,7 +5,7 @@ import { Reveal } from "@/components/motion/Reveal";
 import { VendorSignupForm } from "@/components/profile/VendorSignupForm";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
-import { getCategories, getCities, getFeaturedVendors, getPromises } from "@/lib/api";
+import { getPromises, listAllCategories, listAllCities, listFeatured } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "List Your Business",
@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 
 export default async function ListYourBusinessPage() {
   const [categories, cities, promises, featured] = await Promise.all([
-    getCategories(),
-    getCities(),
+    listAllCategories(),
+    listAllCities(),
     getPromises(),
-    getFeaturedVendors(1),
+    listFeatured(undefined, 1),
   ]);
   const example = featured[0];
 
@@ -40,17 +40,7 @@ export default async function ListYourBusinessPage() {
           {example && (
             <Reveal>
               <div className="max-w-sm">
-                <VendorCard
-                  vendor={{
-                    slug: example.slug,
-                    name: example.name,
-                    category: example.category,
-                    cityName: "Udaipur",
-                    startingPrice: example.pricing[0]?.price,
-                    photos: example.bestPhotos,
-                  }}
-                  sizes="(min-width: 48rem) 30vw, 90vw"
-                />
+                <VendorCard vendor={example} sizes="(min-width: 48rem) 30vw, 90vw" />
                 <p className="mt-3 text-small text-mute">This is how your profile appears to couples.</p>
               </div>
             </Reveal>
@@ -69,7 +59,10 @@ export default async function ListYourBusinessPage() {
       <section className="mt-16 bg-ivory py-section-sm" aria-label="Create your profile">
         <Container>
           <Label>Create your profile</Label>
-          <MaskedHeading as="h2" className="mt-3 font-serif text-h2" lines={[<>Four short steps.</>]} />
+          <MaskedHeading as="h2" className="mt-3 font-serif text-h2" lines={[<>One short form.</>]} />
+          <p className="mt-4 max-w-prose text-mute">
+            We review every application by hand, then you build your profile in the studio.
+          </p>
           <div className="mt-8 max-w-3xl">
             <VendorSignupForm
               categories={categories.map((c) => ({ value: c.slug, label: c.name }))}

@@ -4,7 +4,7 @@ import { ArticleCard } from "@/components/cards/ArticleCard";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getBlogPosts } from "@/lib/api";
+import { listArticles } from "@/lib/api";
 import { pickParams } from "@/lib/url";
 
 export const metadata: Metadata = {
@@ -14,11 +14,12 @@ export const metadata: Metadata = {
 
 export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
   const params = pickParams(await searchParams, ["category"]);
-  const posts = await getBlogPosts();
-  const categories = [...new Set(posts.map((p) => p.category))];
-  const shown = params.category
-    ? posts.filter((p) => p.category.toLowerCase() === params.category.toLowerCase())
-    : posts;
+  const [all, filtered] = await Promise.all([
+    listArticles(),
+    listArticles({ category: params.category || undefined }),
+  ]);
+  const categories = [...new Set(all.items.map((p) => p.category))];
+  const shown = filtered.items;
 
   return (
     <main className="pb-section-sm">

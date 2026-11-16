@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { SavedList } from "@/components/browse/SavedList";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
-import { getCities, getRealWeddings, getVendors } from "@/lib/api";
+import { listAllCities, listVendors, listWeddings } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Saved",
@@ -11,17 +11,14 @@ export const metadata: Metadata = {
 };
 
 export default async function SavedPage() {
-  const [vendors, weddings, cities] = await Promise.all([getVendors(), getRealWeddings(), getCities()]);
+  const [vendorsPage, weddingsPage, cities] = await Promise.all([
+    listVendors({ limit: 999 }),
+    listWeddings(),
+    listAllCities(),
+  ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-
-  const cards = vendors.map((v) => ({
-    slug: v.slug,
-    name: v.name,
-    category: v.category,
-    cityName: cityNames[v.city] ?? v.city,
-    startingPrice: v.pricing[0]?.price,
-    photos: v.bestPhotos,
-  }));
+  const cards = vendorsPage.items;
+  const weddings = weddingsPage.items;
 
   return (
     <main className="pb-section-sm">

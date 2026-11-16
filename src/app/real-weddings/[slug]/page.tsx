@@ -15,18 +15,18 @@ import { Icon } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Label";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { Text } from "@/components/ui/Text";
-import { getCities, getFilm, getRealWedding, getRealWeddings } from "@/lib/api";
+import { getFilm, getWedding, listAllCities, listVendors, listWeddings } from "@/lib/api";
 
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
 export async function generateStaticParams() {
-  const weddings = await getRealWeddings();
-  return weddings.map((w) => ({ slug: w.slug }));
+  const { items } = await listWeddings();
+  return items.map((w) => ({ slug: w.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/real-weddings/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const wedding = await getRealWedding(slug);
+  const wedding = await getWedding(slug);
   if (!wedding) return { title: "Real wedding" };
   return {
     title: wedding.title,
@@ -37,17 +37,20 @@ export async function generateMetadata({ params }: PageProps<"/real-weddings/[sl
 
 export default async function RealWeddingPage({ params }: PageProps<"/real-weddings/[slug]">) {
   const { slug } = await params;
-  const wedding = await getRealWedding(slug);
+  const wedding = await getWedding(slug);
   if (!wedding) notFound();
 
-  const [cities, allWeddings, film] = await Promise.all([
-    getCities(),
-    getRealWeddings(),
+  const [cities, allWeddings, publishedVendors, film] = await Promise.all([
+    listAllCities(),
+    listWeddings(),
+    listVendors({ limit: 999 }),
     wedding.filmId ? getFilm(wedding.filmId) : Promise.resolve(undefined),
   ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-  const more = allWeddings.filter((w) => w.slug !== slug).slice(0, 4);
+  const more = allWeddings.items.filter((w) => w.slug !== slug).slice(0, 4);
   const credit = photographerOf(wedding);
+  // Credits link only to published profiles; others show as plain names.
+  const publishedSlugs = new Set(publishedVendors.items.map((v) => v.slug));
 
   return (
     <main className="pb-section-sm">
@@ -137,12 +140,12 @@ export default async function RealWeddingPage({ params }: PageProps<"/real-weddi
           <div className="grid gap-10 md:grid-cols-[1fr_2fr]">
             <div>
               <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>The team</>]} />
-              <p className="mt-4 max-w-xs text-mute">The people who made the day. Every name links to their work.</p>
+              <p className="mt-4 max-w-xs text-mute">The people who made the day. Names link to their Wedoura profiles.</p>
             </div>
             <ul className="border-t border-line">
               {wedding.credits.map((creditLine) => (
                 <li key={creditLine.role + creditLine.name} className="border-b border-line">
-                  {creditLine.vendorSlug ? (
+                  {creditLine.vendorSlug && publishedSlugs.has(creditLine.vendorSlug) ? (
                     <Link
                       href={`/vendors/${creditLine.vendorSlug}`}
                       className="group flex tap items-baseline justify-between gap-6 py-4"

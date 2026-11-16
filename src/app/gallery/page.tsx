@@ -4,7 +4,7 @@ import { PhotoGrid, type PhotoLink } from "@/components/media/PhotoGrid";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getCategories, getGalleryItems } from "@/lib/api";
+import { listCategoriesWithCounts, listGalleryPhotos } from "@/lib/api";
 import { pickParams } from "@/lib/url";
 
 export const metadata: Metadata = {
@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 
 export default async function GalleryPage({ searchParams }: PageProps<"/gallery">) {
   const params = pickParams(await searchParams, ["category"]);
-  const [items, categories] = await Promise.all([getGalleryItems(), getCategories()]);
+  const [gallery, categories] = await Promise.all([listGalleryPhotos(1, 200), listCategoriesWithCounts()]);
+  const items = gallery.items;
   const usedCategories = new Set(items.map((i) => i.category).filter(Boolean));
 
   const shown = params.category ? items.filter((i) => i.category === params.category) : items;
