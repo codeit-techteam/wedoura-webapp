@@ -62,7 +62,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
         count={count}
         activeCount={activeCount}
         clearHref={clearedHref(PATHNAME, params, [...BASE_KEYS, "show", ...fieldKeys])}
-        className="sticky top-0 z-30 md:top-nav"
       >
         <FilterSelect
           param="category"
@@ -70,7 +69,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           options={categories.map((c) => ({ value: c.slug, label: c.shortName }))}
           pathname={PATHNAME}
           params={params}
-          className="md:w-48"
         />
         <FilterSelect
           param="city"
@@ -79,7 +77,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           allLabel="Anywhere"
           pathname={PATHNAME}
           params={params}
-          className="md:w-40"
         />
         <FilterSelect
           param="budget"
@@ -88,7 +85,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           allLabel="Any budget"
           pathname={PATHNAME}
           params={params}
-          className="md:w-44"
         />
         <FilterSelect
           param="sort"
@@ -97,7 +93,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           allLabel="Featured first"
           pathname={PATHNAME}
           params={params}
-          className="md:w-48"
         />
         {fieldDefs.map((def) => (
           <FilterSelect
@@ -108,7 +103,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
             allLabel="Any"
             pathname={PATHNAME}
             params={params}
-            className="md:w-44"
           />
         ))}
       </FilterBar>

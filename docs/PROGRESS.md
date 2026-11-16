@@ -188,6 +188,24 @@ Known gaps / next up:
 - Real film clips (the films section and a working player return automatically), real 360 photos, logo.
 - The homepage films showcase still shows breathing posters; decide whether to hide it until clips exist.
 
+### 2026-11-16 · Vendors filter strap
+
+Done:
+- **Filter strip UI.** Replaced native `<select>` in `FilterSelect` with custom listboxes (ported
+  menus on desktop, bottom sheet on mobile). One open filter at a time via `FilterBar` context.
+- **Shorter strap.** `min-h-14`, tighter `py-2` cells, compact count/Clear aside. Active filter uses
+  ivory background. Real Weddings standalone city filter keeps a compact trigger + sheet outside
+  `FilterBar`.
+
+### 2026-11-16 · Search overlay + hero scroll
+
+Done:
+- **Search overlay** restyled to match the hero search bar: ivory field, bordered
+  row (icon + input + Search button), suggestion panel and city/category cards.
+- **Hero scroll jitter:** removed scroll-linked scale on the photo layer (was
+  compounding with Ken Burns under Lenis); dropped vertical parallax on copy;
+  eased opacity via a spring on scroll progress.
+
 ### 2026-11-16 · Hero gap + serif descenders
 
 Done:

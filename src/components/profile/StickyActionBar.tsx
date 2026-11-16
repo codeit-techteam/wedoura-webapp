@@ -14,7 +14,7 @@ type Props = {
 
 /**
  * The profile's persistent actions on phones and tablets: price, save,
- * WhatsApp, inquiry. From lg the sticky side panel takes over.
+ * WhatsApp, inquiry. Hidden from lg where the side panel carries these actions.
  */
 export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) {
   const wa = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;

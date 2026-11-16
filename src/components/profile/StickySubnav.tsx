@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/cn";
 
 export type SubnavSection = { id: string; label: string };
@@ -8,8 +9,8 @@ export type SubnavSection = { id: string; label: string };
 type Props = { sections: SubnavSection[] };
 
 /**
- * The profile's section navigation: sticky under the navbar, highlighting
- * the section currently in view while scrolling.
+ * Profile section links in a bordered strap. Scrollspy highlights the section
+ * in view; the bar stays in normal document flow (not sticky).
  */
 export function StickySubnav({ sections }: Props) {
   const [active, setActive] = useState(sections[0]?.id ?? "");
@@ -27,7 +28,6 @@ export function StickySubnav({ sections }: Props) {
           if (entry.isIntersecting) visible.set(entry.target.id, entry.intersectionRatio);
           else visible.delete(entry.target.id);
         }
-        // Highest visible section in document order wins.
         for (const section of sections) {
           if (visible.has(section.id)) {
             setActive(section.id);
@@ -39,8 +39,6 @@ export function StickySubnav({ sections }: Props) {
     );
     targets.forEach((t) => observer.observe(t));
 
-    // Near the top of the page no section sits in the observer band yet;
-    // fall back to the first section so the highlight never lags behind.
     const onScroll = () => {
       if (window.scrollY < window.innerHeight * 0.4) setActive(sections[0]?.id ?? "");
     };
@@ -52,33 +50,27 @@ export function StickySubnav({ sections }: Props) {
   }, [sections]);
 
   return (
-    <nav
-      aria-label="Profile sections"
-      className="sticky top-0 z-30 border-b border-line bg-white md:top-nav"
-    >
-      <ul className="no-scrollbar container-site flex gap-6 overflow-x-auto md:gap-8">
-        {sections.map((section) => (
-          <li key={section.id} className="shrink-0">
-            <a
-              href={`#${section.id}`}
-              aria-current={active === section.id ? "true" : undefined}
-              className={cn(
-                "tap relative flex items-center pt-3 pb-3 text-label-lg whitespace-nowrap transition-colors duration-300 ease-wedoura",
-                active === section.id ? "font-medium text-ink" : "text-mute hover:text-ink",
-              )}
-            >
-              {section.label}
-              <span
-                aria-hidden="true"
+    <Container className="pb-6 md:pb-8">
+      <nav aria-label="Profile sections" className="border border-line bg-white">
+        <ul className="no-scrollbar flex divide-x divide-line overflow-x-auto">
+          {sections.map((section) => (
+            <li key={section.id} className="min-w-[max-content] flex-1 shrink-0">
+              <a
+                href={`#${section.id}`}
+                aria-current={active === section.id ? "true" : undefined}
                 className={cn(
-                  "absolute inset-x-0 bottom-0 h-0.5 origin-left bg-ink transition-transform duration-300 ease-wedoura",
-                  active === section.id ? "scale-x-100" : "scale-x-0",
+                  "tap flex items-center justify-center px-4 py-3.5 text-label-lg whitespace-nowrap transition-chrome md:px-5 md:py-4",
+                  active === section.id
+                    ? "bg-ivory font-medium text-ink"
+                    : "text-mute hover:bg-ivory hover:text-ink",
                 )}
-              />
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+              >
+                {section.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </Container>
   );
 }

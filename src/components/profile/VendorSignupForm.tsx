@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import type { CategorySlug } from "@/data/types";
@@ -159,13 +158,6 @@ export function VendorSignupForm({ categories, cities }: Props) {
         </select>
         {error("city")}
       </div>
-      {/* Mid-form login route for vendors who already applied. */}
-      <p className="border-y border-line py-3 text-center text-small text-mute md:col-span-2">
-        Already on Wedoura?{" "}
-        <Link href="/login" className="link-draw text-ink">
-          Log in to check your status
-        </Link>
-      </p>
       <div>
         <label htmlFor="su-whatsapp" className="label text-mute">
           WhatsApp number

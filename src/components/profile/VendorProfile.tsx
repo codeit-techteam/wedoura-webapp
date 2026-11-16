@@ -30,7 +30,7 @@ const PORTFOLIO_INITIAL = 12;
 
 /**
  * The vendor profile: the most important page on the site. A full-bleed
- * cover, a strip of key facts, then the work in a wide column with a sticky
+ * cover, a strip of key facts, then the work in a wide column with a
  * price-and-inquiry panel beside it from lg (the same panel sits after the
  * content on phones, where the bottom action bar takes over). Every section
  * renders only when the listing has content for it; films only with a real
@@ -117,7 +117,7 @@ export function VendorProfile({ vendor, similar }: Props) {
       <StickySubnav sections={sections} />
 
       <Container>
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start lg:gap-14 xl:gap-20">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start lg:gap-14 xl:gap-20 lg:pt-2">
           {/* The work, in a wide column. */}
           <div className="min-w-0">
             {vendor.portfolio.length > 0 && (
@@ -253,12 +253,12 @@ export function VendorProfile({ vendor, similar }: Props) {
             )}
           </div>
 
-          {/* Price, save, WhatsApp and a compact inquiry form. Sticky beside the
-              work from lg; after it on phones (one set of markup). */}
+          {/* Price, save, WhatsApp and a compact inquiry form beside the work
+              from lg; after it on phones (one set of markup). */}
           <aside
             id="inquiry"
             aria-label="Price and inquiry"
-            className="border-t border-line py-section-sm lg:sticky lg:top-[calc(var(--nav-h)+4rem)] lg:border-0 lg:py-0 lg:pt-section-sm"
+            className="border-t border-line py-section-sm lg:border-0 lg:py-0 lg:pt-section-sm"
           >
             <div className="border border-line bg-white p-6 md:p-8">
               <Label>Starting from</Label>
