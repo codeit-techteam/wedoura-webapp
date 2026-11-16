@@ -86,6 +86,8 @@ export interface Vendor {
   about: string[];
   keyFacts: { label: string; value: string }[];
   pricing: PriceLine[];
+  /** Numeric rupees for the first price line; drives budget filter and sort. */
+  startingPriceINR?: number;
   faq: Faq[];
   whatsapp: string; // E.164, sample numbers only
   featured?: boolean;
@@ -94,6 +96,8 @@ export interface Vendor {
     capacity: { min: number; max: number };
     view360Url?: string;
     spaces: string[];
+    /** 360° tour nodes; panorama is an equirectangular image path. */
+    tour?: { id: string; name: string; panorama: string; links: string[] }[];
   };
 }
 
@@ -117,6 +121,10 @@ export interface RealWedding {
   date: string; // ISO date
   excerpt: string;
   cover: Photo;
+  /** e.g. "Palace", "Beach", "Garden"; drives the style filter. */
+  style: string;
+  /** Optional film shown inside the story. */
+  filmId?: string;
   chapters: StoryChapter[];
   credits: VendorCredit[];
   featured?: boolean;
@@ -140,6 +148,8 @@ export interface Destination {
   bestMonths: string;
   summary: string;
   cover: Photo;
+  /** Three short sample lines for the detail panel. */
+  highlights: string[];
 }
 
 export interface SitePromise {

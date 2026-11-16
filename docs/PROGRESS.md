@@ -9,15 +9,101 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 1 | Foundations: scaffold, tokens, styleguide page, base components | ✅ Done (2026-11-14) |
 | 2 | Navbar, mobile bar, footer | ✅ Done (2026-11-14) |
 | 3 | Homepage | ✅ Done (2026-11-14) |
-| 4 | Vendor profile | ⬜ |
-| 5 | Vendor listing | ⬜ |
-| 6 | Real weddings listing and story page | ⬜ |
-| 7 | Blogs, gallery, honeymoon, saved, simple pages | ⬜ |
-| 8 | Vendor signup, login and studio screens | ⬜ |
-| 9 | Venue profile with the 360-degree view | ⬜ |
-| 10 | Polish pass: motion, speed, accessibility, small screens | ⬜ |
+| 4 | Vendor profile | ✅ Done (2026-11-14) |
+| 5 | Vendor listing | ✅ Done (2026-11-14) |
+| 6 | Real weddings listing and story page | ✅ Done (2026-11-14) |
+| 7 | Blogs, gallery, honeymoon, saved, simple pages | ✅ Done (2026-11-14) |
+| 8 | Vendor signup, login and studio screens | ✅ Done (2026-11-14) |
+| 9 | Venue profile with the 360-degree view | ✅ Done (2026-11-14, placeholder imagery) |
+| 10 | Polish pass: motion, speed, accessibility, small screens | ✅ Done (2026-11-14, see docs/AUDIT.md) |
 
 ## Session log
+
+### 2026-11-16 · Hero gap + serif descenders
+
+Done:
+- **Hero white gap.** Navbar hairline (`border-b`) sat outside `h-nav`, so the header
+  was 1px taller than `--nav-h` and heroes with `-mt-nav` left a white strip above the
+  image. `h-nav` now lives on the `<header>` (border-box); the inner row is `h-full`.
+- **Clipped “g” (Instrument Serif descenders).** Display/h1/h2 line-heights were ≤1.02
+  and `<MaskedHeading>` clipped lines with `overflow-hidden`. Raised serif line-heights
+  in `tokens.css`, gave mask lines `pb/mb` room for ~0.3em descent, and dropped
+  `leading-none` / `leading-tight` overrides on serif titles (cards, search, albums, etc.).
+
+### 2026-11-14 · Session 6: remaining pages, 360° tour, full audit (steps 7–10)
+
+Done:
+- **Pages, all on existing shared components.** /blogs (category tabs + ArticleCards) and /blogs/[slug]
+  (prose column, large images, share, related); /gallery (uncropped wall, category filter, viewer with a
+  "By {vendor}" link — PhotoGrid/PhotoViewer gained an optional per-photo `links` map); /honeymoon
+  (PhotoTile grid, linkable `?place=` detail panel with highlights); /saved (Vendors | Stories tabs — the
+  saved store now holds both kinds, `story:`-prefixed; StoryCard gained the save overlay); /list-your-
+  business (pitch with a live example VendorCard + four-step `VendorSignupForm` with per-step validation
+  and success screen); /login + /contact (`AuthForms`); /vendor-studio (`StudioScreens`: profile, cover
+  picks, albums, films, pricing, sample inquiries, all URL-tabbed); /about, /privacy-policy, /terms
+  (prose, marked sample); a designed full-bleed 404. `Placeholder.tsx` deleted — nothing placeholder-shaped
+  remains.
+- **360° tour.** Photo Sphere Viewer 5.15.1 (core + virtual tour + gyroscope), loaded only when "Step
+  inside" is tapped on a still; arrows between three named spaces, a space strip, drag, gyroscope,
+  full screen, fade transitions. Both venues have tour data. Imagery is three clearly captioned
+  placeholder equirects in `public/360/` (README says what to supply).
+- **Audit (docs/AUDIT.md).** `scripts/audit.mjs`: crawls all 35 pages at 1440 and 390 (status, title,
+  overflow, image dimensions, console), exercises every interactive pattern, keyboard/focus, and a
+  layout-shift probe — 37/37 pass, no console errors, CLS ≈ 0.0001 everywhere. Lighthouse: 100/100/100
+  a11y/best-practices/SEO on home, profile and story; perf 77/80/86 under mobile throttling after fixes
+  (hero SSR-visible first slide, zoom settles inward instead of growing the LCP element, covers at q75).
+
+Known gaps / next up (also in AUDIT.md):
+- Real equirectangular 360 photos, real film clips, client logo; backend to make forms live.
+- Replace sample legal copy before launch.
+
+### 2026-11-14 · Session 5: shared components, finished navbar, core pages (steps 4–6)
+
+Done:
+- **Component audit.** Every repeating pattern now exists exactly once, props- and data-driven; the homepage was
+  refactored onto the shared set with no visual change. The system:
+  - `cards/`: `VendorCard` (photo-cycling, save), `StoryCard` (large/small), `ArticleCard`, `PhotoTile`.
+  - `browse/`: `Rail` (snap + hidden scrollbar + progress line + arrows), `UnderlineTabs` (URL-param driven,
+    sliding underline), `FilterBar`+`FilterSelect` (desktop row / mobile `BottomSheet`), `LoadMore`,
+    `VendorBrowser`, `WeddingBrowser`, `SavedList`.
+  - `ui/`: `SaveButton`, `SectionHeader`, `Accordion` (replaces FaqAccordion), `EmptyState`, `Skeleton` +
+    `SkeletonCardGrid`, `Breadcrumb`, `ShareButtons`.
+  - `media/PhotoGrid`: uncropped masonry columns opening the shared `PhotoViewer`.
+  - `profile/`: `VendorProfile`, `StickySubnav` (scrollspy), `StickyActionBar`, `InquiryForm`, `AlbumList`.
+- **Shared behaviour.** `src/lib/url-state.ts` (`useParamState`, `useClearParams`): tabs, filters, sort and
+  search all read/write URL query params — states are linkable, back works. One saved store feeds every save
+  button, the navbar count and /saved. Filter/tab swaps crossfade (0.25s) with a skeleton when pending; every
+  list has a designed empty state.
+- **Navbar finished.** Active-page underline (was already in), Saved live count, and search with live
+  suggestions (vendors → profile, cities and categories → filtered /vendors) from a `getSearchIndex()` data
+  call, keyboard navigable; submit still lands on /vendors?q=.
+- **Pages.** /vendors (sticky filter bar: category/city/budget/sort, result count, 4-across grid, load more,
+  bottom-sheet filters on phones; category and city views are the same page with params); /vendors/[slug]
+  (full-bleed cover, scrollspy subnav, uncropped portfolio with viewer, albums as own sequences, films, about
+  + key facts, pricing, FAQ, validated inquiry form with success state, sticky price/Save/WhatsApp/inquiry
+  bar, similar-vendors rail); /venues/[slug] (same profile + capacity, spaces tiles and a 360° placeholder;
+  /vendors/[venue] redirects here); /real-weddings (featured story, style tabs + city filter, grid, load
+  more); /real-weddings/[slug] (parallax opener, chapters with photographs at mixed sizes, the film when
+  linked, "The team" credits linking to profiles, share buttons, more-stories rail); /saved.
+- **Data.** `startingPriceINR` on all vendors (budget bands under ₹1L / ₹1–5L / over ₹5L), `style` + optional
+  `filmId` on weddings, 3 new stories (6 total, all cities covered), api gains q/budget/sort filtering,
+  `getSimilarVendors`, `getWeddingStyles`, `getSearchIndex`, `getFilm`.
+- **Verification.** Lint, typecheck, build pass (39 static pages). `scripts/screenshots-core.mjs`: 6 full-page
+  screenshots in `docs/screenshots/core/` plus 12 behaviour checks (URL filters, select→URL, save→navbar
+  count, subnav, viewer, search suggestions) — all pass, no console errors, no horizontal overflow.
+
+Decisions / gotchas:
+- Next's image-optimizer cache (`.next/cache/images`) survives rebuilds and served session-2 photos for reused
+  filenames (p04/p07/p14). Deleted once; noted in CLAUDE.md.
+- /vendors stays a static page; filtering runs client-side over the full sample set with the URL as the source
+  of truth. Swap the inner filtering for an api/server call when the backend lands.
+- Venue vendors prerender only under /venues/[slug]; /vendors/[slug] redirects on demand.
+- Profile scrollspy falls back to the first section near the top of the page.
+
+Known gaps / next up:
+- Step 7: blogs, gallery, honeymoon and the simple pages (ArticleCard and PhotoGrid are ready for them).
+- Step 8 forms (vendor signup, login, studio); reuse `InquiryForm` patterns.
+- Real 360° embed decision for step 9; real film clips still pending.
 
 ### 2026-11-14 · Session 4: design overhaul (type, layout, motion) — homepage v2
 

@@ -81,7 +81,7 @@ export function PhotoCard({
   const caption = (title || eyebrow || meta) && (
     <figcaption className={compact ? "mt-3" : "mt-4"}>
       {eyebrow && <p className="label text-mute">{eyebrow}</p>}
-      {title && <p className={cn("mt-1 font-serif leading-tight", compact ? "text-lead" : "text-h3")}>{title}</p>}
+      {title && <p className={cn("mt-1 font-serif", compact ? "text-lead" : "text-h3")}>{title}</p>}
       {meta && <p className="mt-1 text-small text-mute">{meta}</p>}
     </figcaption>
   );

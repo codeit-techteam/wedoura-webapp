@@ -15,6 +15,7 @@ import { cn } from "@/lib/cn";
 
 export type NavCategory = Pick<Category, "slug" | "name" | "shortName" | "cover">;
 export type NavCity = Pick<City, "slug" | "name">;
+export type NavVendor = { slug: string; name: string; citySlug: string };
 type Panel = "vendors" | "search" | "menu";
 
 export const PRIMARY_LINKS = [
@@ -29,7 +30,7 @@ const SCROLLED_AT = 8;
 const HIDE_AFTER = 80;
 const SCROLL_DEADBAND = 4;
 
-type Props = { categories: NavCategory[]; cities: NavCity[] };
+type Props = { categories: NavCategory[]; cities: NavCity[]; vendors: NavVendor[] };
 
 /**
  * Site navigation. Sticky; transparent with white text over a page that
@@ -38,7 +39,7 @@ type Props = { categories: NavCategory[]; cities: NavCity[] };
  * back on scroll up. Panels: Vendors (hover, click, keyboard), Search and
  * the mobile Menu. Escape closes any of them.
  */
-export function Navbar({ categories, cities }: Props) {
+export function Navbar({ categories, cities, vendors }: Props) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -131,9 +132,11 @@ export function Navbar({ categories, cities }: Props) {
         onPointerEnter={cancelHover}
         onPointerLeave={onHeaderPointerLeave}
         onBlur={onHeaderBlur}
-        className="site-nav sticky top-0 z-40 border-b border-line bg-white text-ink transition-chrome data-[hidden=true]:-translate-y-full"
+        className="site-nav sticky top-0 z-40 h-nav border-b border-line bg-white text-ink transition-chrome data-[hidden=true]:-translate-y-full"
       >
-        <div className="container-wide grid h-nav grid-cols-[auto_1fr] items-center md:grid-cols-[1fr_auto_1fr]">
+        {/* h-nav on the header (border-box) so the 1px hairline is inside
+            --nav-h; heroes use -mt-nav and must meet the viewport top. */}
+        <div className="container-wide grid h-full grid-cols-[auto_1fr] items-center md:grid-cols-[1fr_auto_1fr]">
           <nav aria-label="Primary" className="hidden md:block">
             <ul className="flex items-center gap-7 lg:gap-9">
               <li>
@@ -222,7 +225,7 @@ export function Navbar({ categories, cities }: Props) {
         <AnimatePresence>{panel === "vendors" && <VendorsPanel categories={categories} onNavigate={close} />}</AnimatePresence>
       </header>
 
-      <SearchOverlay open={panel === "search"} onClose={close} categories={categories} cities={cities} />
+      <SearchOverlay open={panel === "search"} onClose={close} categories={categories} cities={cities} vendors={vendors} />
       <MobileMenu open={panel === "menu"} onClose={close} onSearch={() => open("search")} categories={categories} />
     </>
   );

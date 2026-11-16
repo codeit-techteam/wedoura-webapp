@@ -101,7 +101,7 @@ export default async function StyleguidePage() {
             {colours.map((c, i) => (
               <Reveal as="li" key={c.token} delay={i * 0.06}>
                 <div className={`aspect-4/5 border border-line ${swatch[c.token]}`} />
-                <p className="mt-4 font-serif text-h3 leading-none">{c.name}</p>
+                <p className="mt-4 font-serif text-h3">{c.name}</p>
                 <p className="mt-2 font-sans text-small text-mute">{c.hex}</p>
                 <p className="mt-1 text-small text-mute">{c.role}</p>
               </Reveal>
@@ -321,7 +321,7 @@ export default async function StyleguidePage() {
             {motionList.map(([n, title, text, component]) => (
               <li key={n} className="grid gap-2 border-t border-line py-6 md:grid-cols-[4rem_14rem_1fr_auto] md:gap-8">
                 <Label>{n}</Label>
-                <p className="font-serif text-h3 leading-none">{title}</p>
+                <p className="font-serif text-h3">{title}</p>
                 <Text tone="mute">{text}</Text>
                 <code className="font-sans text-small text-mute">{component}</code>
               </li>

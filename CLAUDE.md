@@ -12,6 +12,8 @@ npm run lint         # eslint .  (next lint no longer exists in Next 16)
 npm run typecheck    # next typegen && tsc --noEmit
 npm run photos       # regenerate src/data/photos.ts from public/photos + alt.json
 npm run extract-reference  # regenerate docs/reference/extracted from the mockups
+node scripts/screenshots-core.mjs  # core-page screenshots + behaviour checks (needs next start on 3001)
+node scripts/audit.mjs     # full crawl + interaction + keyboard + CLS audit (needs next start on 3001)
 BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboard/reduced-motion checks (needs a running server)
 ```
 
@@ -42,6 +44,10 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
   `data-nav-dark` (CSS `:has()` rule in `globals.css`). A page with a full-bleed dark hero pulls it under the
   navbar with `-mt-nav`. Overlays (search, menu) use `useFocusTrap`; Escape closes every panel.
 - **Forms are screens only.** Validate, show a success state, send nothing.
+- **One component per pattern.** Cards, rails, tabs, filters, accordions, empty states and skeletons live in
+  src/components/{cards,browse,ui}; never rebuild one inline. Tabs/filters/sort/search state lives in URL query
+  params via src/lib/url-state.ts, so every state is linkable and back works. Saved state only through
+  src/lib/saved.ts. Stale photos after replacing files? Delete .next/cache/images.
 
 ## Motion (these patterns, nothing else)
 
@@ -77,9 +83,16 @@ the root layout plus the CSS media query switch motion off. Motion components ar
 src/app            routes (layout, template, styleguide, placeholders for every route in the brief)
 src/components/ui  Heading, Label, Text, Button, Hairline, Container, Section, Icon
 src/components/chrome  Navbar (+SiteHeader), VendorsPanel, SearchOverlay, MobileMenu, BottomBar, SiteFooter, Wordmark, Placeholder
-src/components/media   Photo, PhotoCard, CardRow, FilmPreview
-src/components/home    HeroSearch, CategoriesShowcase, VendorRail, WeddingsEditorial, FilmsBand, CitiesIndex, FaqAccordion
-src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis)
+src/components/media   Photo, PhotoCard, CardRow, FilmPreview, PhotoGrid (uncropped grid + viewer)
+src/components/cards   VendorCard, StoryCard, ArticleCard, PhotoTile  (the one card per content type)
+src/components/browse  Rail, UnderlineTabs, FilterBar+FilterSelect, BottomSheet, LoadMore, VendorBrowser,
+                       WeddingBrowser, SavedList  (URL-param driven; see src/lib/url-state.ts)
+src/components/profile VendorProfile, StickySubnav, StickyActionBar, InquiryForm, AlbumList, VenueTour (360),
+                       VendorSignupForm, AuthForms (login+contact), StudioScreens
+src/components/home    HeroV2, HeroSearch, CategoryTiles, FeaturedTabs, WeddingsScroller, FilmsShowcase,
+                       CityMosaic, RailProgress
+src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis),
+                       MaskedHeading, ImageReveal
 src/data           typed sample content (types.ts, photos.ts generated)
 src/lib            api.ts (data access), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
 src/styles         tokens.css, fonts.ts

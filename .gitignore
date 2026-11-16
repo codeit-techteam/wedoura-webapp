@@ -42,3 +42,6 @@ next-env.d.ts
 
 # next docs cache
 /.next-docs/
+docs
+# project docs (brief, reference mockups, screenshots, progress log) stay local
+/docs/

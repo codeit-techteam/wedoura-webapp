@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
 import type { Photo as PhotoData } from "@/data/types";
 import { viewer } from "@/lib/motion";
@@ -14,13 +15,15 @@ type Props = {
   onClose: () => void;
   /** Must match the layoutId used on the thumbnail: `${layoutPrefix}-${photo.id}`. */
   layoutPrefix?: string;
+  /** Optional per-photo link shown under the caption, keyed by photo id. */
+  links?: Record<string, { href: string; label: string }>;
 };
 
 /**
  * Motion 4: full-screen photo viewer. The thumbnail grows into the viewer
  * through a shared layoutId. Swipe or drag, arrow keys, Escape to close.
  */
-export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "photo" }: Props) {
+export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "photo", links }: Props) {
   const photo = index === null ? null : (photos[index] ?? null);
   const open = photo !== null;
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -132,7 +135,14 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
             )}
           </div>
 
-          <p className="px-gutter pb-6 text-center text-small text-white/70">{photo.alt}</p>
+          <div className="px-gutter pb-6 text-center text-small text-white/70">
+            <p>{photo.alt}</p>
+            {links?.[photo.id] && (
+              <Link href={links[photo.id].href} onClick={onClose} className="link-draw mt-1 inline-block text-white">
+                {links[photo.id].label}
+              </Link>
+            )}
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

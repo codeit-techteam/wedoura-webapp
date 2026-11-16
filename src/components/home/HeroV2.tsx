@@ -49,20 +49,36 @@ export function HeroV2({ photos, cities, categories }: Props) {
       className="relative -mt-nav flex min-h-dvh flex-col justify-end overflow-hidden bg-ink pb-bottombar text-white"
     >
       <motion.div className="absolute inset-0" style={reduce ? undefined : { scale: imageScale }}>
-        <AnimatePresence initial={false}>
+        {/* The first slide is a plain element so the server-rendered hero is
+            visible before hydration (it is the page's LCP element). */}
+        {/* The zoom settles inward (1.06 -> 1): growing the LCP element would
+            keep re-issuing larger LCP candidates for the whole slide. */}
+        {slide === 0 && photos[0] && (
           <motion.div
-            key={current.id}
             className="absolute inset-0 will-change-transform"
-            initial={{ opacity: 0, scale: 1 }}
-            animate={{ opacity: 1, scale: reduce ? 1 : 1.06 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              opacity: { duration: 1.2, ease: EASE },
-              scale: { duration: SLIDE_SECONDS + 1.5, ease: "linear" },
-            }}
+            initial={{ scale: reduce ? 1 : 1.06 }}
+            animate={{ scale: 1 }}
+            transition={{ scale: { duration: SLIDE_SECONDS + 1.5, ease: "linear" } }}
           >
-            <Photo photo={current} sizes="100vw" mode="cover" priority quality={90} objectPosition="60% 38%" />
+            <Photo photo={photos[0]} sizes="100vw" mode="cover" priority quality={75} objectPosition="60% 38%" />
           </motion.div>
+        )}
+        <AnimatePresence initial={false}>
+          {slide !== 0 && (
+            <motion.div
+              key={current.id}
+              className="absolute inset-0 will-change-transform"
+              initial={{ opacity: 0, scale: reduce ? 1 : 1.06 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                opacity: { duration: 1.2, ease: EASE },
+                scale: { duration: SLIDE_SECONDS + 1.5, ease: "linear" },
+              }}
+            >
+              <Photo photo={current} sizes="100vw" mode="cover" quality={75} objectPosition="60% 38%" />
+            </motion.div>
+          )}
         </AnimatePresence>
       </motion.div>
 

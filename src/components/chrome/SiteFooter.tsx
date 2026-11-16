@@ -97,13 +97,6 @@ export function SiteFooter() {
           <Label>Sample content while the site is being built.</Label>
         </div>
       </Container>
-
-      {/* Closing gesture: the wordmark set very large across the bottom. */}
-      <div aria-hidden="true" className="overflow-hidden">
-        <p className="-mb-[0.18em] text-center font-serif text-mega tracking-caps text-ink/90 uppercase select-none">
-          Wedoura
-        </p>
-      </div>
     </footer>
   );
 }

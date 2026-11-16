@@ -98,7 +98,7 @@ export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
         <div className="absolute inset-x-0 bottom-0 flex flex-col items-start gap-4 p-5 text-white md:flex-row md:items-end md:justify-between md:p-8">
           <div className="min-w-0">
             {eyebrow && <p className="label text-white/80">{eyebrow}</p>}
-            <p className="mt-1 font-serif text-h3 leading-tight text-balance">{film.title}</p>
+            <p className="mt-1 font-serif text-h3 text-balance">{film.title}</p>
           </div>
           {hasFull && (
             <Button variant="outline" tone="white" onClick={() => setOpen(true)} className="shrink-0 px-5">
