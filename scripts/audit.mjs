@@ -119,12 +119,12 @@ await selects[3].select("price-asc");
 await sleep(500);
 check("sort writes URL", page.url().includes("sort=price-asc"));
 await goto("/vendors");
-await page.$$eval("button", (btns) => btns.find((b) => b.textContent?.trim() === "Show more")?.click());
-await sleep(500);
+await page.$$eval("a", (links) => links.find((a) => a.textContent?.trim() === "Show more")?.click());
+await sleep(800);
 const afterMore = await page.evaluate(
   () => document.querySelectorAll('main a[href^="/vendors/"] img').length,
 );
-check(`load more shows all 12 cards (got ${afterMore})`, afterMore === 12);
+check(`load more shows all 10 published cards (got ${afterMore})`, afterMore === 10);
 
 const mobile = await browser.newPage();
 await mobile.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
@@ -226,17 +226,25 @@ await page.$$eval('[role="tab"]', (tabs) => tabs.find((t) => t.textContent === "
 await sleep(500);
 check("blogs filter works", page.url().includes("category=venues"));
 
-// Signup steps
+// Signup: one short form
 await goto("/list-your-business");
 await page.evaluate(() => document.querySelector("form")?.scrollIntoView());
 await sleep(400);
 await page.$eval('form button[type="submit"]', (el) => el.click());
 await sleep(300);
-check("signup step 1 validates", (await page.$$('form [role="alert"]')).length === 1);
+check("signup validates empty submit", (await page.$$('form [role="alert"]')).length >= 3);
 await page.type("#su-business", "Test Films");
+await page.type("#su-contact", "Tester");
+await page.select("#su-category", "photography-films");
+await page.select("#su-city", "mumbai");
+await page.type("#su-whatsapp", "+91 98765 43210");
+await page.type("#su-email", `audit-${Date.now()}@example.com`);
+await page.type("#su-password", "longenough");
+await page.type("#su-worklink", "https://example.com/work");
+await page.click("#su-consent");
 await page.$eval('form button[type="submit"]', (el) => el.click());
-await sleep(500);
-check("signup advances to step 2", !!(await page.$("#su-category")));
+await sleep(600);
+check("signup reaches the success screen", !!(await page.$('[role="status"]')));
 
 // Login validation
 await goto("/login");
@@ -244,9 +252,10 @@ await page.$eval('button[type="submit"]', (el) => el.click());
 await sleep(300);
 check("login validates", (await page.$$('[role="alert"]')).length === 2);
 
-// Studio tabs
-await goto("/vendor-studio?tab=inquiries");
-check("studio deep link works", await page.evaluate(() => document.body.innerText.includes("Sample · 2 days ago")));
+// Studio gate (fresh browser state: logged out)
+await goto("/vendor-studio");
+await sleep(500);
+check("studio shows the logged-out gate", await page.evaluate(() => document.body.innerText.includes("Log in to manage your profile")));
 
 // 404 (on an unwatched page: the 404 response itself logs a console error)
 {
@@ -260,11 +269,11 @@ check("studio deep link works", await page.evaluate(() => document.body.innerTex
   await p404.close();
 }
 
-// Footer FAQ anchor
+// Footer FAQ link works from any page
 await goto("/about");
-await page.$$eval('a[href="/#faq"]', (links) => links[0]?.click());
-await sleep(1500);
-check("footer FAQ link lands on the homepage FAQ", await page.evaluate(() => !!document.getElementById("faq") && Math.abs(document.getElementById("faq").getBoundingClientRect().top) < window.innerHeight));
+await page.$$eval('a[href="/faq"]', (links) => links[0]?.click());
+await sleep(1200);
+check("footer FAQ link opens /faq", page.url().includes("/faq") && (await page.evaluate(() => document.body.innerText.includes("Is Wedoura free for couples?"))));
 
 // ------------------------------------------------------------- 3 · keyboard
 await goto("/");

@@ -3,15 +3,15 @@
 import { AnimatePresence, motion } from "motion/react";
 import { UnderlineTabs } from "@/components/browse/UnderlineTabs";
 import { StoryCard } from "@/components/cards/StoryCard";
-import { VendorCard, type VendorCardData } from "@/components/cards/VendorCard";
+import { VendorCard } from "@/components/cards/VendorCard";
 import { EmptyState } from "@/components/ui/EmptyState";
-import type { RealWedding } from "@/data/types";
+import type { RealWedding, VendorSummary } from "@/data/types";
 import { EASE } from "@/lib/motion";
 import { useSavedStories, useSavedVendors } from "@/lib/saved";
 import { useParamState } from "@/lib/url-state";
 
 type Props = {
-  vendors: VendorCardData[];
+  vendors: VendorSummary[];
   weddings: RealWedding[];
   cityNames: Record<string, string>;
 };

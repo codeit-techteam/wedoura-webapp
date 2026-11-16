@@ -3,14 +3,16 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import type { NavCategory } from "@/components/chrome/Navbar";
-import { CardRow } from "@/components/media/CardRow";
-import { PhotoCard } from "@/components/media/PhotoCard";
+import { Photo } from "@/components/media/Photo";
 import { Icon } from "@/components/ui/Icon";
 import { EASE } from "@/lib/motion";
 
 type Props = { categories: NavCategory[]; onNavigate: () => void };
 
-/** Full-width panel under the navbar: the six categories as photo tiles. */
+/**
+ * Compact panel under the navbar: the categories as short photo tiles
+ * (160px) with the name beneath, so the whole panel stays around 280px.
+ */
 export function VendorsPanel({ categories, onNavigate }: Props) {
   return (
     <motion.div
@@ -23,21 +25,29 @@ export function VendorsPanel({ categories, onNavigate }: Props) {
       transition={{ duration: 0.3, ease: EASE }}
       className="absolute inset-x-0 top-full border-b border-line bg-white text-ink"
     >
-      <div className="container-wide py-8 xl:py-10">
-        <CardRow ratio="4/5" columns={6} mobileColumns={2} className="gap-y-6">
+      <div className="container-wide py-5">
+        <ul className="grid grid-cols-3 gap-x-2 gap-y-4 xl:grid-cols-6">
           {categories.map((category) => (
             <li key={category.slug}>
-              <PhotoCard
-                photo={category.cover}
-                sizes="(min-width: 90rem) 16vw, 33vw"
+              <Link
                 href={`/vendors?category=${category.slug}`}
-                compact
-                title={category.name}
-              />
+                onClick={onNavigate}
+                className="group block outline-offset-4"
+              >
+                <span className="relative block h-40 overflow-hidden bg-ivory">
+                  <Photo
+                    photo={category.cover}
+                    mode="cover"
+                    sizes="(min-width: 90rem) 16vw, 33vw"
+                    className="transition-transform duration-1200 ease-wedoura group-hover:scale-104"
+                  />
+                </span>
+                <span className="mt-2 block text-label-lg font-medium">{category.shortName}</span>
+              </Link>
             </li>
           ))}
-        </CardRow>
-        <div className="mt-8 flex items-center justify-between border-t border-line pt-5">
+        </ul>
+        <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
           <p className="text-small text-mute">Browse by category, or see everyone in one place.</p>
           <Link
             href="/vendors"

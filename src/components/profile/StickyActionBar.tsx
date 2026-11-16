@@ -8,15 +8,16 @@ type Props = {
   slug: string;
   name: string;
   startingPrice?: string;
-  whatsapp: string;
+  /** Hidden when the listing has no WhatsApp number. */
+  whatsapp?: string;
 };
 
 /**
  * The profile's persistent actions on phones and tablets: price, save,
- * WhatsApp, inquiry. From lg the sticky side panel takes over.
+ * WhatsApp, inquiry. Hidden from lg where the side panel carries these actions.
  */
 export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) {
-  const wa = `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`;
+  const wa = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
   return (
     <div
       className={cn(
@@ -32,16 +33,18 @@ export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) 
         <div className="flex shrink-0 items-center gap-2 md:gap-4">
           <SaveButton slug={slug} name={name} tone="ink" withLabel className="hidden px-2 sm:inline-flex" />
           <SaveButton slug={slug} name={name} tone="ink" className="sm:hidden" />
-          <a
-            href={wa}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`WhatsApp ${name}`}
-            className="tap inline-flex items-center justify-center gap-2 border border-line px-4 text-ink transition-chrome hover:border-ink"
-          >
-            <Icon name="whatsapp" size={20} />
-            <span className="label hidden md:inline">WhatsApp</span>
-          </a>
+          {wa && (
+            <a
+              href={wa}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`WhatsApp ${name}`}
+              className="tap inline-flex items-center justify-center gap-2 border border-line px-4 text-ink transition-chrome hover:border-ink"
+            >
+              <Icon name="whatsapp" size={20} />
+              <span className="label hidden md:inline">WhatsApp</span>
+            </a>
+          )}
           <a
             href="#inquiry"
             className="label tap inline-flex items-center justify-center bg-ink px-5 text-white transition-chrome hover:bg-black md:px-7"

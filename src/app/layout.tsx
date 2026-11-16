@@ -1,7 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { BottomBar } from "@/components/chrome/BottomBar";
-import { SiteFooter } from "@/components/chrome/SiteFooter";
-import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { dmSans, instrument } from "@/styles/fonts";
@@ -31,6 +28,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/**
+ * The bare shell: fonts, providers, global styles. The public chrome lives
+ * in (site)/layout.tsx; the vendor portal brings its own in vendor-studio/.
+ */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${instrument.variable} ${dmSans.variable} h-full`}>
@@ -43,14 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col bg-white text-ink">
         <MotionProvider>
-          <SmoothScroll>
-            <SiteHeader />
-            <div className="flex flex-1 flex-col pb-bottombar">
-              <div className="flex flex-1 flex-col">{children}</div>
-              <SiteFooter />
-            </div>
-            <BottomBar />
-          </SmoothScroll>
+          <SmoothScroll>{children}</SmoothScroll>
         </MotionProvider>
       </body>
     </html>

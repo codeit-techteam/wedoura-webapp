@@ -19,6 +19,122 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-16 · Round 5: the complete vendor portal at /vendor-studio
+
+Done:
+- **Contract additions** (types first, then UI): `VendorListing.reviewNote` (admin note for
+  changes_requested) and `pendingMediaIds` (photos/films added while published, hidden publicly until
+  approved), `Album.date`, `Inquiry.status` (new/replied/closed). docs/api-contract.md documents them plus
+  PATCH /me/inquiries/{id}, POST /admin/listings/{id}/request-changes and /approve-media.
+- **Route groups.** Public routes moved into `src/app/(site)/` with the chrome layout (SiteHeader, footer,
+  BottomBar, page template); the root layout is bare (fonts, providers, noscript); the root 404 carries its
+  own chrome. `/vendor-studio/` has its own client layout: route guard (logged out → /login; applied/
+  rejected/suspended → status screens) around `StudioShell` — dense left sidebar on desktop, top bar with a
+  focus-trapped slide-in menu at 390px, business name, status badge, View preview, sign out.
+- **Fifteen screens**, every field mapping to `VendorListing`, all reads/writes through vendor-api (no
+  direct store access in components): overview (status explained, 7-item checklist with progress and quick
+  links, review-note callout, recent inquiries), business, category & services (inputs generated from
+  `Category.fields`; venues get capacity/spaces/360 tour), locations, photos (`PhotoManager`: drag-drop +
+  picker upload with simulated progress, ≥800px validation with clear rejections, reorder by drag and
+  keyboard, alt text, bulk delete, pending chips), cover & card photos (`PhotoPicker` + live `VendorCard`
+  and cover previews via the shared mapper), albums, films (file ≤8MB or link + poster), pricing (packages
+  with units, starting price derived from the cheapest or set directly), FAQs, contact (phone marked
+  never-public), inquiries (status chips, detail, WhatsApp reply link), preview (the real `VendorProfile`
+  from the draft, pending media included, under a banner), submit (gated on the checklist), account
+  (screen-only). Autosave (800ms debounce, Saving→Saved→error indicator, quota errors surfaced),
+  beforeunload + nav-confirm dirty guard, skeletons and designed empty states throughout.
+- **Shared mapper.** `src/lib/listing-view.ts` (`listingToSummary`/`listingToDetail` with a pending-media
+  filter) now backs api.ts, the portal previews and the overlay — a vendor's saved data is exactly what the
+  public site renders. `src/lib/upload.ts` simulates uploads (downscale to 1200px data URLs, 12px blur like
+  scripts/photos.mjs).
+- **Closing the loop.** `/vendors/[slug]` falls back to `DemoPublicProfile` for slugs unknown to the static
+  dataset (store-published demo listings render through `VendorProfile`; known-but-unpublished slugs still
+  hard-404); `/vendors` appends `DemoVendorCards` after the server grid. Both are marked demo-ware.
+  `updateMyListing` diffs media while published into `pendingMediaIds`; /demo gained Request changes (with
+  note), Approve N pending, and public links on published rows.
+- **Verification.** Lint, typecheck, build (53 pages). A 34-check Puppeteer run as vendor@gmail.com: route
+  guard, every screen filled (including a rejected undersized upload and ten real ones), autosave indicators,
+  7/7 checklist, submit → in_review, /demo request-changes note round-trip, publish, the public profile and
+  /vendors card showing exactly the entered data, a new photo pending (hidden publicly) then approved
+  (visible), no 390px overflow, the slide-in menu. Round-4 public HTML checks all still pass. Screenshots in
+  docs/screenshots/portal/ (overview, photos, pricing at 390 and 1440).
+
+Decisions / gotchas:
+- The demo overlay returns HTTP 200 with a client-side 404 for truly unknown vendor slugs (server cannot see
+  the browser store); known unpublished slugs keep the server 404. The /vendors count line excludes demo
+  listings. Both seams are documented in the contract and vanish with the backend.
+- Stale `.next/dev` types after moving routes into the group break typecheck; delete `.next` once.
+- In Puppeteer, clicks that depend on React state must be sequential ticks, and the pre-seeded demo
+  cover/cards mean pickers toggle OFF on the first click.
+
+Known gaps / next up:
+- Admin "suspend account" and a real changes_requested flow for media-only edits; search/home overlay for
+  demo listings; backend.
+
+### 2026-11-16 · Round 4: data contract, vendor lifecycle, signup/login, /demo
+
+Done:
+- **Contract (`src/data/types.ts`).** `AccountStatus` (applied/approved/rejected/suspended), `ListingStatus`
+  (draft/in_review/changes_requested/published/unpublished), `PriceUnit` (per_event/per_day/per_plate/
+  on_request), `VendorAccount`, `VendorApplication`, `VendorListing` (structured team/yearsActive/travels/
+  citiesServed/services/styles/categoryValues/packages/contact; admin-only status/featured/featuredOrder/
+  verified), `Package`, `Contact` (phone never public), `VenueDetails`, `Inquiry`, `CategoryFieldDef`
+  (per-category extra fields with filterable flags), and the two public shapes: `VendorSummary` (all lists)
+  and `VendorDetail` (profile only). The old `Vendor`/`PriceLine`/keyFacts are gone.
+- **Public api rewritten (`src/lib/api.ts`).** Every function mirrors one endpoint (docs/api-contract.md) and
+  filters through one `published()` helper — **the published-only rule lives in the api, not in pages**.
+  `listVendors` returns `Paged<VendorSummary>` with q/category/city (base or served)/minPrice/maxPrice/sort/
+  page/limit plus category-specific field filters; price bounds skip per_plate and on_request listings.
+  `getVendor`/`getVenue` → `VendorDetail`; `listFeatured`, `listSimilar`, `listCategoriesWithCounts`/
+  `listCitiesWithCounts` (only values with a published vendor — they feed tiles, tabs, selects, navbar,
+  search, gallery tabs), `listFilms`, `listGalleryPhotos`, `listWeddings`/`listArticles` (same paged
+  pattern), `listAllCategories`/`listAllCities` for forms. The six copies of the card-mapping code are gone;
+  `budgetToRange` gives the bands clear edges (<1L, 1–<5L, ≥5L).
+- **Sample data.** 12 listings migrated; two unpublished on purpose (`kohl-and-rose` in_review,
+  `baraat-collective` draft) so the rule is visible: they 404, appear in no list/search/gallery, and their
+  wedding credits render as plain names (credits link only to published slugs). Bengaluru is covered via
+  `citiesServed`. Cards show category and `formatPrice` ("From ₹1,50,000 per event", "₹2,200 per plate").
+- **Mock store + vendor api.** `src/lib/mock-store.ts` (one localStorage blob, `saved.ts` pattern; the empty
+  store seeds slim rows for the sample listings) and `src/lib/vendor-api.ts` (async, fetch-swappable):
+  submitApplication (duplicate email rejected), login/logout, getMyAccount, getMyListing, updateMyListing,
+  submitListingForReview, listMyInquiries, and the demo admin calls (approve creates the empty draft listing,
+  reject with note, publish, unpublish, reset). `src/lib/demo-credentials.ts` (clearly marked, delete with
+  the backend) makes vendor@gmail.com / 123456 always log into a pre-seeded approved account with a partly
+  filled draft listing.
+- **Signup + login + studio.** /list-your-business is one short form matching `VendorApplication` (business,
+  category, base city, contact, WhatsApp, email, password, one work link, consent) with a success screen
+  pointing at /login. /login checks the store; /vendor-studio renders by status via `StudioGate`: logged-out
+  prompt, under-review, rejection note, suspended, or the approved shell (listing status chip, checklist
+  derived from listing content, Submit for review). `StudioScreens` deleted (full portal next session).
+- **/demo.** Noindex, linked from nowhere: applications (approve / reject-with-note) and listings
+  (publish/unpublish) over the mock store, plus reset. The panel states the limitation: public pages are
+  server-rendered from the static dataset, so demo status changes show in /demo and the studio only.
+- **Also.** Vendors navbar panel compacted to ~300px (160px tiles, names beneath, same animation).
+  `MaskedHeading` inserts a space between line spans ("Why couples choose Wedoura." reads correctly in text
+  and accessible names). Homepage films section hidden while no clip exists. Profile sections render only
+  with content; WhatsApp buttons hidden without a number. Audit script stale checks fixed (footer /faq,
+  single-form signup, studio gate, Show more = 10, link-not-button).
+- **Verification.** Lint, typecheck, build pass (8 vendor + 2 venue profiles prerendered; the unpublished two
+  absent). HTML checks: unpublished vendors appear on no public page and 404; category filters
+  (`?category=catering-cakes&cuisine=Coastal` → 1 vendor) and budget bands work server-side; headlines carry
+  their spaces; /demo is noindexed. Browser flow: apply → /demo approve → login → studio draft → submit →
+  in_review → publish/unpublish; applied sees "under review"; rejected sees the note; demo login works;
+  wrong password errors. Panel screenshot in docs/screenshots/round-3/vendors-panel-compact-1440.png.
+
+Decisions / gotchas:
+- Wedding credits may carry unpublished vendors' names in story data (shown unlinked); the rule is about
+  listings, links and lists, not erasing names from stories.
+- The mock store's empty state *is* the seed (no write-on-read); `useHydrated()` gates studio/demo so
+  signed-in screens never flash logged-out.
+- Puppeteer note: text typed before hydration stays in the DOM while React state stays empty — drive React
+  inputs with the native value setter + `input` event in scripts.
+
+Known gaps / next up:
+- The full studio portal: edit the listing (photos, about, packages, FAQs) through `updateMyListing`.
+- changes_requested exists in the contract but /demo has no "request changes" button yet; suspension flow
+  likewise contract-only.
+- Real film clips, real 360s, logo; backend to replace api.ts internals, vendor-api.ts and the mock store.
+
 ### 2026-11-16 · Round 3: server rendering, hero, vendor profile, why band
 
 Done:
@@ -71,6 +187,24 @@ Decisions / gotchas:
 Known gaps / next up:
 - Real film clips (the films section and a working player return automatically), real 360 photos, logo.
 - The homepage films showcase still shows breathing posters; decide whether to hide it until clips exist.
+
+### 2026-11-16 · Vendors filter strap
+
+Done:
+- **Filter strip UI.** Replaced native `<select>` in `FilterSelect` with custom listboxes (ported
+  menus on desktop, bottom sheet on mobile). One open filter at a time via `FilterBar` context.
+- **Shorter strap.** `min-h-14`, tighter `py-2` cells, compact count/Clear aside. Active filter uses
+  ivory background. Real Weddings standalone city filter keeps a compact trigger + sheet outside
+  `FilterBar`.
+
+### 2026-11-16 · Search overlay + hero scroll
+
+Done:
+- **Search overlay** restyled to match the hero search bar: ivory field, bordered
+  row (icon + input + Search button), suggestion panel and city/category cards.
+- **Hero scroll jitter:** removed scroll-linked scale on the photo layer (was
+  compounding with Ken Burns under Lenis); dropped vertical parallax on copy;
+  eased opacity via a spring on scroll progress.
 
 ### 2026-11-16 · Hero gap + serif descenders
 

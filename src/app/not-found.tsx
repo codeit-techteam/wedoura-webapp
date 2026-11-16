@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { BottomBar } from "@/components/chrome/BottomBar";
+import { SiteFooter } from "@/components/chrome/SiteFooter";
+import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { Photo } from "@/components/media/Photo";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
@@ -6,8 +9,23 @@ import { getPhoto } from "@/lib/api";
 
 export const metadata: Metadata = { title: "Page not found" };
 
+/** Root 404. It sits outside the (site) group, so it brings the site
+ *  chrome itself to look like every other public page. */
 export default async function NotFound() {
   const photo = await getPhoto("p18");
+  return (
+    <>
+      <SiteHeader />
+      <div className="flex flex-1 flex-col pb-bottombar">
+        <div className="flex flex-1 flex-col">{notFoundHero(photo)}</div>
+        <SiteFooter />
+      </div>
+      <BottomBar />
+    </>
+  );
+}
+
+function notFoundHero(photo: Awaited<ReturnType<typeof getPhoto>>) {
   return (
     <main className="relative -mt-nav flex min-h-dvh flex-col justify-end bg-ink pb-bottombar text-white" data-nav-dark>
       {photo && <Photo photo={photo} sizes="100vw" mode="cover" priority objectPosition="50% 40%" />}

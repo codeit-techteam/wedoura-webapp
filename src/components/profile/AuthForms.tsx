@@ -1,40 +1,38 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+import { login } from "@/lib/vendor-api";
 
 const field =
   "w-full border-b border-line bg-transparent pb-2 text-body text-ink outline-offset-4 placeholder:text-mute/60 focus:border-ink";
 
-/** The vendor login screen. Validates, shows a success state, sends nothing. */
+/** The vendor login: checks the mock store and routes to the studio, which
+ *  renders by account status (under review, rejected, approved). */
 export function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [done, setDone] = useState(false);
+  const [pending, setPending] = useState(false);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const next: typeof errors = {};
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) next.email = "An email address, please.";
-    if (password.length < 8) next.password = "At least 8 characters.";
+    if (!password) next.password = "Your password, please.";
     setErrors(next);
-    if (Object.keys(next).length === 0) setDone(true);
-  }
-
-  if (done) {
-    return (
-      <div role="status">
-        <p className="font-serif text-h2">Signed in.</p>
-        <p className="mt-3 text-mute">
-          Screens only for now: no account exists yet. Head to the studio to see what vendors will manage.
-        </p>
-        <Button href="/vendor-studio" variant="link" className="mt-6">
-          Open Vendor Studio
-        </Button>
-      </div>
-    );
+    if (Object.keys(next).length > 0) return;
+    setPending(true);
+    const result = await login(email, password);
+    if (!result.ok) {
+      setPending(false);
+      setErrors({ password: result.error });
+      return;
+    }
+    router.push("/vendor-studio");
   }
 
   return (
@@ -76,7 +74,9 @@ export function LoginForm() {
         )}
       </div>
       <div>
-        <Button type="submit">Sign in</Button>
+        <Button type="submit" disabled={pending}>
+          Sign in
+        </Button>
       </div>
     </form>
   );
