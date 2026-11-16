@@ -27,7 +27,7 @@ type Props = {
  * The one vendor card: tall photo, details over a gradient, save top right.
  * On hover it slowly cycles through the vendor's photos.
  */
-export function VendorCard({ vendor, sizes = "(min-width: 80rem) 24vw, 50vw", priority }: Props) {
+export function VendorCard({ vendor, sizes = "(min-width: 80rem) 25vw, (min-width: 64rem) 33vw, 50vw", priority }: Props) {
   const reduce = useReducedMotion();
   const [frame, setFrame] = useState(0);
   const [hovered, setHovered] = useState(false);
@@ -53,7 +53,7 @@ export function VendorCard({ vendor, sizes = "(min-width: 80rem) 24vw, 50vw", pr
       }}
     >
       <Link href={`/vendors/${vendor.slug}`} className="block">
-        <div className="relative aspect-3/4 overflow-hidden bg-ivory">
+        <div className="relative aspect-4/5 overflow-hidden bg-ivory">
           <AnimatePresence initial={false}>
             <motion.div
               key={photo.id}

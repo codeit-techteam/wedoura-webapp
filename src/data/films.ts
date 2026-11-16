@@ -1,12 +1,13 @@
 import { photos } from "./photos";
 import type { Film } from "./types";
 
-// Sample films. No real clips exist yet, so previews and full films are
-// poster-only: empty srcs are handled by the film components. Drop local
-// clips into public/films and point previewSrc/fullSrc at them.
+// No real clips exist yet, so previews and full films are poster-only: empty
+// srcs make the film components hide the player, and vendor profiles hide the
+// films section entirely. Drop local clips into public/films and point
+// previewSrc/fullSrc at them.
 export const films: Film[] = [
   {
-    id: "film-udaipur-sample",
+    id: "film-udaipur",
     title: "A lake-palace morning",
     previewSrc: "",
     fullSrc: "",
@@ -14,7 +15,7 @@ export const films: Film[] = [
     durationSec: 0,
   },
   {
-    id: "film-goa-sample",
+    id: "film-goa",
     title: "Barefoot in Goa",
     previewSrc: "",
     fullSrc: "",
@@ -22,7 +23,7 @@ export const films: Film[] = [
     durationSec: 0,
   },
   {
-    id: "film-jaipur-sample",
+    id: "film-jaipur",
     title: "Pheras at dusk",
     previewSrc: "",
     fullSrc: "",

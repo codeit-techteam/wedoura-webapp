@@ -107,7 +107,7 @@ export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
           )}
         </div>
       </div>
-      <figcaption className="sr-only">{film.title}, sample film</figcaption>
+      <figcaption className="sr-only">{film.title}</figcaption>
 
       <AnimatePresence>
         {open && hasFull && (

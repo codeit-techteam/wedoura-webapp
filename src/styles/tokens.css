@@ -26,7 +26,7 @@
   --radius-none: 0;
   --radius-full: 9999px; /* only for round icon buttons and count badges */
 
-  /* Type: Cormorant Garamond for headlines, Jost for body and labels.
+  /* Type: Instrument Serif for headlines, DM Sans for body and labels.
      The font variables are set by next/font in src/styles/fonts.ts. */
   --font-*: initial;
   --font-weight-light: 300;
@@ -39,6 +39,15 @@
      Sub-1.0 values clipped glyphs wherever overflow was hidden. */
   --text-display: clamp(3.1rem, 1.6rem + 6.5vw, 7.5rem);
   --text-display--line-height: 1.12;
+  /* Hero headline: ~42px at 390, ~78px at 1440, capped at 80px. */
+  --text-hero: clamp(2.5rem, 1.75rem + 3.5vw, 5rem);
+  --text-hero--line-height: 1.12;
+  /* Hero supporting line: 18 -> 20px. */
+  --text-sublead: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --text-sublead--line-height: 1.5;
+  /* Quiet links over photographs (hero quick links only). */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.4;
   --text-h1: clamp(2.5rem, 1.6rem + 3.9vw, 4.5rem);
   --text-h1--line-height: 1.14;
   --text-h2: clamp(2.25rem, 1.5rem + 3.2vw, 3.75rem);
@@ -83,6 +92,7 @@
   --container-site: 105rem; /* 1680px, centred on wider screens */
   --container-wide: 120rem; /* near full-bleed photo bands */
   --container-prose: 44rem;
+  --container-hero-search: 55rem; /* 880px, the hero search bar */
 
   /* Breakpoints the brief designs for: 390 (base), 768, 1440. */
   --breakpoint-*: initial;

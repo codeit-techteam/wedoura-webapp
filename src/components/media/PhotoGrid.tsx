@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useId, useState } from "react";
 import { Photo } from "@/components/media/Photo";
 import { PhotoViewer } from "@/components/motion/PhotoViewer";
+import { Button } from "@/components/ui/Button";
 import type { Photo as PhotoData } from "@/data/types";
 import { cn } from "@/lib/cn";
 
@@ -17,16 +18,24 @@ type Props = {
   className?: string;
   /** Optional per-photo link (gallery: the vendor), keyed by photo id. */
   links?: Record<string, PhotoLink>;
+  /**
+   * Show only this many at first, with a "See all" expander. Every photo is
+   * still in the markup (server-rendered); the rest are hidden until opened.
+   */
+  initialCount?: number;
 };
 
 /**
  * Uncropped photo grid: masonry-style columns where every photograph keeps
  * its own aspect ratio, each opening the full-screen viewer (shared layout).
  */
-export function PhotoGrid({ photos, columns = 3, sizes, className, links }: Props) {
+export function PhotoGrid({ photos, columns = 3, sizes, className, links, initialCount }: Props) {
   const [index, setIndex] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const prefix = useId();
   const sizesHint = sizes ?? (columns === 3 ? "(min-width: 48rem) 33vw, 50vw" : "50vw");
+  const collapsed = initialCount !== undefined && !expanded && photos.length > initialCount;
+  const limit = collapsed ? initialCount : photos.length;
 
   return (
     <>
@@ -37,7 +46,7 @@ export function PhotoGrid({ photos, columns = 3, sizes, className, links }: Prop
             type="button"
             onClick={() => setIndex(i)}
             aria-label={`Open ${photo.alt}`}
-            className="group block w-full break-inside-avoid outline-offset-4"
+            className={cn("group block w-full break-inside-avoid outline-offset-4", i >= limit && "hidden")}
           >
             <motion.div layoutId={`${prefix}-${photo.id}`} className="relative overflow-hidden bg-ivory">
               <Photo
@@ -54,6 +63,13 @@ export function PhotoGrid({ photos, columns = 3, sizes, className, links }: Prop
           </button>
         ))}
       </div>
+      {collapsed && (
+        <div className="mt-8 flex justify-center">
+          <Button variant="outline" onClick={() => setExpanded(true)}>
+            See all {photos.length} photographs
+          </Button>
+        </div>
+      )}
       <PhotoViewer photos={photos} index={index} onChange={setIndex} onClose={() => setIndex(null)} layoutPrefix={prefix} links={links} />
     </>
   );

@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { BottomSheet } from "@/components/browse/BottomSheet";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
-import { useParamState } from "@/lib/url-state";
+import { patchedHref, type ParamRecord } from "@/lib/url";
 
 export type FilterOption = { value: string; label: string };
 
@@ -13,18 +15,26 @@ type SelectProps = {
   label: string;
   options: FilterOption[];
   allLabel?: string;
+  /** The page's pathname and current query params, from the server component. */
+  pathname: string;
+  params: ParamRecord;
   className?: string;
 };
 
-/** One labelled select bound to a URL parameter. */
-export function FilterSelect({ param, label, options, allLabel = "All", className }: SelectProps) {
-  const [value, setValue] = useParamState(param);
+/** One labelled select that patches its URL parameter on change. */
+export function FilterSelect({ param, label, options, allLabel = "All", pathname, params, className }: SelectProps) {
+  const router = useRouter();
+  const value = params[param] ?? "";
   return (
     <label className={cn("relative flex min-w-0 flex-col gap-1", className)}>
       <span className="label text-mute">{label}</span>
       <select
         value={options.some((o) => o.value === value) ? value : ""}
-        onChange={(e) => setValue(e.target.value || null)}
+        onChange={(e) =>
+          router.replace(patchedHref(pathname, params, { [param]: e.target.value || null, show: null }), {
+            scroll: false,
+          })
+        }
         className="tap w-full cursor-pointer appearance-none border-b border-line bg-transparent pr-7 pb-2 text-body text-ink outline-offset-4"
       >
         <option value="">{allLabel}</option>
@@ -46,7 +56,8 @@ type BarProps = {
   count: string;
   /** How many filters are active, shown on the mobile button. */
   activeCount: number;
-  onClear?: () => void;
+  /** Href that clears every filter (built on the server). */
+  clearHref?: string;
   className?: string;
 };
 
@@ -54,7 +65,7 @@ type BarProps = {
  * The filter bar: sticky under the navbar on desktop; on mobile a single
  * button that opens the same controls in a bottom sheet.
  */
-export function FilterBar({ children, count, activeCount, onClear, className }: BarProps) {
+export function FilterBar({ children, count, activeCount, clearHref, className }: BarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -78,10 +89,10 @@ export function FilterBar({ children, count, activeCount, onClear, className }: 
           <p className="text-small text-mute" aria-live="polite">
             {count}
           </p>
-          {onClear && activeCount > 0 && (
-            <button type="button" onClick={onClear} className="link-draw hidden text-small text-ink md:inline">
+          {clearHref && activeCount > 0 && (
+            <Link href={clearHref} scroll={false} className="link-draw hidden text-small text-ink md:inline">
               Clear
-            </button>
+            </Link>
           )}
         </div>
       </div>
@@ -89,10 +100,15 @@ export function FilterBar({ children, count, activeCount, onClear, className }: 
       <div className="md:hidden">
         <BottomSheet open={open} onClose={() => setOpen(false)} title="Filters">
           <div className="flex flex-col gap-7">{children}</div>
-          {onClear && activeCount > 0 && (
-            <button type="button" onClick={onClear} className="link-draw mt-7 text-small text-ink">
+          {clearHref && activeCount > 0 && (
+            <Link
+              href={clearHref}
+              scroll={false}
+              onClick={() => setOpen(false)}
+              className="link-draw mt-7 inline-block text-small text-ink"
+            >
               Clear all filters
-            </button>
+            </Link>
           )}
         </BottomSheet>
       </div>

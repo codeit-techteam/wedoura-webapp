@@ -11,13 +11,16 @@ type Props = {
   whatsapp: string;
 };
 
-/** The profile's persistent actions: price, save, WhatsApp, inquiry. */
+/**
+ * The profile's persistent actions on phones and tablets: price, save,
+ * WhatsApp, inquiry. From lg the sticky side panel takes over.
+ */
 export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) {
   const wa = `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}`;
   return (
     <div
       className={cn(
-        "fixed inset-x-0 z-30 border-t border-line bg-white",
+        "fixed inset-x-0 z-30 border-t border-line bg-white lg:hidden",
         "bottom-bottombar md:bottom-0",
       )}
     >

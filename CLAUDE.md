@@ -38,7 +38,8 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
   text, not even labels (3.5:1 on white). Headlines are Instrument Serif 400 (large, tracking tight); body is DM Sans 400 (500 for emphasis).
   Square corners, hairlines, no shadows, no loud colour, no pop-ups, no auto-advancing carousels.
   Body text at least 17px, nothing under 14px; tap targets at least 44px (`tap`). Visible focus (gold outline) stays on.
-- **No invented numbers.** No ratings, review counts or statistics. Sample content says "(sample)" or "Sample copy".
+- **No invented numbers.** No ratings, review counts or statistics. Placeholder content carries no "sample"
+  labels or slugs; the footer note is the one flag that the site is being built.
 - **Mobile first.** Design at 390px, then 768px (`md:`), then 1440px (`xl:`). Bottom nav on mobile.
 - **Chrome.** The navbar is sticky and goes transparent with white text over any page element carrying
   `data-nav-dark` (CSS `:has()` rule in `globals.css`). A page with a full-bleed dark hero pulls it under the
@@ -46,8 +47,16 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
 - **Forms are screens only.** Validate, show a success state, send nothing.
 - **One component per pattern.** Cards, rails, tabs, filters, accordions, empty states and skeletons live in
   src/components/{cards,browse,ui}; never rebuild one inline. Tabs/filters/sort/search state lives in URL query
-  params via src/lib/url-state.ts, so every state is linkable and back works. Saved state only through
+  params, so every state is linkable and back works. Saved state only through
   src/lib/saved.ts. Stale photos after replacing files? Delete .next/cache/images.
+- **Lists are server-rendered.** A list page reads its `searchParams` prop, normalises it with `pickParams`
+  (src/lib/url.ts), filters through `@/lib/api` and renders the cards itself. Controls get `pathname` + `params`
+  as props and build hrefs with `patchedHref` (`UnderlineTabs` are links; `FilterSelect` and `LoadMore` patch
+  `?param=` / `?show=`). Never read `useSearchParams` for list content: on a static route it bails the whole
+  Suspense boundary out of the HTML. `useParamState` (src/lib/url-state.ts) is only for client-only screens
+  (saved, studio). Collapsed content (FAQ answers, "See all" photos) stays in the markup and is hidden with CSS.
+  Never render separate desktop and mobile copies of the same content; pinned sections upgrade one copy via
+  `useIsDesktop()` (src/lib/media.ts).
 
 ## Motion (these patterns, nothing else)
 
@@ -85,16 +94,18 @@ src/components/ui  Heading, Label, Text, Button, Hairline, Container, Section, I
 src/components/chrome  Navbar (+SiteHeader), VendorsPanel, SearchOverlay, MobileMenu, BottomBar, SiteFooter, Wordmark, Placeholder
 src/components/media   Photo, PhotoCard, CardRow, FilmPreview, PhotoGrid (uncropped grid + viewer)
 src/components/cards   VendorCard, StoryCard, ArticleCard, PhotoTile  (the one card per content type)
-src/components/browse  Rail, UnderlineTabs, FilterBar+FilterSelect, BottomSheet, LoadMore, VendorBrowser,
-                       WeddingBrowser, SavedList  (URL-param driven; see src/lib/url-state.ts)
-src/components/profile VendorProfile, StickySubnav, StickyActionBar, InquiryForm, AlbumList, VenueTour (360),
-                       VendorSignupForm, AuthForms (login+contact), StudioScreens
-src/components/home    HeroV2, HeroSearch, CategoryTiles, FeaturedTabs, WeddingsScroller, FilmsShowcase,
-                       CityMosaic, RailProgress
+src/components/browse  Rail, UnderlineTabs (links), FilterBar+FilterSelect, BottomSheet, LoadMore (?show=),
+                       SavedList  (list pages render their own grids; see src/lib/url.ts)
+src/components/profile VendorProfile (cover, key facts, content column + sticky inquiry aside), StickySubnav,
+                       StickyActionBar (below lg), InquiryForm (compact variant), AlbumList (large covers),
+                       VenueTour (360), VendorSignupForm, AuthForms (login+contact), StudioScreens
+src/components/home    HeroV2, HeroSearch, CategoryTiles, WeddingsScroller, FilmsShowcase, CityMosaic,
+                       RailProgress
 src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis),
                        MaskedHeading, ImageReveal
 src/data           typed sample content (types.ts, photos.ts generated)
-src/lib            api.ts (data access), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
+src/lib            api.ts (data access), url.ts (server-safe param/href helpers), url-state.ts (client hook),
+                   media.ts (useIsDesktop), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
 src/styles         tokens.css, fonts.ts
 public/photos      placeholder photographs + alt.json (replace, then npm run photos)
 docs/screenshots   chrome captures from scripts/screenshots.mjs

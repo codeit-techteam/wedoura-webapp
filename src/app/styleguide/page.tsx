@@ -150,8 +150,8 @@ export default async function StyleguidePage() {
             <Specimen label="Body">
               <Text className="max-w-prose">
                 Body text is DM Sans 400, 17px on phones and 18px from tablets up, with a line height of 1.6.
-                Paragraphs stay under 42rem so lines remain comfortable. Sample content on the site is always
-                labelled as sample.
+                Paragraphs stay under 42rem so lines remain comfortable. The footer carries the one note that
+                the site&apos;s content is placeholder while it is being built.
               </Text>
             </Specimen>
             <Specimen label="Small">
@@ -266,7 +266,7 @@ export default async function StyleguidePage() {
                   photo={photo}
                   sizes="(min-width: 48rem) 33vw, 50vw"
                   eyebrow="Photography & Films"
-                  title="Sample Studio"
+                  title="Aperture & Marigold"
                   meta="Udaipur"
                   href="#photos"
                 />
@@ -283,7 +283,7 @@ export default async function StyleguidePage() {
                   sizes="(min-width: 48rem) 50vw, 100vw"
                   eyebrow="Real wedding"
                   title="Three days by the lake"
-                  meta="A. & R. (sample story)"
+                  meta="A. & R. · Udaipur"
                   href="#photos"
                 />
               </Reveal>
@@ -351,11 +351,11 @@ export default async function StyleguidePage() {
           <Label>05 · Film preview</Label>
           <Text tone="mute" className="mt-3 mb-8 max-w-prose">
             Plays muted while at least 60% visible and pauses when it leaves. Watch the film opens the full
-            version. The clip is a CC0 sample until vendors supply films.
+            version. With no clip, the poster breathes instead; profiles hide films that have no clip.
           </Text>
           <div className="grid gap-8 md:grid-cols-2">
             {films.slice(0, 2).map((film) => (
-              <FilmPreview key={film.id} film={film} sizes="(min-width: 768px) 50vw, 100vw" eyebrow="Sample film" />
+              <FilmPreview key={film.id} film={film} sizes="(min-width: 768px) 50vw, 100vw" eyebrow="Wedding film" />
             ))}
           </div>
         </Container>
@@ -373,7 +373,7 @@ export default async function StyleguidePage() {
 
       <footer className="border-t border-line">
         <Container className="flex flex-wrap items-center justify-between gap-4 py-8">
-          <Label>Wedoura · Styleguide · Sample content throughout</Label>
+          <Label>Wedoura · Styleguide · Placeholder content throughout</Label>
           <Label>
             <Link href="/" className="hover:text-ink">
               Home

@@ -1,11 +1,9 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import { useId, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import type { Faq } from "@/data/types";
-import { EASE } from "@/lib/motion";
 
 type Props = {
   items: Faq[];
@@ -13,7 +11,10 @@ type Props = {
   defaultOpen?: number | null;
 };
 
-/** Question-and-answer accordion with smooth open and close. */
+/**
+ * Question-and-answer accordion. Every answer is always in the markup (so it
+ * is server-rendered and findable); open and close animate the row height.
+ */
 export function Accordion({ items, defaultOpen = 0 }: Props) {
   const [open, setOpen] = useState<number | null>(defaultOpen);
   const uid = useId();
@@ -45,24 +46,19 @@ export function Accordion({ items, defaultOpen = 0 }: Props) {
                 />
               </button>
             </h3>
-            <AnimatePresence initial={false}>
-              {isOpen && (
-                <motion.div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.45, ease: EASE }}
-                  className="overflow-hidden"
-                >
-                  <Text tone="mute" className="max-w-prose pb-6">
-                    {item.answer}
-                  </Text>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={buttonId}
+              className="grid transition-[grid-template-rows,opacity] duration-450 ease-wedoura"
+              style={{ gridTemplateRows: isOpen ? "1fr" : "0fr", opacity: isOpen ? 1 : 0 }}
+            >
+              <div className="overflow-hidden" {...(isOpen ? {} : { inert: true })}>
+                <Text tone="mute" className="max-w-prose pb-6">
+                  {item.answer}
+                </Text>
+              </div>
+            </div>
           </li>
         );
       })}

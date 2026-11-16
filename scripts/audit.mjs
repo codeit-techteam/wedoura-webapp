@@ -140,7 +140,7 @@ check("Escape closes the sheet", !(await mobile.$('[role="dialog"][aria-label="F
 await mobile.close();
 
 // Profile: subnav anchor, viewer, album, inquiry validation + success, sticky bar
-await goto("/vendors/aperture-marigold-sample");
+await goto("/vendors/aperture-marigold");
 await page.$$eval('nav[aria-label="Profile sections"] a', (links) => links.find((l) => l.textContent === "Pricing")?.click());
 await sleep(900);
 check("subnav anchor scrolls to pricing", await page.evaluate(() => Math.abs(document.getElementById("pricing").getBoundingClientRect().top) < 300));
@@ -284,7 +284,7 @@ const outline = await page.evaluate(() => {
 check("focus outline is the gold token", outline.includes("168") || outline.includes("rgb(168, 134, 74)"));
 
 // --------------------------------------------------------------- 4 · CLS
-for (const path of ["/", "/vendors/aperture-marigold-sample", "/real-weddings/sample-udaipur-lake-wedding"]) {
+for (const path of ["/", "/vendors/aperture-marigold", "/real-weddings/udaipur-lake-wedding"]) {
   const p = await browser.newPage();
   await p.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
   await p.evaluateOnNewDocument(() => {

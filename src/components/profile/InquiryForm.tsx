@@ -4,7 +4,11 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 
-type Props = { vendorName: string };
+type Props = {
+  vendorName: string;
+  /** Single-column layout for the profile's side panel. */
+  compact?: boolean;
+};
 
 type Values = {
   name: string;
@@ -35,7 +39,7 @@ const field =
  * The inquiry form. Screen only: validates, shows a success state, sends
  * nothing anywhere yet.
  */
-export function InquiryForm({ vendorName }: Props) {
+export function InquiryForm({ vendorName, compact = false }: Props) {
   const [values, setValues] = useState<Values>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof Values, string>>>({});
   const [sent, setSent] = useState(false);
@@ -52,8 +56,8 @@ export function InquiryForm({ vendorName }: Props) {
 
   if (sent) {
     return (
-      <div className="bg-ivory px-8 py-14 md:px-12" role="status">
-        <p className="font-serif text-h2">Sent. {vendorName} will reply to you directly.</p>
+      <div className={cn("bg-ivory", compact ? "px-6 py-10" : "px-8 py-14 md:px-12")} role="status">
+        <p className={cn("font-serif", compact ? "text-h3" : "text-h2")}>Sent. {vendorName} will reply to you directly.</p>
         <p className="mt-4 max-w-prose text-mute">
           Nothing was actually sent; forms go live with the backend. This screen shows the success state.
         </p>
@@ -79,7 +83,7 @@ export function InquiryForm({ vendorName }: Props) {
     ) : null;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-x-10 gap-y-8 md:grid-cols-2">
+    <form onSubmit={onSubmit} noValidate className={cn("grid gap-y-6", !compact && "gap-x-10 gap-y-8 md:grid-cols-2")}>
       <div>
         <label htmlFor="inq-name" className="label text-mute">
           Your name
@@ -122,13 +126,13 @@ export function InquiryForm({ vendorName }: Props) {
         <input id="inq-city" type="text" value={values.city} onChange={set("city")} className={cn(field, "mt-3")} />
         {error("city")}
       </div>
-      <div className="md:col-span-2">
+      <div className={cn(!compact && "md:col-span-2")}>
         <label htmlFor="inq-message" className="label text-mute">
           About your wedding
         </label>
         <textarea
           id="inq-message"
-          rows={4}
+          rows={compact ? 3 : 4}
           value={values.message}
           onChange={set("message")}
           placeholder="Dates, places, what you have in mind."

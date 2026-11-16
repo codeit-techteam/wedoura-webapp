@@ -26,9 +26,9 @@ const TABS = [
 ];
 
 const SAMPLE_INQUIRIES = [
-  { name: "T. & J.", city: "Bengaluru", date: "Sample · 2 days ago", note: "Looking for two days in October, garden wedding, around 150 guests." },
-  { name: "S. & V.", city: "Delhi", date: "Sample · 5 days ago", note: "Winter wedding, mostly outdoors. Are you free around 20 December?" },
-  { name: "I. & F.", city: "Mumbai", date: "Sample · last week", note: "One evening reception in town. What does your smallest package cover?" },
+  { name: "T. & J.", city: "Bengaluru", date: "2 days ago", note: "Looking for two days in October, garden wedding, around 150 guests." },
+  { name: "S. & V.", city: "Delhi", date: "5 days ago", note: "Winter wedding, mostly outdoors. Are you free around 20 December?" },
+  { name: "I. & F.", city: "Mumbai", date: "Last week", note: "One evening reception in town. What does your smallest package cover?" },
 ];
 
 /** The studio screens: what a vendor will manage, driven by sample data. */

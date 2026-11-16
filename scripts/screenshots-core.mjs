@@ -46,8 +46,8 @@ async function capture(path, name, width) {
 
 for (const width of [1440, 390]) {
   (await capture("/vendors", "vendors", width)).close();
-  (await capture("/vendors/aperture-marigold-sample", "vendor-profile", width)).close();
-  (await capture("/real-weddings/sample-udaipur-lake-wedding", "story", width)).close();
+  (await capture("/vendors/aperture-marigold", "vendor-profile", width)).close();
+  (await capture("/real-weddings/udaipur-lake-wedding", "story", width)).close();
 }
 
 // Behaviour spot-checks at 1440.
@@ -78,7 +78,7 @@ check(`saving shows 1 in the navbar (got "${savedBadge.trim()}")`, savedBadge.in
 await page.$eval('button[aria-pressed="true"]', (el) => el.click());
 
 // 4. Profile subnav exists and the viewer opens from the portfolio.
-await page.goto(`${BASE}/vendors/aperture-marigold-sample`, { waitUntil: "load", timeout: 60000 });
+await page.goto(`${BASE}/vendors/aperture-marigold`, { waitUntil: "load", timeout: 60000 });
 await sleep(1500);
 check("profile subnav renders", !!(await page.$('nav[aria-label="Profile sections"]')));
 await page.evaluate(() => document.querySelector("#portfolio button")?.scrollIntoView({ block: "center" }));

@@ -14,7 +14,7 @@ const columns = [
       { href: "/blogs", label: "Blogs" },
       { href: "/gallery", label: "Gallery" },
       { href: "/honeymoon", label: "Honeymoon" },
-      { href: "/#faq", label: "FAQs" },
+      { href: "/faq", label: "FAQs" },
     ],
   },
   {

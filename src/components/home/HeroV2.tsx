@@ -92,7 +92,7 @@ export function HeroV2({ photos, cities, categories }: Props) {
       >
         <MaskedHeading
           as="h1"
-          className="font-serif text-display"
+          className="font-serif text-hero"
           lines={[
             <>Your wedding,</>,
             <>
@@ -101,7 +101,7 @@ export function HeroV2({ photos, cities, categories }: Props) {
           ]}
         />
         <motion.p
-          className="mt-5 max-w-xl text-lead text-white/90"
+          className="mt-4 max-w-xl text-sublead text-white/90"
           initial={reduce ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: EASE, delay: 0.35 }}
@@ -115,10 +115,13 @@ export function HeroV2({ photos, cities, categories }: Props) {
           transition={{ duration: 0.8, ease: EASE, delay: 0.5 }}
         >
           <HeroSearch cities={cities} categories={categories} />
-          <ul className="mt-5 flex flex-wrap gap-x-7 gap-y-2" aria-label="Browse a category">
+          <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2" aria-label="Browse a category">
             {categories.map((c) => (
               <li key={c.slug}>
-                <Link href={`/vendors?category=${c.slug}`} className="link-draw label inline-block py-1 text-white/85">
+                <Link
+                  href={`/vendors?category=${c.slug}`}
+                  className="link-draw inline-block py-1 text-caption font-medium tracking-label uppercase text-white/85"
+                >
                   {c.name}
                 </Link>
               </li>

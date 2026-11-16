@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { Photo } from "@/components/media/Photo";
 import { PhotoViewer } from "@/components/motion/PhotoViewer";
-import { Icon } from "@/components/ui/Icon";
 import type { Album } from "@/data/types";
 
 type Props = { albums: Album[] };
 
-/** Albums as rows; each opens its own full-screen photo sequence. */
+/** Albums as large covers with title, city and count; each opens its own full-screen sequence. */
 export function AlbumList({ albums }: Props) {
   const [openAlbum, setOpenAlbum] = useState<number | null>(null);
   const [index, setIndex] = useState<number | null>(null);
@@ -16,32 +15,30 @@ export function AlbumList({ albums }: Props) {
 
   return (
     <>
-      <ul className="border-t border-line">
+      <ul className="grid gap-2 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
         {albums.map((item, i) => (
-          <li key={item.slug} className="border-b border-line">
+          <li key={item.slug}>
             <button
               type="button"
               onClick={() => {
                 setOpenAlbum(i);
                 setIndex(0);
               }}
-              className="group flex tap w-full items-center gap-6 py-4 text-left outline-offset-4 md:gap-10"
+              aria-label={`Open the album ${item.title}, ${item.photos.length} photographs`}
+              className="group block w-full text-left outline-offset-4"
             >
-              <div className="relative aspect-4/3 w-24 shrink-0 overflow-hidden bg-ivory md:w-32">
+              <div className="relative aspect-4/3 overflow-hidden bg-ivory">
                 <Photo
                   photo={item.photos[0]}
                   mode="cover"
-                  sizes="8rem"
+                  sizes="(min-width: 90rem) 30vw, (min-width: 40rem) 45vw, 100vw"
                   className="transition-transform duration-1200 ease-wedoura group-hover:scale-104"
                 />
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-serif text-h3">{item.title}</p>
-                <p className="mt-1 text-small text-mute">
-                  {item.location} · {item.photos.length} photographs
-                </p>
-              </div>
-              <Icon name="arrow-right" size={20} className="shrink-0 text-gold transition-transform duration-300 ease-wedoura group-hover:translate-x-1" />
+              <p className="mt-4 font-serif text-h3">{item.title}</p>
+              <p className="mt-1 text-small text-mute">
+                {item.location} · {item.photos.length} photographs
+              </p>
             </button>
           </li>
         ))}

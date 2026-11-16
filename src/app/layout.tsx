@@ -34,6 +34,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${instrument.variable} ${dmSans.variable} h-full`}>
+      <head>
+        {/* Motion components server-render their hidden initial state (opacity,
+            transforms, masks). Without JS nothing would animate in, so undo it. */}
+        <noscript>
+          <style>{`[style]{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
+        </noscript>
+      </head>
       <body className="flex min-h-full flex-col bg-white text-ink">
         <MotionProvider>
           <SmoothScroll>
