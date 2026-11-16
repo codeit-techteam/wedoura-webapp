@@ -36,7 +36,7 @@ export function AlbumList({ albums }: Props) {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="font-serif text-h3 leading-tight">{item.title}</p>
+                <p className="font-serif text-h3">{item.title}</p>
                 <p className="mt-1 text-small text-mute">
                   {item.location} · {item.photos.length} photographs
                 </p>

@@ -86,7 +86,7 @@ export function SearchOverlay({ open, onClose, categories, cities, vendors }: Pr
   };
 
   const quickLink =
-    "inline-flex tap items-center font-serif text-h3 leading-none text-ink transition-chrome hover:text-mute";
+    "inline-flex tap items-center font-serif text-h3 text-ink transition-chrome hover:text-mute";
   const showSuggestions = query.trim().length > 0;
 
   return (
@@ -161,7 +161,7 @@ export function SearchOverlay({ open, onClose, categories, cities, vendors }: Pr
                         highlight === i ? "text-ink" : "text-mute hover:text-ink"
                       }`}
                     >
-                      <span className="font-serif text-h3 leading-none">{s.label}</span>
+                      <span className="font-serif text-h3">{s.label}</span>
                       <span className="label">{s.kind}</span>
                     </Link>
                   </li>

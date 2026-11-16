@@ -71,7 +71,7 @@ export function VendorCard({ vendor, sizes = "(min-width: 80rem) 24vw, 50vw", pr
             className="absolute inset-x-0 bottom-0 h-2/5 bg-linear-to-t from-ink/80 to-transparent"
           />
           <div className="absolute inset-x-0 bottom-0 p-4 text-white md:p-5">
-            <p className="font-serif text-h3 leading-tight">{vendor.name}</p>
+            <p className="font-serif text-h3">{vendor.name}</p>
             <p className="mt-1 text-small text-white/85">
               {vendor.cityName}
               {vendor.startingPrice ? ` · ${vendor.startingPrice}` : ""}

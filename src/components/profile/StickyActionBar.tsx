@@ -23,7 +23,7 @@ export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) 
     >
       <div className="container-site flex items-center justify-between gap-4 py-2 md:py-3">
         <div className="min-w-0">
-          <p className="truncate font-serif text-h3 leading-tight md:hidden">{name}</p>
+          <p className="truncate font-serif text-h3 md:hidden">{name}</p>
           {startingPrice && <p className="truncate text-small text-mute">{startingPrice}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-2 md:gap-4">

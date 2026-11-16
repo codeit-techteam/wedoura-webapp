@@ -19,6 +19,17 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-16 · Hero gap + serif descenders
+
+Done:
+- **Hero white gap.** Navbar hairline (`border-b`) sat outside `h-nav`, so the header
+  was 1px taller than `--nav-h` and heroes with `-mt-nav` left a white strip above the
+  image. `h-nav` now lives on the `<header>` (border-box); the inner row is `h-full`.
+- **Clipped “g” (Instrument Serif descenders).** Display/h1/h2 line-heights were ≤1.02
+  and `<MaskedHeading>` clipped lines with `overflow-hidden`. Raised serif line-heights
+  in `tokens.css`, gave mask lines `pb/mb` room for ~0.3em descent, and dropped
+  `leading-none` / `leading-tight` overrides on serif titles (cards, search, albums, etc.).
+
 ### 2026-11-14 · Session 6: remaining pages, 360° tour, full audit (steps 7–10)
 
 Done:

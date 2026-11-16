@@ -45,7 +45,7 @@ export function StoryCard({ wedding, cityName, sizes, variant = "large", classNa
             {cityName}
             {wedding.style ? `${cityName ? " · " : ""}${wedding.style}` : ""}
           </p>
-          <p className={cn("mt-2 font-serif leading-none", large ? "text-h2" : "text-h3")}>{wedding.title}</p>
+          <p className={cn("mt-2 font-serif", large ? "text-h2" : "text-h3")}>{wedding.title}</p>
           <p className="mt-3 text-small text-white/85">
             {wedding.couple}
             {large && credit ? ` · Photographs by ${credit}` : ""}
