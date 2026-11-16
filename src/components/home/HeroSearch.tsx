@@ -32,7 +32,6 @@ type PanelCoords = {
 
 type PickerProps = {
   field: "city" | "category";
-  label: string;
   placeholder: string;
   value: string;
   options: Option[];
@@ -40,6 +39,11 @@ type PickerProps = {
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
+};
+
+const PICKER_TITLE: Record<"city" | "category", string> = {
+  city: "City",
+  category: "Category",
 };
 
 function PickerOptions({
@@ -85,7 +89,8 @@ function PickerOptions({
   );
 }
 
-function HeroPicker({ field, label, placeholder, value, options, onChange, open, onToggle, onClose }: PickerProps) {
+function HeroPicker({ field, placeholder, value, options, onChange, open, onToggle, onClose }: PickerProps) {
+  const title = PICKER_TITLE[field];
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLUListElement>(null);
   const isDesktop = useIsDesktop();
@@ -151,16 +156,16 @@ function HeroPicker({ field, label, placeholder, value, options, onChange, open,
     <div
       ref={rootRef}
       className={cn(
-        "flex min-h-full min-w-0 flex-col justify-center px-3 py-2 transition-chrome md:px-7 md:py-3",
+        "flex min-h-full min-w-0 items-center px-4 transition-chrome md:px-7",
         open && "bg-ivory",
       )}
     >
-      <span className="label mb-0.5 text-mute">{label}</span>
       <button
         type="button"
         id={`hero-${field}`}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-label={title}
         onClick={onToggle}
         className="tap flex w-full min-w-0 items-center justify-between gap-3 text-left"
       >
@@ -176,7 +181,7 @@ function HeroPicker({ field, label, placeholder, value, options, onChange, open,
 
   const sheet =
     !isDesktop && open ? (
-      <BottomSheet open onClose={onClose} title={label}>
+      <BottomSheet open onClose={onClose} title={title}>
         <ul role="listbox" aria-labelledby={`hero-${field}`} className="-mx-gutter border-y border-line">
           <PickerOptions placeholder={placeholder} value={value} options={options} onPick={pick} />
         </ul>
@@ -241,13 +246,12 @@ export function HeroSearch({ cities, categories }: Props) {
       onSubmit={onSubmit}
       aria-label="Find vendors"
       className={cn(
-        "relative z-30 mx-auto grid h-[4.25rem] w-full max-w-(--container-hero-search) grid-cols-[1fr_1fr_auto] items-stretch divide-x divide-line border border-line bg-white text-ink md:h-16",
+        "relative z-30 mx-auto grid h-14 w-full max-w-(--container-hero-search) grid-cols-[1fr_1fr_auto] items-stretch divide-x divide-line border border-line bg-white text-ink",
         active && "border-ink",
       )}
     >
       <HeroPicker
         field="city"
-        label="Where"
         placeholder="Anywhere"
         value={city}
         options={cities}
@@ -258,7 +262,6 @@ export function HeroSearch({ cities, categories }: Props) {
       />
       <HeroPicker
         field="category"
-        label="Who"
         placeholder="All vendors"
         value={category}
         options={categories}
