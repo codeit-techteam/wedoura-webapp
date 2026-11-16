@@ -95,7 +95,8 @@ the root layout plus the CSS media query switch motion off. Motion components ar
 ## Layout
 
 ```
-src/app            routes (layout, template, styleguide, placeholders for every route in the brief)
+src/app            bare root layout + root 404; public routes live in (site)/ (chrome layout + template);
+                   vendor-studio/ is the vendor portal (own client layout: guard + StudioShell, 15 screens)
 src/components/ui  Heading, Label, Text, Button, Hairline, Container, Section, Icon
 src/components/chrome  Navbar (+SiteHeader), VendorsPanel, SearchOverlay, MobileMenu, BottomBar, SiteFooter, Wordmark, Placeholder
 src/components/media   Photo, PhotoCard, CardRow, FilmPreview, PhotoGrid (uncropped grid + viewer)
@@ -108,13 +109,19 @@ src/components/profile VendorProfile (cover, key facts, content column + sticky 
                        StudioGate (status-routed studio), DemoPanel (/demo admin stand-in)
 src/components/home    HeroV2, HeroSearch, CategoryTiles, WeddingsScroller, FilmsShowcase, CityMosaic,
                        RailProgress
+src/components/studio  the portal: StudioShell (sidebar/drawer), StatusScreens, status badge, Field/ScreenHeader,
+                       autosave (DirtyProvider + useListingAutosave + SaveState), screen helpers (useListingForm,
+                       TagListInput, ReorderButtons), checklist, PhotoManager, PhotoPicker. Every portal field
+                       maps to VendorListing; reads/writes only through vendor-api (hooks + updateMyListing).
 src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis),
                        MaskedHeading, ImageReveal
 src/data           typed sample content (types.ts, photos.ts generated)
-src/lib            api.ts (public reads, published-only), vendor-api.ts (vendor/admin calls), mock-store.ts
-                   (localStorage mock db), demo-credentials.ts (deletable), format.ts (formatPrice), url.ts
-                   (server-safe param/href helpers), url-state.ts (client hook), media.ts (useIsDesktop),
-                   motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
+src/lib            api.ts (public reads, published-only), vendor-api.ts (vendor/admin calls + reactive hooks),
+                   listing-view.ts (THE listing→public mapper, pending-media filter; api, previews and the
+                   demo overlay all use it), upload.ts (simulated uploads: ≥800px, data URLs, 12px blur),
+                   mock-store.ts (localStorage mock db), demo-credentials.ts (deletable), format.ts
+                   (formatPrice), url.ts (server-safe param/href helpers), url-state.ts (client hook),
+                   media.ts (useIsDesktop), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
 src/styles         tokens.css, fonts.ts
 public/photos      placeholder photographs + alt.json (replace, then npm run photos)
 docs/screenshots   chrome captures from scripts/screenshots.mjs

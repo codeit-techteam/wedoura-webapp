@@ -19,6 +19,58 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-16 · Round 5: the complete vendor portal at /vendor-studio
+
+Done:
+- **Contract additions** (types first, then UI): `VendorListing.reviewNote` (admin note for
+  changes_requested) and `pendingMediaIds` (photos/films added while published, hidden publicly until
+  approved), `Album.date`, `Inquiry.status` (new/replied/closed). docs/api-contract.md documents them plus
+  PATCH /me/inquiries/{id}, POST /admin/listings/{id}/request-changes and /approve-media.
+- **Route groups.** Public routes moved into `src/app/(site)/` with the chrome layout (SiteHeader, footer,
+  BottomBar, page template); the root layout is bare (fonts, providers, noscript); the root 404 carries its
+  own chrome. `/vendor-studio/` has its own client layout: route guard (logged out → /login; applied/
+  rejected/suspended → status screens) around `StudioShell` — dense left sidebar on desktop, top bar with a
+  focus-trapped slide-in menu at 390px, business name, status badge, View preview, sign out.
+- **Fifteen screens**, every field mapping to `VendorListing`, all reads/writes through vendor-api (no
+  direct store access in components): overview (status explained, 7-item checklist with progress and quick
+  links, review-note callout, recent inquiries), business, category & services (inputs generated from
+  `Category.fields`; venues get capacity/spaces/360 tour), locations, photos (`PhotoManager`: drag-drop +
+  picker upload with simulated progress, ≥800px validation with clear rejections, reorder by drag and
+  keyboard, alt text, bulk delete, pending chips), cover & card photos (`PhotoPicker` + live `VendorCard`
+  and cover previews via the shared mapper), albums, films (file ≤8MB or link + poster), pricing (packages
+  with units, starting price derived from the cheapest or set directly), FAQs, contact (phone marked
+  never-public), inquiries (status chips, detail, WhatsApp reply link), preview (the real `VendorProfile`
+  from the draft, pending media included, under a banner), submit (gated on the checklist), account
+  (screen-only). Autosave (800ms debounce, Saving→Saved→error indicator, quota errors surfaced),
+  beforeunload + nav-confirm dirty guard, skeletons and designed empty states throughout.
+- **Shared mapper.** `src/lib/listing-view.ts` (`listingToSummary`/`listingToDetail` with a pending-media
+  filter) now backs api.ts, the portal previews and the overlay — a vendor's saved data is exactly what the
+  public site renders. `src/lib/upload.ts` simulates uploads (downscale to 1200px data URLs, 12px blur like
+  scripts/photos.mjs).
+- **Closing the loop.** `/vendors/[slug]` falls back to `DemoPublicProfile` for slugs unknown to the static
+  dataset (store-published demo listings render through `VendorProfile`; known-but-unpublished slugs still
+  hard-404); `/vendors` appends `DemoVendorCards` after the server grid. Both are marked demo-ware.
+  `updateMyListing` diffs media while published into `pendingMediaIds`; /demo gained Request changes (with
+  note), Approve N pending, and public links on published rows.
+- **Verification.** Lint, typecheck, build (53 pages). A 34-check Puppeteer run as vendor@gmail.com: route
+  guard, every screen filled (including a rejected undersized upload and ten real ones), autosave indicators,
+  7/7 checklist, submit → in_review, /demo request-changes note round-trip, publish, the public profile and
+  /vendors card showing exactly the entered data, a new photo pending (hidden publicly) then approved
+  (visible), no 390px overflow, the slide-in menu. Round-4 public HTML checks all still pass. Screenshots in
+  docs/screenshots/portal/ (overview, photos, pricing at 390 and 1440).
+
+Decisions / gotchas:
+- The demo overlay returns HTTP 200 with a client-side 404 for truly unknown vendor slugs (server cannot see
+  the browser store); known unpublished slugs keep the server 404. The /vendors count line excludes demo
+  listings. Both seams are documented in the contract and vanish with the backend.
+- Stale `.next/dev` types after moving routes into the group break typecheck; delete `.next` once.
+- In Puppeteer, clicks that depend on React state must be sequential ticks, and the pre-seeded demo
+  cover/cards mean pickers toggle OFF on the first click.
+
+Known gaps / next up:
+- Admin "suspend account" and a real changes_requested flow for media-only edits; search/home overlay for
+  demo listings; backend.
+
 ### 2026-11-16 · Round 4: data contract, vendor lifecycle, signup/login, /demo
 
 Done:

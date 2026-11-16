@@ -134,7 +134,7 @@ export function VendorProfile({ vendor, similar }: Props) {
 
             {vendor.venue && (
               <section id="venue" aria-label="The venue" className="border-t border-line py-section-sm">
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>The venue</>]} />
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={["The venue"]} />
                 <div className="mt-8 grid gap-10 md:grid-cols-[1fr_2fr] md:gap-14">
                   <div>
                     <Label>Capacity</Label>
@@ -179,7 +179,7 @@ export function VendorProfile({ vendor, similar }: Props) {
 
             {vendor.albums.length > 0 && (
               <section id="albums" aria-label="Albums" className="border-t border-line py-section-sm">
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>Albums</>]} />
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Albums"]} />
                 <p className="mt-3 max-w-prose text-mute">Whole weddings, each one its own sequence.</p>
                 <div className="mt-8">
                   <AlbumList albums={vendor.albums} />
@@ -189,7 +189,7 @@ export function VendorProfile({ vendor, similar }: Props) {
 
             {films.length > 0 && (
               <section id="films" aria-label="Films" className="border-t border-line py-section-sm">
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>Films</>]} />
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Films"]} />
                 <div className="mt-8 grid gap-2 md:grid-cols-2">
                   {films.map((film) => (
                     <FilmPreview key={film.id} film={film} sizes="(min-width: 64rem) 33vw, (min-width: 48rem) 50vw, 100vw" />
@@ -202,7 +202,7 @@ export function VendorProfile({ vendor, similar }: Props) {
               <section id="about" aria-label="About" className="border-t border-line py-section-sm">
                 <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)] md:gap-14">
                   <div>
-                    <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>About {vendor.name}</>]} />
+                    <MaskedHeading as="h2" className="font-serif text-h2" lines={[`About ${vendor.name}`]} />
                     <div className="mt-6 flex max-w-prose flex-col gap-4">
                       {vendor.about.map((paragraph) => (
                         <Text key={paragraph.slice(0, 24)} tone="mute">
@@ -227,7 +227,7 @@ export function VendorProfile({ vendor, similar }: Props) {
 
             {vendor.packages.length > 0 && (
               <section id="pricing" aria-label="Pricing" className="border-t border-line py-section-sm">
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>Pricing</>]} />
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Pricing"]} />
                 <p className="mt-3 max-w-prose text-mute">Starting points. Exact quotes come from {vendor.name}.</p>
                 <ul className="mt-8 grid gap-2 md:grid-cols-3">
                   {vendor.packages.map((pkg, i) => (
@@ -245,7 +245,7 @@ export function VendorProfile({ vendor, similar }: Props) {
 
             {vendor.faqs.length > 0 && (
               <section id="faq" aria-label="Frequently asked questions" className="border-t border-line py-section-sm">
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>Good to know</>]} />
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Good to know"]} />
                 <div className="mt-8">
                   <Accordion items={vendor.faqs} />
                 </div>
@@ -302,7 +302,7 @@ export function VendorProfile({ vendor, similar }: Props) {
       {similar.length > 0 && (
         <section aria-label="Similar vendors" className="border-t border-line py-section-sm">
           <Container>
-            <MaskedHeading as="h2" className="font-serif text-h2" lines={[<>You might also like</>]} />
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["You might also like"]} />
             <div className="mt-8">
               <Rail label="Similar vendors" itemClassName="w-3/4 sm:w-2/5 xl:w-[23%]">
                 {similar.map((v) => (

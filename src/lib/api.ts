@@ -31,6 +31,7 @@ import type {
   VendorSummary,
 } from "@/data/types";
 import { listings } from "@/data/vendors";
+import { listingToDetail, listingToSummary } from "@/lib/listing-view";
 
 /* ----------------------------------------------------------- internals */
 
@@ -42,56 +43,10 @@ function published(): VendorListing[] {
   return listings.filter((l) => l.status === "published");
 }
 
-function toSummary(l: VendorListing): VendorSummary {
-  return {
-    slug: l.slug,
-    name: l.name,
-    category: l.category,
-    categoryName: categoryNames.get(l.category) ?? l.category,
-    citySlug: l.baseCity,
-    cityName: cityNames.get(l.baseCity) ?? l.baseCity,
-    startingPriceINR: l.startingPriceINR,
-    priceUnit: l.priceUnit,
-    cardPhotos: l.cardPhotos,
-    featured: l.featured,
-    verified: l.verified,
-  };
-}
-
-function toDetail(l: VendorListing): VendorDetail {
-  // Strip account and admin internals; never expose a phone number.
-  const { whatsapp, email, instagram, website } = l.contact;
-  return {
-    slug: l.slug,
-    name: l.name,
-    tagline: l.tagline,
-    about: l.about,
-    aboutPhoto: l.aboutPhoto,
-    team: l.team,
-    yearsActive: l.yearsActive,
-    category: l.category,
-    categoryName: categoryNames.get(l.category) ?? l.category,
-    services: l.services,
-    styles: l.styles,
-    categoryValues: l.categoryValues,
-    baseCity: l.baseCity,
-    cityName: cityNames.get(l.baseCity) ?? l.baseCity,
-    citiesServed: l.citiesServed,
-    travels: l.travels,
-    startingPriceINR: l.startingPriceINR,
-    priceUnit: l.priceUnit,
-    cover: l.cover,
-    cardPhotos: l.cardPhotos,
-    portfolio: l.portfolio,
-    albums: l.albums,
-    films: l.films,
-    packages: l.packages,
-    faqs: l.faqs,
-    contact: { whatsapp, email, instagram, website },
-    venue: l.venue,
-    verified: l.verified,
-  };
-}
+/** Public shapes come from the one shared mapper (src/lib/listing-view.ts),
+ *  so the portal preview and the public site can never disagree. */
+const toSummary = (l: VendorListing): VendorSummary => listingToSummary(l, categories, cities);
+const toDetail = (l: VendorListing): VendorDetail => listingToDetail(l, categories, cities);
 
 function paginate<T>(all: T[], page = 1, limit = 24): Paged<T> {
   const pageCount = Math.max(1, Math.ceil(all.length / limit));
@@ -218,6 +173,13 @@ export async function getVendor(slug: string): Promise<VendorDetail | undefined>
 export async function getVenue(slug: string): Promise<VendorDetail | undefined> {
   const listing = published().find((l) => l.slug === slug && l.category === "venues");
   return listing ? toDetail(listing) : undefined;
+}
+
+/** True when the slug exists in the dataset at any status. An unpublished
+ *  known slug must 404 outright; only truly unknown slugs may fall through
+ *  to the demo-store overlay. */
+export async function isKnownVendorSlug(slug: string): Promise<boolean> {
+  return listings.some((l) => l.slug === slug);
 }
 
 export async function listFeatured(category?: CategorySlug | string, limit = 8): Promise<VendorSummary[]> {

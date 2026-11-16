@@ -10,12 +10,15 @@ import {
   DEMO_EMAIL,
   DEMO_PASSWORD,
   demoAccount,
+  demoInquiries,
   demoListing,
 } from "@/lib/demo-credentials";
-import { emptyListing, readDb, resetDb, writeDb, type MockDb } from "@/lib/mock-store";
+import { listingMediaIds } from "@/lib/listing-view";
+import { emptyListing, readDb, resetDb, useHydrated, useMockDb, writeDb, type MockDb } from "@/lib/mock-store";
 import type {
   CategorySlug,
   Inquiry,
+  InquiryStatus,
   VendorAccount,
   VendorApplication,
   VendorListing,
@@ -39,6 +42,43 @@ function slugify(name: string, taken: Set<string>): string {
 }
 
 export type Result<T> = { ok: true; value: T } | { ok: false; error: string };
+
+/* ------------------------------------------------- reactive client hooks
+ * Frontend conveniences over the GET endpoints, so screens re-render when
+ * the store changes without touching it directly. Each pairs with the
+ * matching async function (getMyAccount, getMyListing, listMyInquiries). */
+
+export function useSessionHydrated(): boolean {
+  return useHydrated();
+}
+
+export function useMyAccount(): VendorAccount | null {
+  const db = useMockDb();
+  return db.accounts.find((a) => a.id === db.sessionAccountId) ?? null;
+}
+
+export function useMyListing(): VendorListing | null {
+  const db = useMockDb();
+  const account = db.accounts.find((a) => a.id === db.sessionAccountId);
+  if (!account?.listingId) return null;
+  return db.listings.find((l) => l.id === account.listingId) ?? null;
+}
+
+export function useMyInquiries(): Inquiry[] {
+  const db = useMockDb();
+  const account = db.accounts.find((a) => a.id === db.sessionAccountId);
+  const inquiries = account?.listingId ? db.inquiries.filter((i) => i.listingId === account.listingId) : [];
+  return inquiries.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/** Store-published listings with actual content: what the public overlay
+ *  renders for demo-created vendors (the seeded sample rows are empty). */
+export function useDemoPublishedListings(): VendorListing[] {
+  const db = useMockDb();
+  return db.listings.filter(
+    (l) => l.status === "published" && (l.cardPhotos.length > 0 || l.portfolio.length > 0),
+  );
+}
 
 /* ------------------------------------------------------- applications */
 
@@ -105,6 +145,7 @@ export async function login(emailRaw: string, password: string): Promise<Result<
         ...db,
         accounts: [...db.accounts, account],
         listings: [...db.listings, demoListing()],
+        inquiries: [...db.inquiries, ...demoInquiries().filter((i) => !db.inquiries.some((e) => e.id === i.id))],
       };
     }
     writeDb({ ...db, sessionAccountId: account.id });
@@ -142,16 +183,28 @@ export async function getMyListing(): Promise<VendorListing | null> {
   return myListing(readDb());
 }
 
-/** PATCH /me/listing */
+/** PATCH /me/listing. While the listing is published, newly added photos and
+ *  films go into pendingMediaIds: text edits go live at once, new media stays
+ *  hidden publicly until the admin approves it. */
 export async function updateMyListing(patch: Partial<VendorListing>): Promise<Result<VendorListing>> {
   const db = readDb();
   const listing = myListing(db);
   if (!listing) return { ok: false, error: "No listing on this account yet." };
   // Status and admin flags move only through their own endpoints.
-  const { status: _s, featured: _f, featuredOrder: _o, verified: _v, id: _i, accountId: _a, ...safe } = patch;
-  void _s; void _f; void _o; void _v; void _i; void _a;
-  const next = { ...listing, ...safe };
-  writeDb({ ...db, listings: db.listings.map((l) => (l.id === listing.id ? next : l)) });
+  const { status: _s, featured: _f, featuredOrder: _o, verified: _v, id: _i, accountId: _a, reviewNote: _r, pendingMediaIds: _p, ...safe } = patch;
+  void _s; void _f; void _o; void _v; void _i; void _a; void _r; void _p;
+  const next: VendorListing = { ...listing, ...safe };
+  if (listing.status === "published") {
+    const before = listingMediaIds(listing);
+    const after = listingMediaIds(next);
+    const pending = new Set(listing.pendingMediaIds ?? []);
+    for (const id of after) if (!before.has(id)) pending.add(id);
+    // Media that was removed again needs no approval.
+    for (const id of [...pending]) if (!after.has(id)) pending.delete(id);
+    next.pendingMediaIds = [...pending];
+  }
+  const saved = writeDb({ ...db, listings: db.listings.map((l) => (l.id === listing.id ? next : l)) });
+  if (!saved) return { ok: false, error: "Could not save in this browser (storage is full or blocked)." };
   return { ok: true, value: next };
 }
 
@@ -163,7 +216,7 @@ export async function submitListingForReview(): Promise<Result<VendorListing>> {
   if (listing.status !== "draft" && listing.status !== "changes_requested") {
     return { ok: false, error: `A listing in ${listing.status} cannot be submitted.` };
   }
-  const next: VendorListing = { ...listing, status: "in_review" };
+  const next: VendorListing = { ...listing, status: "in_review", reviewNote: undefined };
   writeDb({ ...db, listings: db.listings.map((l) => (l.id === listing.id ? next : l)) });
   return { ok: true, value: next };
 }
@@ -173,6 +226,19 @@ export async function listMyInquiries(): Promise<Inquiry[]> {
   const db = readDb();
   const listing = myListing(db);
   return listing ? db.inquiries.filter((i) => i.listingId === listing.id) : [];
+}
+
+/** PATCH /me/inquiries/{id} */
+export async function setInquiryStatus(id: string, status: InquiryStatus): Promise<Result<Inquiry>> {
+  const db = readDb();
+  const listing = myListing(db);
+  const inquiry = db.inquiries.find((i) => i.id === id);
+  if (!listing || !inquiry || inquiry.listingId !== listing.id) {
+    return { ok: false, error: "No such inquiry on this account." };
+  }
+  const next = { ...inquiry, status };
+  writeDb({ ...db, inquiries: db.inquiries.map((i) => (i.id === id ? next : i)) });
+  return { ok: true, value: next };
 }
 
 /* ------------------------------------------- demo admin (/demo only) */
@@ -244,6 +310,26 @@ export async function demoUnpublish(listingId: string): Promise<void> {
   writeDb({
     ...db,
     listings: db.listings.map((l) => (l.id === listingId ? { ...l, status: "unpublished" } : l)),
+  });
+}
+
+/** POST /admin/listings/{id}/request-changes */
+export async function demoRequestChanges(listingId: string, note: string): Promise<void> {
+  const db = readDb();
+  writeDb({
+    ...db,
+    listings: db.listings.map((l) =>
+      l.id === listingId ? { ...l, status: "changes_requested", reviewNote: note } : l,
+    ),
+  });
+}
+
+/** POST /admin/listings/{id}/approve-media — pending photos/films go live. */
+export async function demoApproveMedia(listingId: string): Promise<void> {
+  const db = readDb();
+  writeDb({
+    ...db,
+    listings: db.listings.map((l) => (l.id === listingId ? { ...l, pendingMediaIds: [] } : l)),
   });
 }
 

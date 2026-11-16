@@ -34,6 +34,8 @@ export interface Album {
   slug: string;
   title: string;
   location: string;
+  /** ISO date of the wedding the album documents. */
+  date?: string;
   photos: Photo[];
 }
 
@@ -119,6 +121,8 @@ export interface VenueDetails {
   tour?: { id: string; name: string; panorama: string; links: string[] }[];
 }
 
+export type InquiryStatus = "new" | "replied" | "closed";
+
 export interface Inquiry {
   id: string;
   listingId: string;
@@ -128,6 +132,7 @@ export interface Inquiry {
   date?: string; // ISO date
   city: string;
   message: string;
+  status: InquiryStatus;
   createdAt: string; // ISO datetime
 }
 
@@ -175,6 +180,11 @@ export interface VendorListing {
   featured: boolean;
   featuredOrder?: number;
   verified: boolean;
+  /** The admin's note to the vendor (changes_requested); cleared on resubmit. */
+  reviewNote?: string;
+  /** Photo/film ids added while published; hidden publicly until the admin
+   *  approves them. */
+  pendingMediaIds?: string[];
   /* Identity */
   name: string;
   slug: string;

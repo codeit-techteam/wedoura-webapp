@@ -135,14 +135,17 @@ export function readDb(): MockDb {
   return getSnapshot();
 }
 
-/** Imperative write; notifies every subscribed screen. */
-export function writeDb(next: MockDb): void {
+/** Imperative write; notifies every subscribed screen. Returns false when
+ *  the write failed (private mode, quota) so saves can surface an error. */
+export function writeDb(next: MockDb): boolean {
+  let ok = true;
   try {
     window.localStorage.setItem(KEY, JSON.stringify(next));
   } catch {
-    /* private mode or quota: the demo flow is a convenience, not critical */
+    ok = false;
   }
   window.dispatchEvent(new Event(EVENT));
+  return ok;
 }
 
 /** Back to the seed state (the sample rows reappear). */

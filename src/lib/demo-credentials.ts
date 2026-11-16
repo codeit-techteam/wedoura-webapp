@@ -10,7 +10,7 @@
  * src/lib/vendor-api.ts special-cases these credentials in login().
  */
 import { photos } from "@/data/photos";
-import type { VendorAccount, VendorListing } from "@/data/types";
+import type { Inquiry, VendorAccount, VendorListing } from "@/data/types";
 import { emptyListing } from "@/lib/mock-store";
 
 export const DEMO_EMAIL = "vendor@gmail.com";
@@ -56,4 +56,44 @@ export function demoListing(): VendorListing {
     packages: [{ label: "One day, photography", priceINR: 90000, unit: "per_event" }],
     contact: { whatsapp: "+910000000000", email: DEMO_EMAIL },
   };
+}
+
+/** Sample inquiries so the portal's inquiries screen has content. */
+export function demoInquiries(): Inquiry[] {
+  const day = 24 * 60 * 60 * 1000;
+  return [
+    {
+      id: "inq-demo-1",
+      listingId: DEMO_LISTING_ID,
+      name: "Ananya",
+      partner: "Dev",
+      whatsapp: "+919876543210",
+      date: "2026-12-12",
+      city: "Mumbai",
+      message: "We are planning two days in December, mostly outdoors. Are you free around the 12th?",
+      status: "new",
+      createdAt: new Date(Date.now() - 2 * day).toISOString(),
+    },
+    {
+      id: "inq-demo-2",
+      listingId: DEMO_LISTING_ID,
+      name: "Sana",
+      whatsapp: "+919876500000",
+      city: "Pune",
+      message: "What does your one-day package cover, and do you travel to Pune?",
+      status: "replied",
+      createdAt: new Date(Date.now() - 6 * day).toISOString(),
+    },
+    {
+      id: "inq-demo-3",
+      listingId: DEMO_LISTING_ID,
+      name: "Rhea",
+      whatsapp: "+919876511111",
+      date: "2026-02-02",
+      city: "Mumbai",
+      message: "Looking for a small registry shoot, about twenty guests.",
+      status: "closed",
+      createdAt: new Date(Date.now() - 20 * day).toISOString(),
+    },
+  ];
 }

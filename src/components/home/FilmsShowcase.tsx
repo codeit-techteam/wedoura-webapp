@@ -24,7 +24,7 @@ export function FilmsShowcase({ films }: Props) {
 
   const heading = (
     <div className="container-site">
-      <MaskedHeading as="h2" className="font-serif text-h1" lines={[<>The day, in motion.</>]} />
+      <MaskedHeading as="h2" className="font-serif text-h1" lines={["The day, in motion."]} />
       <p className="mt-4 max-w-prose text-white/80">Short films from real weddings. Sound off until you want it.</p>
     </div>
   );

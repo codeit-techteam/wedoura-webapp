@@ -46,7 +46,10 @@ export function HeroV2({ photos, cities, categories }: Props) {
       ref={sectionRef}
       data-nav-dark
       aria-label="Welcome"
-      className="relative -mt-nav flex min-h-dvh flex-col justify-end overflow-hidden bg-ink pb-bottombar text-white"
+      // svh, not dvh: the dynamic viewport resizes as the mobile URL bar
+      // collapses, which made the hero (and everything after it) jump while
+      // scrolling. The small viewport height is stable.
+      className="relative -mt-nav flex min-h-svh flex-col justify-end overflow-hidden bg-ink pb-bottombar text-white"
     >
       <motion.div className="absolute inset-0" style={reduce ? undefined : { scale: imageScale }}>
         {/* The first slide is a plain element so the server-rendered hero is
@@ -94,10 +97,11 @@ export function HeroV2({ photos, cities, categories }: Props) {
           as="h1"
           className="font-serif text-hero"
           lines={[
-            <>Your wedding,</>,
-            <>
+            "Your wedding,",
+            // Elements in the lines array need keys (strings do not).
+            <span key="hands">
               in <em>good hands</em>.
-            </>,
+            </span>,
           ]}
         />
         <motion.p
