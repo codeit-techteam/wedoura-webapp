@@ -23,3 +23,15 @@ export function useIsDesktop(): boolean {
     () => false,
   );
 }
+
+const noopSubscribe = () => () => {};
+
+/** False during SSR and hydration, true once mounted — without an effect, so
+ *  portals and absolute URLs can wait for the client safely. */
+export function useMounted(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+}

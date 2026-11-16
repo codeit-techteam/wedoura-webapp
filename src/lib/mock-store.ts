@@ -20,7 +20,9 @@ import type {
   VendorApplication,
   VendorListing,
 } from "@/data/types";
-import { listings as sampleListings } from "@/data/vendors";
+// The hand-written sample rows only — never the seeded dataset, which would
+// blow the localStorage quota and clutter /demo.
+import { sampleListings } from "@/data/vendors";
 
 const KEY = "wedoura:mock-db";
 const EVENT = "wedoura:mock-db-change";

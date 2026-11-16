@@ -13,8 +13,11 @@ import { Label } from "@/components/ui/Label";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { Text } from "@/components/ui/Text";
 import type { Photo as PhotoData } from "@/data/types";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { cn } from "@/lib/cn";
 import { getArticle, listArticles } from "@/lib/api";
+import { articleSchema } from "@/lib/schema";
+import { absoluteUrl } from "@/lib/site-config";
 
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
@@ -26,7 +29,7 @@ function articleFigureWidth(photo: PhotoData) {
 }
 
 export async function generateStaticParams() {
-  const { items } = await listArticles();
+  const { items } = await listArticles({ limit: 10000 });
   return items.map((p) => ({ slug: p.slug }));
 }
 
@@ -34,14 +37,19 @@ export async function generateMetadata({ params }: PageProps<"/blogs/[slug]">): 
   const { slug } = await params;
   const post = await getArticle(slug);
   if (!post) return { title: "Article" };
-  return { title: post.title, description: post.excerpt, openGraph: { images: [post.cover.src] } };
+  return {
+    title: post.title,
+    description: post.excerpt,
+    alternates: { canonical: absoluteUrl(`/blogs/${post.slug}`) },
+    openGraph: { images: [{ url: absoluteUrl(post.cover.src) }] },
+  };
 }
 
 export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]">) {
   const { slug } = await params;
   const post = await getArticle(slug);
   if (!post) notFound();
-  const related = (await listArticles()).items.filter((p) => p.slug !== slug).slice(0, 3);
+  const related = (await listArticles({ page: 1, limit: 4 })).items.filter((p) => p.slug !== slug).slice(0, 3);
 
   const meta = (
     <>
@@ -51,6 +59,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]"
 
   return (
     <main className="pb-section-sm">
+      <JsonLd schema={articleSchema(post)} />
       <section
         data-nav-dark
         className="relative -mt-nav flex min-h-[min(62vh,36rem)] flex-col justify-end bg-ink text-white"

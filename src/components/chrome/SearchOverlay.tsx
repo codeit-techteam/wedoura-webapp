@@ -3,11 +3,12 @@
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { NavCategory, NavCity, NavVendor } from "@/components/chrome/Navbar";
+import { useEffect, useRef, useState } from "react";
+import type { NavCategory, NavCity } from "@/components/chrome/Navbar";
 import { Wordmark } from "@/components/chrome/Wordmark";
 import { Icon } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Label";
+import type { SearchSuggestions } from "@/lib/api";
 import { useFocusTrap } from "@/lib/focus-trap";
 import { EASE } from "@/lib/motion";
 
@@ -16,53 +17,72 @@ type Props = {
   onClose: () => void;
   categories: NavCategory[];
   cities: NavCity[];
-  vendors: NavVendor[];
 };
 
 type Suggestion = { href: string; label: string; kind: string };
+
+const DEBOUNCE_MS = 200;
 
 /**
  * Full-screen search. A bordered bar like the hero (icon, field, Search),
  * live suggestions, and city/category shortcuts when the field is empty.
  */
-export function SearchOverlay({ open, onClose, categories, cities, vendors }: Props) {
+export function SearchOverlay({ open, onClose, categories, cities }: Props) {
+  // The panel unmounts on close, so query and suggestion state reset
+  // naturally — no reset effect needed.
+  return (
+    <AnimatePresence>
+      {open && <SearchPanel onClose={onClose} categories={categories} cities={cities} />}
+    </AnimatePresence>
+  );
+}
+
+function SearchPanel({ onClose, categories, cities }: Omit<Props, "open">) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [highlight, setHighlight] = useState(-1);
-  useFocusTrap(rootRef, open, inputRef);
+  // The last fetched results, tagged with the query they answer; everything
+  // else (loading, emptiness) is derived at render time.
+  const [results, setResults] = useState<{ query: string; items: Suggestion[] } | null>(null);
+  useFocusTrap(rootRef, true, inputRef);
 
+  // Suggestions come from /api/search (capped server-side), debounced, so
+  // the vendor index never ships with the page.
   useEffect(() => {
-    if (!open) {
-      setQuery("");
-      setHighlight(-1);
-    }
-  }, [open]);
+    const q = query.trim();
+    if (!q) return;
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as SearchSuggestions;
+        setResults({
+          query: q,
+          items: [
+            ...data.vendors.map((v) => ({
+              href: v.category === "venues" ? `/venues/${v.slug}` : `/vendors/${v.slug}`,
+              label: v.name,
+              kind: v.cityName,
+            })),
+            ...data.cities.map((c) => ({ href: `/vendors?city=${c.slug}`, label: c.name, kind: "City" })),
+            ...data.categories.map((c) => ({ href: `/vendors?category=${c.slug}`, label: c.name, kind: "Category" })),
+          ],
+        });
+      } catch {
+        // Aborted or offline: keep whatever is shown; Enter still searches.
+      }
+    }, DEBOUNCE_MS);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [query]);
 
-  const cityNames = useMemo(() => new Map(cities.map((c) => [c.slug, c.name])), [cities]);
-
-  const suggestions: Suggestion[] = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    const matchedVendors = vendors
-      .filter((v) => v.name.toLowerCase().includes(q))
-      .slice(0, 5)
-      .map((v) => ({
-        href: `/vendors/${v.slug}`,
-        label: v.name,
-        kind: cityNames.get(v.citySlug) ?? "Vendor",
-      }));
-    const matchedCities = cities
-      .filter((c) => c.name.toLowerCase().includes(q))
-      .slice(0, 3)
-      .map((c) => ({ href: `/vendors?city=${c.slug}`, label: c.name, kind: "City" }));
-    const matchedCategories = categories
-      .filter((c) => c.name.toLowerCase().includes(q))
-      .slice(0, 3)
-      .map((c) => ({ href: `/vendors?category=${c.slug}`, label: c.name, kind: "Category" }));
-    return [...matchedVendors, ...matchedCities, ...matchedCategories];
-  }, [query, vendors, cities, categories, cityNames]);
+  const settled = results?.query === query.trim();
+  const suggestions = query.trim() && results ? results.items : [];
 
   const go = (href: string) => {
     router.push(href);
@@ -97,8 +117,6 @@ export function SearchOverlay({ open, onClose, categories, cities, vendors }: Pr
   const showSuggestions = query.trim().length > 0;
 
   return (
-    <AnimatePresence>
-      {open && (
         <motion.div
           ref={rootRef}
           role="dialog"
@@ -165,7 +183,7 @@ export function SearchOverlay({ open, onClose, categories, cities, vendors }: Pr
                   </button>
                 </div>
 
-                {showSuggestions && (
+                {showSuggestions && (suggestions.length > 0 || settled) && (
                   <div className="mt-2 border border-line bg-white">
                     <ul id="search-suggestions" className="divide-y divide-line" aria-label="Suggestions">
                       {suggestions.map((s, i) => (
@@ -186,7 +204,7 @@ export function SearchOverlay({ open, onClose, categories, cities, vendors }: Pr
                           </Link>
                         </li>
                       ))}
-                      {suggestions.length === 0 && (
+                      {settled && suggestions.length === 0 && (
                         <li className="px-5 py-8 md:px-6">
                           <p className="font-serif text-h3">Nothing matches &ldquo;{query.trim()}&rdquo; yet.</p>
                           <p className="mt-2 text-small text-mute">Press Enter to search all vendors instead.</p>
@@ -232,7 +250,5 @@ export function SearchOverlay({ open, onClose, categories, cities, vendors }: Pr
             </form>
           </div>
         </motion.div>
-      )}
-    </AnimatePresence>
   );
 }

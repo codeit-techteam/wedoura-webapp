@@ -3,22 +3,19 @@ import { Suspense } from "react";
 import { SavedList } from "@/components/browse/SavedList";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
-import { listAllCities, listVendors, listWeddings } from "@/lib/api";
+import { listAllCities } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Saved",
   description: "Your shortlist of vendors and stories, kept on this device.",
+  robots: { index: false, follow: false },
 };
 
 export default async function SavedPage() {
-  const [vendorsPage, weddingsPage, cities] = await Promise.all([
-    listVendors({ limit: 999 }),
-    listWeddings(),
-    listAllCities(),
-  ]);
+  // The shortlist lives in the browser; SavedList fetches exactly the saved
+  // slugs, so nothing here grows with the vendor count.
+  const cities = await listAllCities();
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-  const cards = vendorsPage.items;
-  const weddings = weddingsPage.items;
 
   return (
     <main className="pb-section-sm">
@@ -28,7 +25,7 @@ export default async function SavedPage() {
       </Container>
       <Container width="wide" className="mt-10">
         <Suspense fallback={null}>
-          <SavedList vendors={cards} weddings={weddings} cityNames={cityNames} />
+          <SavedList cityNames={cityNames} />
         </Suspense>
       </Container>
     </main>

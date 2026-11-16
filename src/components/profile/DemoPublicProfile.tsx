@@ -8,7 +8,7 @@ import { useDemoPublishedListings, useSessionHydrated } from "@/lib/vendor-api";
 
 type Props = {
   slug: string;
-  categories: Pick<Category, "slug" | "name">[];
+  categories: Pick<Category, "slug" | "name" | "fields">[];
   cities: Pick<City, "slug" | "name">[];
 };
 
@@ -29,5 +29,6 @@ export function DemoPublicProfile({ slug, categories, cities }: Props) {
   if (!listing) notFound();
 
   const detail = listingToDetail(listing, categories, cities, { includePending: false });
-  return <VendorProfile vendor={detail} similar={[]} />;
+  const fields = categories.find((c) => c.slug === listing.category)?.fields;
+  return <VendorProfile vendor={detail} similar={[]} categoryFields={fields} />;
 }

@@ -4,10 +4,12 @@ import { Accordion } from "@/components/ui/Accordion";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { getSiteFaq } from "@/lib/api";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "FAQs",
   description: "Questions couples ask us about finding, saving and contacting wedding vendors on Wedoura.",
+  alternates: { canonical: absoluteUrl("/faq") },
 };
 
 export default async function FaqPage() {

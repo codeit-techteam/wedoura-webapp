@@ -6,6 +6,8 @@ import { cn } from "@/lib/cn";
 type Props = {
   photo: PhotoData;
   title: string;
+  /** One quiet line under the title, e.g. a vendor count. */
+  meta?: string;
   href?: string;
   sizes: string;
   /** Fills its parent; give the parent the aspect or height. */
@@ -15,7 +17,7 @@ type Props = {
 
 /** A photo tile with the name over a bottom gradient. Used for categories,
  *  cities and venue spaces. The parent sets the size. */
-export function PhotoTile({ photo, title, href, sizes, className, titleClassName }: Props) {
+export function PhotoTile({ photo, title, meta, href, sizes, className, titleClassName }: Props) {
   const inner = (
     <>
       <Photo
@@ -27,6 +29,7 @@ export function PhotoTile({ photo, title, href, sizes, className, titleClassName
       <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-ink/75 to-transparent" />
       <p className={cn("absolute inset-x-0 bottom-0 p-5 font-serif text-h3 text-white md:p-6", titleClassName)}>
         {title}
+        {meta && <span className="mt-1 block font-sans text-small text-white/80">{meta}</span>}
       </p>
     </>
   );

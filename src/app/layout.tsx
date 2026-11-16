@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { SmoothScroll } from "@/components/motion/SmoothScroll";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationSchema, webSiteSchema } from "@/lib/schema";
+import { SITE_URL } from "@/lib/site-config";
 import { dmSans, instrument } from "@/styles/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  ),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Wedoura · Wedding vendors across India",
     template: "%s · Wedoura",
@@ -17,7 +18,10 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "Wedoura",
+    // The share image for every page that sets none of its own.
+    images: [{ url: "/photos/p23.jpg" }],
   },
+  twitter: { card: "summary_large_image" },
 };
 
 // viewportFit=cover lets the bottom bar pad for the home indicator.
@@ -43,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </noscript>
       </head>
       <body className="flex min-h-full flex-col bg-white text-ink">
+        <JsonLd schema={[organizationSchema(), webSiteSchema()]} />
         <MotionProvider>
           <SmoothScroll>{children}</SmoothScroll>
         </MotionProvider>

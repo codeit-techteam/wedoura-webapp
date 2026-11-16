@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PhotoTile } from "@/components/cards/PhotoTile";
 import type { Category } from "@/data/types";
 
-type Props = { categories: Category[] };
+type Props = { categories: (Category & { count?: number })[] };
 
 /**
  * One full-width row of six tall photo tiles, rendered once: a snap carousel
@@ -32,6 +32,7 @@ export function CategoryTiles({ categories }: Props) {
             <PhotoTile
               photo={category.cover}
               title={category.name}
+              meta={category.count ? `${category.count} vendor${category.count === 1 ? "" : "s"}` : undefined}
               href={`/vendors?category=${category.slug}`}
               sizes="(min-width: 48rem) 30vw, 72vw"
             />

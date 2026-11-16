@@ -62,6 +62,8 @@ function paginate<T>(all: T[], page = 1, limit = 24): Paged<T> {
 const byFeatured = (a: VendorListing, b: VendorListing) =>
   Number(b.featured) - Number(a.featured) ||
   (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99) ||
+  // Newest published first once featured order is exhausted.
+  (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") ||
   a.name.localeCompare(b.name);
 
 /* ------------------------------------------------------------- vendors */
@@ -273,7 +275,7 @@ export interface GalleryItem {
   category?: CategorySlug;
 }
 
-export async function listGalleryPhotos(page = 1, limit = 100): Promise<Paged<GalleryItem>> {
+export async function listGalleryPhotos(page = 1, limit = 100, category?: CategorySlug | string): Promise<Paged<GalleryItem>> {
   const byPhoto = new Map<string, { slug: string; name: string; category: CategorySlug }>();
   for (const listing of published()) {
     const owned = [listing.cover, ...listing.cardPhotos, ...listing.portfolio].filter(
@@ -285,8 +287,11 @@ export async function listGalleryPhotos(page = 1, limit = 100): Promise<Paged<Ga
       }
     }
   }
+  // Filter before paginating, so a category's photos beyond the first page
+  // are never lost.
   const items = photoList
     .filter((photo) => byPhoto.has(photo.id))
+    .filter((photo) => !category || byPhoto.get(photo.id)?.category === category)
     .map((photo) => {
       const owner = byPhoto.get(photo.id);
       return {
@@ -303,23 +308,38 @@ export async function listGalleryPhotos(page = 1, limit = 100): Promise<Paged<Ga
 export interface WeddingListParams {
   city?: string;
   style?: string;
+  /** An explicit shortlist of slugs (GET /weddings?slugs=): the saved page
+   *  asks only for what the visitor shortlisted. */
+  slugs?: string[];
   page?: number;
   limit?: number;
 }
 
+/** Featured story first, then newest; the cover story is always item one. */
 export async function listWeddings(params: WeddingListParams = {}): Promise<Paged<RealWedding>> {
   const all = realWeddings
     .filter(
       (w) =>
         (!params.city || w.city === params.city) &&
-        (!params.style || w.style.toLowerCase() === params.style.toLowerCase()),
+        (!params.style || w.style.toLowerCase() === params.style.toLowerCase()) &&
+        (!params.slugs || params.slugs.includes(w.slug)),
     )
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => Number(b.featured ?? false) - Number(a.featured ?? false) || b.date.localeCompare(a.date));
   return paginate(all, params.page, params.limit ?? 50);
 }
 
 export async function getWedding(slug: string): Promise<RealWedding | undefined> {
-  return realWeddings.find((w) => w.slug === slug);
+  const wedding = realWeddings.find((w) => w.slug === slug);
+  if (!wedding) return undefined;
+  // Credits keep their names, but only published vendors keep a link: the
+  // published-only rule applies to links and lists, not to erasing names.
+  const publishedSlugs = new Set(published().map((l) => l.slug));
+  return {
+    ...wedding,
+    credits: wedding.credits.map((c) =>
+      c.vendorSlug && !publishedSlugs.has(c.vendorSlug) ? { role: c.role, name: c.name } : c,
+    ),
+  };
 }
 
 export async function listWeddingStyles(): Promise<string[]> {
@@ -345,6 +365,11 @@ export async function getArticle(slug: string): Promise<BlogPost | undefined> {
   return blogPosts.find((p) => p.slug === slug);
 }
 
+/** Distinct article categories, for the blog tabs. */
+export async function listArticleCategories(): Promise<string[]> {
+  return [...new Set(blogPosts.map((p) => p.category))];
+}
+
 /* ---------------------------------------------------------------- misc */
 
 export async function listDestinations(): Promise<Destination[]> {
@@ -359,18 +384,84 @@ export async function getPromises(): Promise<SitePromise[]> {
   return promises;
 }
 
-/** Everything the navbar search suggests from: published vendors only. */
-export interface SearchIndex {
+/* -------------------------------------------------------------- search */
+
+/** Capped suggestions for the search overlay (GET /search?q=). The whole
+ *  vendor index never ships to the browser; the overlay fetches these. */
+export interface SearchSuggestions {
+  vendors: { slug: string; name: string; cityName: string; category: CategorySlug }[];
   cities: { slug: string; name: string }[];
   categories: { slug: string; name: string }[];
-  vendors: { slug: string; name: string; citySlug: string; category: CategorySlug }[];
 }
 
-export async function getSearchIndex(): Promise<SearchIndex> {
+const SUGGESTION_CAPS = { vendors: 5, cities: 3, categories: 3 };
+
+export async function searchSuggestions(query: string): Promise<SearchSuggestions> {
+  const q = query.trim().toLowerCase();
+  if (!q) return { vendors: [], cities: [], categories: [] };
   const [cats, cits] = await Promise.all([listCategoriesWithCounts(), listCitiesWithCounts()]);
+  const vendors = published()
+    .filter((l) =>
+      [l.name, l.tagline, cityNames.get(l.baseCity) ?? "", categoryNames.get(l.category) ?? "", ...l.services, ...l.styles]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    )
+    .sort(byFeatured)
+    .slice(0, SUGGESTION_CAPS.vendors)
+    .map((l) => ({
+      slug: l.slug,
+      name: l.name,
+      cityName: cityNames.get(l.baseCity) ?? l.baseCity,
+      category: l.category,
+    }));
   return {
-    cities: cits.map((c) => ({ slug: c.slug, name: c.name })),
-    categories: cats.map((c) => ({ slug: c.slug, name: c.name })),
-    vendors: published().map((l) => ({ slug: l.slug, name: l.name, citySlug: l.baseCity, category: l.category })),
+    vendors,
+    cities: cits
+      .filter((c) => c.name.toLowerCase().includes(q))
+      .slice(0, SUGGESTION_CAPS.cities)
+      .map((c) => ({ slug: c.slug, name: c.name })),
+    categories: cats
+      .filter((c) => c.name.toLowerCase().includes(q) || c.shortName.toLowerCase().includes(q))
+      .slice(0, SUGGESTION_CAPS.categories)
+      .map((c) => ({ slug: c.slug, name: c.name })),
   };
+}
+
+/* ------------------------------------------------- scale-safe helpers */
+
+/** Summaries for an explicit set of slugs (GET /vendors?slugs=): the saved
+ *  page asks only for what the visitor shortlisted. Order follows the input;
+ *  unknown and unpublished slugs are simply absent. */
+export async function getVendorSummariesBySlugs(slugs: string[]): Promise<VendorSummary[]> {
+  const bySlug = new Map(published().map((l) => [l.slug, l]));
+  return slugs
+    .map((slug) => bySlug.get(slug))
+    .filter((l): l is VendorListing => l !== undefined)
+    .map(toSummary);
+}
+
+/** Category × city pairs with at least one published vendor (base or served):
+ *  the category-in-city pages, their links and the sitemap come from this. */
+export interface CategoryCityPair {
+  category: CategorySlug;
+  categoryName: string;
+  city: string;
+  cityName: string;
+  count: number;
+}
+
+export async function listCategoryCityPairs(): Promise<CategoryCityPair[]> {
+  const pool = published();
+  const pairs: CategoryCityPair[] = [];
+  for (const category of categories) {
+    for (const city of cities) {
+      const count = pool.filter(
+        (l) => l.category === category.slug && (l.baseCity === city.slug || l.citiesServed.includes(city.slug)),
+      ).length;
+      if (count > 0)
+        pairs.push({ category: category.slug, categoryName: category.name, city: city.slug, cityName: city.name, count });
+    }
+  }
+  return pairs;
 }

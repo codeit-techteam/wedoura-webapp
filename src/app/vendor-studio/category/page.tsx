@@ -6,7 +6,7 @@ import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, TagListInput, useListingForm } from "@/components/studio/screen";
 import type { Category, CategoryFieldDef, CategorySlug, VenueDetails } from "@/data/types";
 import { listAllCategories } from "@/lib/api";
-import { processPhotoFile } from "@/lib/upload";
+import { TOUR_MAX_LONG_EDGE, processPhotoFile } from "@/lib/upload";
 
 type Form = {
   category: CategorySlug;
@@ -224,7 +224,8 @@ function TourEditor({ venue, onChange }: { venue: VenueDetails; onChange: (venue
       setMessage("Name the space first (e.g. The courtyard).");
       return;
     }
-    const result = await processPhotoFile(file);
+    // Panoramas keep far more resolution than ordinary photos.
+    const result = await processPhotoFile(file, { maxLongEdge: TOUR_MAX_LONG_EDGE });
     if (!result.ok) {
       setMessage(result.error);
       return;

@@ -16,7 +16,7 @@ import { BottomSheet } from "@/components/browse/BottomSheet";
 import { Icon } from "@/components/ui/Icon";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/cn";
-import { useIsDesktop } from "@/lib/media";
+import { useIsDesktop, useMounted } from "@/lib/media";
 import { patchedHref, type ParamRecord } from "@/lib/url";
 
 export type FilterOption = { value: string; label: string };
@@ -96,7 +96,7 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLUListElement>(null);
   const [menu, setMenu] = useState<{ left: number; top: number; width: number } | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
   const value = params[param] ?? "";
   const active = Boolean(value);
@@ -104,8 +104,6 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
 
   const resolved = options.find((o) => o.value === value);
   const display = resolved?.label ?? allLabel;
-
-  useEffect(() => setMounted(true), []);
 
   const close = useCallback(() => {
     if (strap) strap.setOpenParam(null);

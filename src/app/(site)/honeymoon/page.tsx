@@ -8,10 +8,12 @@ import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { listDestinations } from "@/lib/api";
 import { pickParams } from "@/lib/url";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Honeymoon",
   description: "Places worth the first week of being married: backwaters, islands, coffee hills and fort towns.",
+  alternates: { canonical: absoluteUrl("/honeymoon") },
 };
 
 export default async function HoneymoonPage({ searchParams }: PageProps<"/honeymoon">) {

@@ -1,7 +1,8 @@
 import { photos } from "./photos";
+import { generateSeedArticles } from "./seed";
 import type { BlogPost } from "./types";
 
-export const blogPosts: BlogPost[] = [
+const sampleBlogPosts: BlogPost[] = [
   {
     slug: "how-to-choose-a-photographer",
     title: "How to choose a wedding photographer",
@@ -114,3 +115,6 @@ export const blogPosts: BlogPost[] = [
     ],
   },
 ];
+/** With WEDOURA_SEED=1 extra articles are appended so the blog pages. */
+export const blogPosts: BlogPost[] =
+  process.env.WEDOURA_SEED === "1" ? [...sampleBlogPosts, ...generateSeedArticles()] : sampleBlogPosts;

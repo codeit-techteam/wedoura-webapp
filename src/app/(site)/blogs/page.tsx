@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
+import { LoadMore } from "@/components/browse/LoadMore";
 import { UnderlineTabs } from "@/components/browse/UnderlineTabs";
 import { ArticleCard } from "@/components/cards/ArticleCard";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { listArticles } from "@/lib/api";
-import { pickParams } from "@/lib/url";
+import { listArticleCategories, listArticles } from "@/lib/api";
+import { patchedHref, pickParams } from "@/lib/url";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Blog",
   description: "Planning guides, venue notes and ideas worth saving, from people who work weddings every week.",
+  alternates: { canonical: absoluteUrl("/blogs") },
 };
 
+const PAGE = 9;
+const PATHNAME = "/blogs";
+
 export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
-  const params = pickParams(await searchParams, ["category"]);
-  const [all, filtered] = await Promise.all([
-    listArticles(),
-    listArticles({ category: params.category || undefined }),
+  const params = pickParams(await searchParams, ["category", "show"]);
+  const shownCount = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
+  const [categories, filtered] = await Promise.all([
+    listArticleCategories(),
+    listArticles({ category: params.category || undefined, page: 1, limit: shownCount }),
   ]);
-  const categories = [...new Set(all.items.map((p) => p.category))];
   const shown = filtered.items;
 
   return (
@@ -31,7 +37,7 @@ export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
           param="category"
           label="Article categories"
           tabs={categories.map((c) => ({ value: c.toLowerCase(), label: c }))}
-          pathname="/blogs"
+          pathname={PATHNAME}
           params={params}
         />
         <div className="mt-10">
@@ -51,6 +57,12 @@ export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
             </ul>
           )}
         </div>
+        <LoadMore
+          shown={shown.length}
+          total={filtered.total}
+          moreHref={patchedHref(PATHNAME, params, { show: String(shownCount + PAGE) })}
+          noun="articles"
+        />
       </Container>
     </main>
   );

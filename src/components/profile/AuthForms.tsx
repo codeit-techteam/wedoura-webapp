@@ -103,8 +103,7 @@ export function ContactForm() {
       <div className="bg-ivory px-8 py-12" role="status">
         <p className="font-serif text-h2">Got it, {values.name}.</p>
         <p className="mt-3 max-w-prose text-mute">
-          We read everything and reply within two working days. Nothing was actually sent yet; the form goes
-          live with the backend.
+          We read everything and reply within two working days.
         </p>
       </div>
     );

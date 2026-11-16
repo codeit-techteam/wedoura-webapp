@@ -15,12 +15,15 @@ import { Icon } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Label";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { Text } from "@/components/ui/Text";
-import { getFilm, getWedding, listAllCities, listVendors, listWeddings } from "@/lib/api";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { getFilm, getWedding, listAllCities, listWeddings } from "@/lib/api";
+import { weddingSchema } from "@/lib/schema";
+import { absoluteUrl } from "@/lib/site-config";
 
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
 export async function generateStaticParams() {
-  const { items } = await listWeddings();
+  const { items } = await listWeddings({ limit: 10000 });
   return items.map((w) => ({ slug: w.slug }));
 }
 
@@ -31,7 +34,8 @@ export async function generateMetadata({ params }: PageProps<"/real-weddings/[sl
   return {
     title: wedding.title,
     description: wedding.excerpt,
-    openGraph: { images: [wedding.cover.src] },
+    alternates: { canonical: absoluteUrl(`/real-weddings/${wedding.slug}`) },
+    openGraph: { images: [{ url: absoluteUrl(wedding.cover.src) }] },
   };
 }
 
@@ -40,20 +44,18 @@ export default async function RealWeddingPage({ params }: PageProps<"/real-weddi
   const wedding = await getWedding(slug);
   if (!wedding) notFound();
 
-  const [cities, allWeddings, publishedVendors, film] = await Promise.all([
+  const [cities, morePage, film] = await Promise.all([
     listAllCities(),
-    listWeddings(),
-    listVendors({ limit: 999 }),
+    listWeddings({ page: 1, limit: 5 }),
     wedding.filmId ? getFilm(wedding.filmId) : Promise.resolve(undefined),
   ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-  const more = allWeddings.items.filter((w) => w.slug !== slug).slice(0, 4);
+  const more = morePage.items.filter((w) => w.slug !== slug).slice(0, 4);
   const credit = photographerOf(wedding);
-  // Credits link only to published profiles; others show as plain names.
-  const publishedSlugs = new Set(publishedVendors.items.map((v) => v.slug));
 
   return (
     <main className="pb-section-sm">
+      <JsonLd schema={weddingSchema(wedding)} />
       {/* Opener: full-bleed parallax cover. */}
       <section data-nav-dark className="relative -mt-nav bg-ink text-white">
         <Parallax className="h-[82vh]">
@@ -145,7 +147,9 @@ export default async function RealWeddingPage({ params }: PageProps<"/real-weddi
             <ul className="border-t border-line">
               {wedding.credits.map((creditLine) => (
                 <li key={creditLine.role + creditLine.name} className="border-b border-line">
-                  {creditLine.vendorSlug && publishedSlugs.has(creditLine.vendorSlug) ? (
+                  {/* getWedding strips vendorSlug for unpublished vendors, so
+                      a slug here is always a live, published profile. */}
+                  {creditLine.vendorSlug ? (
                     <Link
                       href={`/vendors/${creditLine.vendorSlug}`}
                       className="group flex tap items-baseline justify-between gap-6 py-4"

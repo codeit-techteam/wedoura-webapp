@@ -185,6 +185,9 @@ export interface VendorListing {
   /** Photo/film ids added while published; hidden publicly until the admin
    *  approves them. */
   pendingMediaIds?: string[];
+  /** ISO date set by the system when the listing is first published.
+   *  Breaks featured-order ties: newest published first. */
+  publishedAt?: string;
   /* Identity */
   name: string;
   slug: string;
@@ -237,6 +240,8 @@ export interface VendorSummary {
   cardPhotos: Photo[];
   featured: boolean;
   verified: boolean;
+  /** ISO date of first publication; sorts "newest" and feeds sitemap lastmod. */
+  publishedAt?: string;
 }
 
 /** What the public profile receives: the listing minus account and admin

@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { BottomSheet } from "@/components/browse/BottomSheet";
 import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
-import { useIsDesktop } from "@/lib/media";
+import { useIsDesktop, useMounted } from "@/lib/media";
 
 type Option = { slug: string; name: string };
 
@@ -95,9 +95,7 @@ function HeroPicker({ field, placeholder, value, options, onChange, open, onTogg
   const panelRef = useRef<HTMLUListElement>(null);
   const isDesktop = useIsDesktop();
   const [coords, setCoords] = useState<PanelCoords | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const mounted = useMounted();
 
   const display = value ? (options.find((o) => o.slug === value)?.name ?? placeholder) : placeholder;
 

@@ -18,12 +18,14 @@ import { Icon } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Label";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { Text } from "@/components/ui/Text";
-import type { VendorDetail, VendorSummary } from "@/data/types";
+import type { CategoryFieldDef, VendorDetail, VendorSummary } from "@/data/types";
 import { formatPrice } from "@/lib/format";
 
 type Props = {
   vendor: VendorDetail;
   similar: VendorSummary[];
+  /** The vendor's category field definitions; filled values become key facts. */
+  categoryFields?: CategoryFieldDef[];
 };
 
 const PORTFOLIO_INITIAL = 12;
@@ -36,22 +38,28 @@ const PORTFOLIO_INITIAL = 12;
  * renders only when the listing has content for it; films only with a real
  * clip. Venues get the capacity/spaces/360 section via `vendor.venue`.
  */
-export function VendorProfile({ vendor, similar }: Props) {
+export function VendorProfile({ vendor, similar, categoryFields }: Props) {
   const startingPrice = formatPrice(vendor.startingPriceINR, vendor.priceUnit);
   // A poster alone is not a film; only real clips count.
   const films = vendor.films.filter((f) => f.previewSrc.length > 0 || f.fullSrc.length > 0);
   const whatsapp = vendor.contact.whatsapp;
   const whatsappHref = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
 
+  // The vendor's category-specific values (coverage, venue type, cuisine …)
+  // become key facts, labelled by the category's own field definitions.
+  const fieldFacts = (categoryFields ?? []).map((def) => {
+    const value = vendor.categoryValues[def.key];
+    if (value === undefined || value === "" || value === false) return undefined;
+    const display = value === true ? "Yes" : Array.isArray(value) ? value.join(", ") : String(value);
+    return { label: def.label, value: display };
+  });
+
   // The key-facts strip, from structured listing fields; only facts that exist.
-  const facts = (
-    vendor.venue
+  const facts = [
+    ...(vendor.venue
       ? [
           { label: "Location", value: vendor.cityName },
           { label: "Capacity", value: `${vendor.venue.capacity.min} to ${vendor.venue.capacity.max} guests` },
-          typeof vendor.categoryValues.roomsOnSite === "number"
-            ? { label: "Rooms", value: `${vendor.categoryValues.roomsOnSite} on site` }
-            : undefined,
           vendor.team ? { label: "Run by", value: vendor.team } : undefined,
         ]
       : [
@@ -59,8 +67,10 @@ export function VendorProfile({ vendor, similar }: Props) {
           vendor.travels ? { label: "Travels", value: vendor.travels } : undefined,
           vendor.team ? { label: "Team", value: vendor.team } : undefined,
           vendor.yearsActive ? { label: "Years active", value: `${vendor.yearsActive} years` } : undefined,
-        ]
-  ).filter((f): f is { label: string; value: string } => f !== undefined);
+        ]),
+    vendor.styles.length > 0 ? { label: "Style", value: vendor.styles.join(", ") } : undefined,
+    ...fieldFacts,
+  ].filter((f): f is { label: string; value: string } => f !== undefined);
 
   const sections: SubnavSection[] = [
     ...(vendor.portfolio.length ? [{ id: "portfolio", label: "Portfolio" }] : []),

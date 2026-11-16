@@ -15,7 +15,6 @@ import { cn } from "@/lib/cn";
 
 export type NavCategory = Pick<Category, "slug" | "name" | "shortName" | "cover">;
 export type NavCity = Pick<City, "slug" | "name">;
-export type NavVendor = { slug: string; name: string; citySlug: string };
 type Panel = "vendors" | "search" | "menu";
 
 export const PRIMARY_LINKS = [
@@ -30,7 +29,7 @@ const SCROLLED_AT = 8;
 const HIDE_AFTER = 80;
 const SCROLL_DEADBAND = 4;
 
-type Props = { categories: NavCategory[]; cities: NavCity[]; vendors: NavVendor[] };
+type Props = { categories: NavCategory[]; cities: NavCity[] };
 
 /**
  * Site navigation. Sticky; transparent with white text over a page that
@@ -39,7 +38,7 @@ type Props = { categories: NavCategory[]; cities: NavCity[]; vendors: NavVendor[
  * back on scroll up. Panels: Vendors (hover, click, keyboard), Search and
  * the mobile Menu. Escape closes any of them.
  */
-export function Navbar({ categories, cities, vendors }: Props) {
+export function Navbar({ categories, cities }: Props) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -225,7 +224,7 @@ export function Navbar({ categories, cities, vendors }: Props) {
         <AnimatePresence>{panel === "vendors" && <VendorsPanel categories={categories} onNavigate={close} />}</AnimatePresence>
       </header>
 
-      <SearchOverlay open={panel === "search"} onClose={close} categories={categories} cities={cities} vendors={vendors} />
+      <SearchOverlay open={panel === "search"} onClose={close} categories={categories} cities={cities} />
       <MobileMenu open={panel === "menu"} onClose={close} onSearch={() => open("search")} categories={categories} />
     </>
   );

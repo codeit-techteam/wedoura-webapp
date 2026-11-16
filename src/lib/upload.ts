@@ -13,6 +13,9 @@ import type { Photo } from "@/data/types";
 export const MIN_LONG_EDGE = 800;
 /** Stored images are capped at this long edge. */
 const MAX_LONG_EDGE = 1200;
+/** Equirectangular 360° panoramas need far more pixels than a photograph;
+ *  the tour editor passes this cap instead. */
+export const TOUR_MAX_LONG_EDGE = 4096;
 const JPEG_QUALITY = 0.72;
 
 export type UploadResult = { ok: true; photo: Photo } | { ok: false; error: string };
@@ -82,7 +85,8 @@ export async function filesFromDataTransfer(dt: DataTransfer): Promise<{ files: 
 }
 
 /** Validate and process one file into a Photo, or explain the rejection. */
-export async function processPhotoFile(file: File): Promise<UploadResult> {
+export async function processPhotoFile(file: File, options: { maxLongEdge?: number } = {}): Promise<UploadResult> {
+  const maxLongEdge = options.maxLongEdge ?? MAX_LONG_EDGE;
   if (!file.type.startsWith("image/")) {
     return { ok: false, error: `"${file.name}" is not an image.` };
   }
@@ -101,7 +105,7 @@ export async function processPhotoFile(file: File): Promise<UploadResult> {
         error: `"${file.name}" is ${w}×${h}px. Photographs need at least ${MIN_LONG_EDGE}px on the long edge.`,
       };
     }
-    const scale = Math.min(1, MAX_LONG_EDGE / Math.max(w, h));
+    const scale = Math.min(1, maxLongEdge / Math.max(w, h));
     const width = Math.round(w * scale);
     const height = Math.round(h * scale);
     const src = draw(img, width, height, JPEG_QUALITY);

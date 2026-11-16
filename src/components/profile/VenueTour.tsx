@@ -66,7 +66,7 @@ export function VenueTour({ spaces, still, venueName }: Props) {
                   id: space.id,
                   panorama: space.panorama,
                   name: space.name,
-                  caption: `${space.name} · ${venueName} (placeholder 360°)`,
+                  caption: `${space.name} · ${venueName}`,
                   links: space.links.map((nodeId, j) => ({
                     nodeId,
                     position: { yaw: ((j + 1) * Math.PI) / 2 + i, pitch: 0 },
@@ -111,7 +111,7 @@ export function VenueTour({ spaces, still, venueName }: Props) {
               <Button tone="white" onClick={() => setStarted(true)}>
                 Step inside
               </Button>
-              <p className="text-small text-white/80">Placeholder 360° imagery until the venue supplies its own.</p>
+              <p className="text-small text-white/80">Drag to look around; arrows move between spaces.</p>
             </div>
           </>
         )}

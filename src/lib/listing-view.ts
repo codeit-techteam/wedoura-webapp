@@ -41,6 +41,7 @@ export function listingToSummary(
     cardPhotos: visiblePhotos(listing.cardPhotos, pending),
     featured: listing.featured,
     verified: listing.verified,
+    publishedAt: listing.publishedAt,
   };
 }
 

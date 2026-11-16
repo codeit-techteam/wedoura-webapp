@@ -9,10 +9,12 @@ import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listCitiesWithCounts, listWeddings, listWeddingStyles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Real Weddings",
   description: "Whole weddings across India, told the way they happened, with the people who made them.",
+  alternates: { canonical: absoluteUrl("/real-weddings") },
 };
 
 const PAGE = 6;
@@ -20,18 +22,21 @@ const PATHNAME = "/real-weddings";
 
 export default async function RealWeddingsPage({ searchParams }: PageProps<"/real-weddings">) {
   const params = pickParams(await searchParams, ["style", "city", "show"]);
-  const [allWeddings, filtered, styles, cities] = await Promise.all([
-    listWeddings(),
-    listWeddings({ style: params.style, city: params.city }),
+  const shown = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
+  // listWeddings sorts the featured story first, so one extra row covers the
+  // cover-story slot; the grid never refetches the whole dataset.
+  const [coverPage, filtered, styles, cities] = await Promise.all([
+    listWeddings({ page: 1, limit: 1 }),
+    listWeddings({ style: params.style, city: params.city, page: 1, limit: shown + 1 }),
     listWeddingStyles(),
     listCitiesWithCounts(),
   ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-  const featured = allWeddings.items.find((w) => w.featured) ?? allWeddings.items[0];
+  const featured = coverPage.items[0];
   const rest = filtered.items.filter((w) => w.slug !== featured?.slug);
-
-  const shown = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
   const visible = rest.slice(0, shown);
+  const coverInFilter = filtered.items.some((w) => w.slug === featured?.slug);
+  const total = filtered.total - (coverInFilter ? 1 : 0);
 
   return (
     <main className="pb-section-sm">
@@ -93,7 +98,7 @@ export default async function RealWeddingsPage({ searchParams }: PageProps<"/rea
         </div>
         <LoadMore
           shown={visible.length}
-          total={rest.length}
+          total={total}
           moreHref={patchedHref(PATHNAME, params, { show: String(shown + PAGE) })}
           noun="stories"
         />

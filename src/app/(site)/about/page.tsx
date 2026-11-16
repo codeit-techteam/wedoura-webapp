@@ -6,10 +6,12 @@ import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { Text } from "@/components/ui/Text";
 import { getPhoto, getPromises } from "@/lib/api";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "About",
   description: "Why Wedoura exists: real work, direct contact and no made-up numbers.",
+  alternates: { canonical: absoluteUrl("/about") },
 };
 
 export default async function AboutPage() {

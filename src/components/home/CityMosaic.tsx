@@ -3,7 +3,7 @@ import { ImageReveal } from "@/components/motion/ImageReveal";
 import type { City } from "@/data/types";
 import { cn } from "@/lib/cn";
 
-type Props = { cities: City[] };
+type Props = { cities: (City & { count?: number })[] };
 
 /** A photo mosaic of the six cities, uneven tile sizes, names over photos. */
 export function CityMosaic({ cities }: Props) {
@@ -25,6 +25,7 @@ export function CityMosaic({ cities }: Props) {
             <PhotoTile
               photo={city.cover}
               title={city.name}
+              meta={city.count ? `${city.count} vendor${city.count === 1 ? "" : "s"}` : undefined}
               href={`/vendors?city=${city.slug}`}
               sizes="(min-width: 48rem) 50vw, 100vw"
             />

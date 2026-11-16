@@ -16,8 +16,77 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 8 | Vendor signup, login and studio screens | ✅ Done (2026-11-14) |
 | 9 | Venue profile with the 360-degree view | ✅ Done (2026-11-14, placeholder imagery) |
 | 10 | Polish pass: motion, speed, accessibility, small screens | ✅ Done (2026-11-14, see docs/AUDIT.md) |
+| 11 | Scale (~200 vendors), mapping tests, SEO, full re-audit | ✅ Done (2026-11-16, see docs/AUDIT.md) |
 
 ## Session log
+
+### 2026-11-16 · Round 6: scale, mapping tests, remaining pages, SEO, re-audit
+
+Done:
+- **Seed at ~200 vendors.** `src/data/seed.ts` deterministically generates ~190 listings (all categories ×
+  cities, varied completeness, a few unpublished), 24 wedding stories and 12 articles from the existing 46
+  photographs, appended behind `WEDOURA_SEED=1` (`npm run dev:seed` / `build:seed` / `start:seed` — dynamic
+  routes read the flag at request time, so `next start` needs it too). The mock store seeds from the new
+  `sampleListings` export only. Both builds pass; seeded build prerenders ~195 profiles.
+- **Tests (vitest, new).** 65 tests in `tests/`: the portal→public mapping check (a vendor built from
+  `emptyListing()` with every field filled and published appears field-by-field on the card, the rendered
+  profile, under every matching filter and in search; phone/admin fields nowhere; pending media hidden
+  publicly, shown in previews), lifecycle invisibility for every non-published status (lists, lookups,
+  counts, featured, similar, films, gallery, search, **sitemap**; credits keep names, lose links), empty
+  sections hidden with a minimal profile still complete, paging at 200 vendors, gallery filter-before-page,
+  seed determinism, JSON-LD builders (never ratings/reviews). Tests mock `@/data/vendors` via `vi.hoisted`;
+  component tests run in jsdom with next/image/link mocks. They caught two real gaps, both fixed:
+  `publishedAt` missing from `listingToSummary`, and styles + category field values never rendering on the
+  public profile (now key facts labelled from `Category.fields`, passed as `categoryFields` into
+  `VendorProfile` by profile pages, previews and the demo overlay).
+- **Scale behaviour.** `publishedAt` added to the contract (featured sort is featured → featuredOrder →
+  newest → name). Search is `GET /api/search?q=` (≤5/3/3, debounced fetch in SearchOverlay) — the full
+  vendor index no longer ships on every page; `getSearchIndex` is gone from api and contract. `/saved`
+  fetches only its shortlisted slugs (`/api/vendors/by-slugs`, `/api/weddings/by-slugs`; `GET /vendors` and
+  `GET /weddings` gain `slugs`). Homepage fixed-size: `listFeatured` (8, tabs intact), weddings scroller
+  capped at 6, films at 6, counts rendered on category and city tiles (`PhotoTile` gained `meta`).
+  `/real-weddings` pages through the api (featured story sorts first; the silent 50-row default no longer
+  loses stories), `/blogs` gained `?show=` paging + `listArticleCategories()`, `/gallery` pages with the
+  category filter inside the api (before pagination). All limit-999 fetch-alls replaced.
+- **Category-in-city pages.** `/vendors/[slug]/[city]` (slug doubles as category; anything else 404s so
+  profiles never soft-render with an extra segment) with own title/description/canonical, breadcrumb JSON-LD,
+  pinned rendering through the new shared `VendorBrowse` (extracted from /vendors; pinned filters applied,
+  not rendered), sibling-city links on the pinned pages, pretty-page chips on filtered /vendors, pairs from
+  `listCategoryCityPairs()` (`GET /categories/cities`), all in the sitemap.
+- **Remaining pages.** Privacy policy and terms rewritten as complete copy (dated, no "preview" flags);
+  contact page shows the site email and the form success dropped its dev wording; footer socials (and site
+  name/email) come from `src/lib/site-config.ts` — empty link = hidden icon. VenueTour lost its hardcoded
+  "placeholder 360°" captions (data drives it; portal tours flow through the demo overlay) and tour uploads
+  keep 4096px (`TOUR_MAX_LONG_EDGE`). `/saved` noindexed.
+- **SEO.** `app/sitemap.ts` (static pages, published profiles/venues with `publishedAt` lastmod, stories,
+  articles, category-in-city pages; excludes /demo /login /vendor-studio /saved /styleguide) and
+  `app/robots.ts`. Canonicals on every page; absolute OG images + twitter `summary_large_image`; home page
+  metadata; JSON-LD via `src/lib/schema.ts` + `<JsonLd>`: Organization + WebSite (SearchAction) in the root
+  layout, LocalBusiness/EventVenue + BreadcrumbList on profiles, Article on stories, BlogPosting on posts.
+  The studio layout became a server wrapper exporting `robots: noindex` around `StudioLayoutClient`.
+- **Audit.** `scripts/audit.mjs` made count-agnostic (works seed-on and seed-off), stale selectors fixed
+  (tabs/destinations are links, listbox filter strap, logged-out studio redirects to /login), new checks for
+  sitemap/robots//api/search and the category-in-city routes, plus a portal pass (demo login, all 15 studio
+  screens, 390px drawer). Seed-off: 50/50 checks, no console errors. Lighthouse (mobile): 82/83/77/88 perf,
+  100 a11y/bp/seo everywhere (reports in docs/lighthouse/). Dead `SectionHeader` deleted; `PhotoCard` kept
+  (motion pattern 2 via CardRow/styleguide). `react-hooks/set-state-in-effect` violations fixed with derived
+  state and a new `useMounted()` (src/lib/media.ts).
+- **Verification.** Lint, typecheck, 65/65 tests, both builds; full audit against both modes; docs/AUDIT.md
+  rewritten.
+
+Decisions / gotchas:
+- vitest 5 needs `@types/node` ≥22 (bumped); cross-env for Windows env vars.
+- `vi.mock("@/data/vendors")` factories must come from `vi.hoisted`; mock-store writes throw outside the
+  browser, so tests build listings from the pure `emptyListing()` instead.
+- The seed flag is read at request time by dynamic routes: build **and** start need `WEDOURA_SEED=1`
+  (hence `start:seed`). Delete `.next` when flipping modes.
+- Next forbids a `[category]` sibling of `/vendors/[slug]`, so the pretty route reuses `[slug]` as the
+  category segment and 404s fast for non-category values.
+
+Known gaps / next up:
+- Real film clips, real 360 equirects, client logo, legal review of the new policy/terms copy, confirmed
+  social handles (site-config). Backend: swap api.ts/vendor-api.ts internals; the new route handlers
+  (/api/search, by-slugs) document the endpoints the backend must serve.
 
 ### 2026-11-16 · Round 5: the complete vendor portal at /vendor-studio
 
