@@ -21,7 +21,7 @@ export default async function VendorStudioPage() {
       <Container className="pt-10 md:pt-16">
         <MaskedHeading as="h1" className="font-serif text-h1" lines={[<>Vendor Studio.</>]} />
         <p className="mt-4 max-w-prose text-mute">
-          Screens only until the backend arrives, shown with {vendor.name}&apos;s sample profile.
+          Screens only until the backend arrives, shown with {vendor.name}&apos;s profile.
         </p>
       </Container>
       <Container className="mt-10">

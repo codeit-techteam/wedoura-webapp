@@ -5,16 +5,18 @@ import { useRef } from "react";
 import { FilmPreview } from "@/components/media/FilmPreview";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import type { Film } from "@/data/types";
+import { useIsDesktop } from "@/lib/media";
 
 type Props = { films: Film[] };
 
 /**
- * The one dark section. Desktop: as it scrolls into view the first film
- * grows from a card to nearly full-screen, then the row with the others
- * follows. Mobile and reduced motion: a simple row of large cards.
+ * The one dark section, rendered once. The server and small screens get a
+ * simple row of large cards; from md (motion allowed) the first film grows
+ * from a card to nearly full-screen while pinned, the others follow.
  */
 export function FilmsShowcase({ films }: Props) {
   const reduce = useReducedMotion();
+  const desktop = useIsDesktop();
   const pinRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: pinRef, offset: ["start start", "end end"] });
   const scale = useTransform(scrollYProgress, [0.05, 0.75], [0.55, 1]);
@@ -37,7 +39,7 @@ export function FilmsShowcase({ films }: Props) {
     </ul>
   );
 
-  if (reduce) {
+  if (reduce || !desktop) {
     return (
       <section className="bg-ink py-section text-white" aria-label="Wedding films">
         {heading}
@@ -48,24 +50,15 @@ export function FilmsShowcase({ films }: Props) {
 
   return (
     <section className="bg-ink text-white" aria-label="Wedding films">
-      {/* Mobile: heading + row. */}
-      <div className="py-section md:hidden">
-        {heading}
-        <div className="px-gutter">{row(films, true)}</div>
-      </div>
-
-      {/* Desktop: the first film grows to nearly full-screen while pinned. */}
-      <div className="hidden md:block">
-        <div className="pt-section">{heading}</div>
-        <div ref={pinRef} className="h-[220vh]">
-          <div className="sticky top-0 flex h-dvh items-center justify-center overflow-hidden">
-            <motion.div className="w-[94vw] will-change-transform" style={{ scale }}>
-              {first && <FilmPreview film={first} sizes="94vw" />}
-            </motion.div>
-          </div>
+      <div className="pt-section">{heading}</div>
+      <div ref={pinRef} className="h-[220vh]">
+        <div className="sticky top-0 flex h-dvh items-center justify-center overflow-hidden">
+          <motion.div className="w-[94vw] will-change-transform" style={{ scale }}>
+            {first && <FilmPreview film={first} sizes="94vw" />}
+          </motion.div>
         </div>
-        <div className="container-wide pb-section">{rest.length > 0 && row(rest)}</div>
       </div>
+      <div className="container-wide pb-section">{rest.length > 0 && row(rest)}</div>
     </section>
   );
 }

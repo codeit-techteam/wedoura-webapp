@@ -27,16 +27,16 @@ export function HeroSearch({ cities, categories }: Props) {
   }
 
   const selectClass =
-    "tap w-full appearance-none bg-transparent pr-8 text-body text-ink outline-offset-4 cursor-pointer";
+    "tap h-full w-full appearance-none bg-transparent pr-6 text-body text-ink outline-offset-4 cursor-pointer md:pr-8";
 
   return (
     <form
       onSubmit={onSubmit}
       aria-label="Find vendors"
-      className="grid grid-cols-[1fr_1fr_auto] items-stretch divide-x divide-line border border-line bg-white text-ink"
+      className="grid h-16 max-w-(--container-hero-search) grid-cols-[1fr_1fr_auto] items-stretch divide-x divide-line border border-line bg-white text-ink"
     >
-      <label className="relative flex flex-col justify-center gap-1 px-5 py-3 md:px-8">
-        <span className="label text-mute">Where</span>
+      <label className="relative flex items-center px-3 md:px-7">
+        <span className="sr-only">Where</span>
         <select value={city} onChange={(e) => setCity(e.target.value)} className={selectClass}>
           <option value="">Anywhere</option>
           {cities.map((c) => (
@@ -45,10 +45,14 @@ export function HeroSearch({ cities, categories }: Props) {
             </option>
           ))}
         </select>
-        <Icon name="chevron-down" size={16} className="pointer-events-none absolute right-4 bottom-4 text-mute" />
+        <Icon
+          name="chevron-down"
+          size={16}
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-mute md:right-4"
+        />
       </label>
-      <label className="relative flex flex-col justify-center gap-1 px-5 py-3 md:px-8">
-        <span className="label text-mute">Who</span>
+      <label className="relative flex items-center px-3 md:px-7">
+        <span className="sr-only">Who</span>
         <select value={category} onChange={(e) => setCategory(e.target.value)} className={selectClass}>
           <option value="">All vendors</option>
           {categories.map((c) => (
@@ -57,11 +61,15 @@ export function HeroSearch({ cities, categories }: Props) {
             </option>
           ))}
         </select>
-        <Icon name="chevron-down" size={16} className="pointer-events-none absolute right-4 bottom-4 text-mute" />
+        <Icon
+          name="chevron-down"
+          size={16}
+          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-mute md:right-4"
+        />
       </label>
       <button
         type="submit"
-        className="tap flex items-center gap-3 bg-ink px-5 text-white transition-chrome hover:bg-black md:px-10"
+        className="tap flex items-center gap-3 bg-ink px-4 text-white transition-chrome hover:bg-black md:px-9"
       >
         <Icon name="search" size={18} />
         <span className="label hidden md:inline">Search</span>

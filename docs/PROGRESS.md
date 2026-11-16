@@ -19,6 +19,59 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-16 · Round 3: server rendering, hero, vendor profile, why band
+
+Done:
+- **Server rendering (step 10 follow-up).** Every list page now reads the `searchParams` prop in its server
+  component, filters through `@/lib/api` and renders the cards as server markup: `/vendors` (filters, count,
+  grid, `?show=` paging), `/blogs`, `/gallery`, `/honeymoon` (`?place=` detail), `/real-weddings` (all six
+  stories) and the homepage featured grid (`?category=`). Root cause was `useSearchParams()` in client
+  browser components inside `<Suspense>`, which bails static prerendering out to the fallback. The browser
+  components (`VendorBrowser`, `BlogBrowser`, `GalleryWall`, `DestinationExplorer`, `WeddingBrowser`,
+  `FeaturedTabs`) are gone. `UnderlineTabs` are real links; `FilterSelect`/`LoadMore` take the current params as
+  props and patch the URL (`src/lib/url.ts` holds the hook-free helpers, `url-state.ts` the client hook for the
+  saved/studio screens). These routes are now dynamic (ƒ) in the build, as expected.
+- **FAQ answers always in the markup.** `Accordion` renders every panel and animates `grid-template-rows`
+  instead of mounting on open. A `<noscript>` style in the root layout undoes the motion components' hidden
+  initial states so the server HTML is visible without JS.
+- **One set of markup per breakpoint.** `CategoryTiles` is a single list (snap rail → hover-widen row via a
+  `--grow` variable). `WeddingsScroller` and `FilmsShowcase` render one copy: the carousel on the server and
+  small screens, upgraded to the pinned variant from `md` through `useIsDesktop()` (`src/lib/media.ts`).
+- **Hero, smaller.** New tokens `--text-hero` (≈42px at 390 → 80px cap), `--text-sublead` (18–20px),
+  `--text-caption` (13px, hero quick links only, at the client's request), `--container-hero-search` (880px).
+  The search bar is one 64px row, left-aligned under the headline.
+- **Cards.** `VendorCard` is 4:5; grids are 2 / 3 (`lg`) / 4 (`min-[80rem]`) across on the homepage (capped at
+  eight) and `/vendors`.
+- **Vendor profile redesign.** Cover opener → key-facts strip → sticky subnav → a wide content column with a
+  sticky price/Save/WhatsApp/compact-inquiry `<aside>` from `lg` (the same aside sits after the content on
+  phones; `StickyActionBar` is now `lg:hidden`). Portfolio shows 12 with a "See all" expander (`PhotoGrid
+  initialCount`; every photo stays in the HTML), albums are large covers, about has an `aboutPhoto`, pricing is
+  three cards, FAQ has every answer. Films render only when a clip exists, so the section is hidden everywhere
+  until clips land in `public/films`.
+- **Data.** All 12 vendors have ≥12 portfolio photos, 3 albums (4–6 photos), 3 price lines, 4 key facts and an
+  about photo, reusing p01–p46. Every "Sample copy / answer / story / article / pricing / film" marker is gone
+  from data and UI; the footer note is the one remaining flag. Slugs lost their `sample` markers (7 vendors,
+  6 weddings, 3 blogs, 3 film ids) with 308 redirects in `next.config.ts`; scripts updated.
+- **Why band.** "Why couples choose Wedoura": three numbered points with title and sentence beside the tall
+  haldi photograph (p35), `Reveal`/`ImageReveal` like the other sections.
+- **Also.** `/faq` page (footer link works from every page); the signup step list is a plain `<ul>` so browser
+  markers cannot double the written numbers; all four steps verified in the browser.
+- **Verification.** Lint, typecheck, build pass. A scratch script fetched 15 pages as raw HTML (scripts and
+  React comments stripped) and found every expected card, filter option, story and collapsed FAQ answer, no
+  sample labels, and the four redirects. Screenshots in `docs/screenshots/round-3/` (hero, why, vendor profile
+  at 390 and 1440): no console errors, no horizontal overflow.
+
+Decisions / gotchas:
+- Client components still server-render; the only bailout is `useSearchParams` on a statically prerendered
+  route. Reading `searchParams` in the page makes the route dynamic, which is fine for in-memory data.
+- When checking server HTML, strip `<script>` (the RSC payload carries props even for client-only content) and
+  `<!-- -->` (React splits adjacent text nodes) before searching.
+- Shortlists saved under old slugs in localStorage will drop silently (sample data only).
+
+Known gaps / next up:
+- Real film clips (the films section and a working player return automatically), real 360 photos, logo.
+- The homepage films showcase still shows breathing posters; decide whether to hide it until clips exist.
+
 ### 2026-11-16 · Hero gap + serif descenders
 
 Done:

@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { UnderlineTabs } from "@/components/browse/UnderlineTabs";
+import { VendorCard, type VendorCardData } from "@/components/cards/VendorCard";
 import { CategoryTiles } from "@/components/home/CategoryTiles";
 import { CityMosaic } from "@/components/home/CityMosaic";
 import { Accordion } from "@/components/ui/Accordion";
-import { FeaturedTabs } from "@/components/home/FeaturedTabs";
 import { FilmsShowcase } from "@/components/home/FilmsShowcase";
 import { HeroV2 } from "@/components/home/HeroV2";
 import { WeddingsScroller } from "@/components/home/WeddingsScroller";
@@ -26,19 +26,22 @@ import {
   getSiteFaq,
   getVendors,
 } from "@/lib/api";
+import { pickParams } from "@/lib/url";
 
 const monthYear = new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" });
 
-export default async function HomePage() {
-  const [heroA, heroB, heroC, bandPhoto, categories, cities, vendors, weddings, films, promises, posts, faq] =
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  const params = pickParams(await searchParams, ["category"]);
+  const [heroA, heroB, heroC, bandPhoto, whyPhoto, categories, cities, vendors, weddings, films, promises, posts, faq] =
     await Promise.all([
       getPhoto("p23"),
       getPhoto("p21"),
       getPhoto("p24"),
       getPhoto("p31"),
+      getPhoto("p35"),
       getCategories(),
       getCities(),
-      getVendors(),
+      getVendors({ category: params.category || undefined }),
       getRealWeddings(),
       getFilms(),
       getPromises(),
@@ -48,7 +51,8 @@ export default async function HomePage() {
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
   const heroPhotos = [heroA, heroB, heroC].filter((p) => p !== undefined);
 
-  const tabVendors = vendors.map((vendor) => ({
+  // Two full rows of four from 1280px.
+  const featuredVendors: VendorCardData[] = vendors.slice(0, 8).map((vendor) => ({
     slug: vendor.slug,
     name: vendor.name,
     category: vendor.category,
@@ -85,12 +89,20 @@ export default async function HomePage() {
           </Button>
         </Container>
         <Container width="wide">
-          <Suspense fallback={null}>
-            <FeaturedTabs
-              vendors={tabVendors}
-              tabs={categories.map((c) => ({ slug: c.slug, name: c.shortName }))}
-            />
-          </Suspense>
+          <UnderlineTabs
+            param="category"
+            label="Vendor categories"
+            tabs={categories.map((c) => ({ value: c.slug, label: c.shortName }))}
+            pathname="/"
+            params={params}
+          />
+          <ul className="mt-6 grid grid-cols-2 gap-2 gap-y-8 md:mt-8 lg:grid-cols-3 min-[80rem]:grid-cols-4">
+            {featuredVendors.map((vendor) => (
+              <li key={vendor.slug}>
+                <VendorCard vendor={vendor} />
+              </li>
+            ))}
+          </ul>
         </Container>
       </section>
 
@@ -118,16 +130,30 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* 7 · Why Wedoura: one slim band, three short lines. */}
-      <Section tone="ivory" size="small" aria-label="Why Wedoura">
+      {/* 7 · Why couples choose Wedoura: three explained points beside one tall photograph. */}
+      <Section tone="ivory" aria-label="Why couples choose Wedoura">
         <Container>
-          <ul className="grid gap-6 md:grid-cols-3 md:gap-10">
-            {promises.map((promise, i) => (
-              <Reveal as="li" key={promise.title} delay={i * 0.08} className="border-t border-ink/20 pt-5">
-                <p className="font-serif text-h3">{promise.title}</p>
-              </Reveal>
-            ))}
-          </ul>
+          <div className="grid gap-10 md:grid-cols-2 md:gap-16 xl:gap-24">
+            <div>
+              <MaskedHeading as="h2" className="font-serif text-h1" lines={[<>Why couples</>, <>choose Wedoura.</>]} />
+              <ul className="mt-10 md:mt-14">
+                {promises.map((promise, i) => (
+                  <Reveal as="li" key={promise.title} delay={i * 0.08} className="border-t border-ink/20 py-6 md:py-8">
+                    <span className="label block text-mute">0{i + 1}</span>
+                    <h3 className="mt-2 font-serif text-h3">{promise.title}</h3>
+                    <p className="mt-2 max-w-prose text-body text-mute">{promise.text}</p>
+                  </Reveal>
+                ))}
+              </ul>
+            </div>
+            {whyPhoto && (
+              <ImageReveal className="self-stretch">
+                <div className="relative h-full min-h-96 overflow-hidden md:min-h-full">
+                  <Photo photo={whyPhoto} mode="cover" sizes="(min-width: 48rem) 50vw, 100vw" />
+                </div>
+              </ImageReveal>
+            )}
+          </div>
         </Container>
       </Section>
 

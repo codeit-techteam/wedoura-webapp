@@ -84,6 +84,8 @@ export interface Vendor {
   albums: Album[];
   films: Film[];
   about: string[];
+  /** Portrait or team photograph shown beside the about text. */
+  aboutPhoto: Photo;
   keyFacts: { label: string; value: string }[];
   pricing: PriceLine[];
   /** Numeric rupees for the first price line; drives budget filter and sort. */

@@ -112,7 +112,8 @@ export function VendorSignupForm({ categories, cities }: Props) {
   return (
     <form onSubmit={next} noValidate className="bg-white p-6 md:p-12">
       {/* Step indicator */}
-      <ol className="flex flex-wrap gap-x-6 gap-y-2" aria-label="Signup steps">
+      {/* A plain list with written numbers: browser list markers would double them. */}
+      <ul className="flex list-none flex-wrap gap-x-6 gap-y-2" aria-label="Signup steps">
         {STEPS.map((label, i) => (
           <li
             key={label}
@@ -125,7 +126,7 @@ export function VendorSignupForm({ categories, cities }: Props) {
             {i + 1}. {label}
           </li>
         ))}
-      </ol>
+      </ul>
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div

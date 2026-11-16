@@ -30,12 +30,12 @@ export default async function AboutPage() {
               photographers, venues, makeup artists, decorators, caterers and musicians.
             </Text>
             <Text tone="mute" className="mt-6">
-              Sample copy. We started Wedoura after planning weddings of our own and finding the same thing
+              We started Wedoura after planning weddings of our own and finding the same thing
               everywhere: directories full of badges, paid rankings and numbers nobody could check. The work
               itself, the only thing that matters, was always three clicks away and cropped into squares.
             </Text>
             <Text tone="mute" className="mt-4">
-              Sample copy. So the rules here are simple. Photographs run whole. Messages go straight to the
+              So the rules here are simple. Photographs run whole. Messages go straight to the
               vendor. And if we cannot stand behind a number, we do not show it.
             </Text>
             <ul className="mt-10 border-t border-line">
