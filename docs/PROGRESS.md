@@ -21,6 +21,26 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-17 · Vendor avatar + card and hero polish
+
+Done:
+- **Avatar field.** Optional `avatar?: Photo` on `VendorListing`, `VendorSummary` and `VendorDetail` (round
+  vendor mark; UI falls back to the first card photo). Threaded through `listingToSummary`/`listingToDetail`
+  with the pending-media guard and added to `listingMediaIds`; all 12 sample vendors picked a portrait from
+  their own photos (venues get a place-mark). Contract note in api-contract.md; field-map.md row added.
+- **VendorCard.** Identity row top-left (circular avatar with a white ring — 36px at phone widths, 44px from
+  md — name and city in white) over a new top-down scrim; bottom gradient strengthened
+  (`from-ink/85 via-ink/35`); bottom block now category + price (city moved up, no duplication). Save button,
+  4:5 image, hover cycling unchanged; applies to every card surface via the one component.
+- **Profile hero.** Fixed height (60svh mobile / 72svh desktop), stronger bottom-up scrim
+  (`from-ink/95 via-ink/45 to-ink/10`); bottom-left block: breadcrumb → 72px avatar → serif name → tagline →
+  one dot-separated meta line (category · city · from-price) with the Verified chip (gold border + mark,
+  white label) by the category. Key-facts strip tightened (py-7/10, serif values `leading-tight`,
+  `min-w-0 break-words` so long values wrap instead of overflowing).
+- **Verification.** Lint, typecheck, 69/69 tests (mapping toEqual + builder updated in lockstep; field-map
+  check covers `avatar`), `npm run build`; spot-checked hero and card grids at 1440 and 390 against
+  `next start` — no horizontal overflow. Screenshots intentionally not added to docs (per request).
+
 ### 2026-11-17 · Round 5 follow-up: live demo vendor, field parity, profile and portal redesign
 
 Done:

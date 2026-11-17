@@ -126,6 +126,7 @@
   --font-serif: var(--font-instrument), "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-sans: var(--font-dm), "DM Sans", "Helvetica Neue", Arial, sans-serif;
   --spacing-nav: var(--nav-h);
+  --spacing-profile-sticky: var(--profile-sticky-top);
   --spacing-bottombar: var(--bottombar-h);
 }
 
@@ -133,6 +134,9 @@
    from JS (see src/lib/motion.ts). Reduced motion zeroes the movement. */
 :root {
   --nav-h: 3.75rem;
+  /* Profile section subnav (Portfolio / Albums / …) under the main navbar. */
+  --subnav-h: 3.5rem;
+  --profile-sticky-top: calc(var(--nav-h) + var(--subnav-h));
   --bottombar-h: calc(3.5rem + env(safe-area-inset-bottom, 0px));
   --motion-rise: 24px;
   --motion-duration: 0.9s;
