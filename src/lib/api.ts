@@ -376,6 +376,10 @@ export async function listDestinations(): Promise<Destination[]> {
   return destinations;
 }
 
+export async function getDestination(slug: string): Promise<Destination | undefined> {
+  return destinations.find((d) => d.slug === slug);
+}
+
 export async function getSiteFaq(): Promise<Faq[]> {
   return siteFaq;
 }

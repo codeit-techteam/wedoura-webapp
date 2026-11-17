@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/Label";
 import { ShareButtons } from "@/components/ui/ShareButtons";
 import { Text } from "@/components/ui/Text";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { cn } from "@/lib/cn";
 import { getFilm, getWedding, listAllCities, listWeddings } from "@/lib/api";
 import { weddingSchema } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site-config";
@@ -75,52 +76,63 @@ export default async function RealWeddingPage({ params }: PageProps<"/real-weddi
       </section>
 
       {/* Lead */}
-      <Container className="py-section-sm">
-        <div className="flex flex-wrap items-end justify-between gap-8">
-          <p className="max-w-2xl font-serif text-h3 leading-snug text-balance">{wedding.excerpt}</p>
-          <ShareButtons title={wedding.title} path={`/real-weddings/${wedding.slug}`} />
-        </div>
-        {credit && <p className="mt-6 text-small text-mute">Photographs by {credit}</p>}
-      </Container>
+      <section className="border-b border-line bg-white">
+        <Container className="py-section-sm">
+          <div className="flex flex-wrap items-end justify-between gap-8">
+            <p className="max-w-2xl font-serif text-h3 leading-snug text-balance">{wedding.excerpt}</p>
+            <ShareButtons title={wedding.title} path={`/real-weddings/${wedding.slug}`} />
+          </div>
+          {credit && <p className="mt-6 text-small text-mute">Photographs by {credit}</p>}
+        </Container>
+        <Container className="border-t border-line">
+          <dl className="grid grid-cols-2 gap-x-8 gap-y-5 py-6 md:grid-cols-4 md:py-7">
+            <div>
+              <dt className="label text-mute">Couple</dt>
+              <dd className="mt-1 font-serif text-h3">{wedding.couple}</dd>
+            </div>
+            <div>
+              <dt className="label text-mute">City</dt>
+              <dd className="mt-1 font-serif text-h3">{cityNames[wedding.city]}</dd>
+            </div>
+            <div>
+              <dt className="label text-mute">Style</dt>
+              <dd className="mt-1 font-serif text-h3">{wedding.style}</dd>
+            </div>
+            <div>
+              <dt className="label text-mute">Date</dt>
+              <dd className="mt-1 font-serif text-h3">{longDate.format(new Date(wedding.date))}</dd>
+            </div>
+          </dl>
+        </Container>
+      </section>
 
-      {/* Chapters: photographs inside the story at mixed sizes. */}
+      {/* Chapters: copy beside a three-column photo grid. */}
       {wedding.chapters.map((chapter, i) => (
-        <section key={chapter.title} aria-label={chapter.title} className="pb-section-sm">
-          {i % 2 === 0 ? (
-            <Container>
-              <div className="grid items-start gap-10 md:grid-cols-[1fr_1.6fr] md:gap-16">
-                <Reveal className="md:sticky md:top-24">
-                  <Label>Chapter {String(i + 1).padStart(2, "0")}</Label>
-                  <MaskedHeading as="h2" className="mt-3 font-serif text-h2" lines={[chapter.title]} />
+        <section
+          key={chapter.title}
+          aria-label={chapter.title}
+          className={cn("py-section-sm", i % 2 === 1 ? "bg-ivory" : "bg-white")}
+        >
+          <Container width={i % 2 === 1 ? "wide" : undefined}>
+            <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+              <Reveal className="lg:sticky lg:top-24">
+                <Label>Chapter {String(i + 1).padStart(2, "0")}</Label>
+                <MaskedHeading as="h2" className="mt-3 font-serif text-h2" lines={[chapter.title]} />
+                <div className="mt-5 flex flex-col gap-4">
                   {chapter.text.map((paragraph) => (
-                    <Text key={paragraph.slice(0, 24)} tone="mute" className="mt-5 max-w-prose">
+                    <Text key={paragraph.slice(0, 24)} tone="mute" className="max-w-prose">
                       {paragraph}
                     </Text>
                   ))}
-                </Reveal>
-                <PhotoGrid photos={chapter.photos} columns={2} sizes="(min-width: 48rem) 30vw, 50vw" />
-              </div>
-            </Container>
-          ) : (
-            <>
-              <Container className="mb-10">
-                <Label>Chapter {String(i + 1).padStart(2, "0")}</Label>
-                <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
-                  <MaskedHeading as="h2" className="font-serif text-h2" lines={[chapter.title]} />
-                  <div className="max-w-md">
-                    {chapter.text.map((paragraph) => (
-                      <Text key={paragraph.slice(0, 24)} tone="mute">
-                        {paragraph}
-                      </Text>
-                    ))}
-                  </div>
                 </div>
-              </Container>
-              <Container width="wide">
-                <PhotoGrid photos={chapter.photos} columns={2} sizes="(min-width: 48rem) 48vw, 100vw" />
-              </Container>
-            </>
-          )}
+              </Reveal>
+              <PhotoGrid
+                photos={chapter.photos}
+                columns={3}
+                sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 30vw, 50vw"
+              />
+            </div>
+          </Container>
         </section>
       ))}
 

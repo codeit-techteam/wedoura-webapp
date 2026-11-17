@@ -20,6 +20,20 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-17 · Honeymoon detail pages, blogs, stories and profile polish
+
+Done:
+- **Honeymoon:** `/honeymoon/[slug]` detail pages (overview, experiences, gallery, why couples, practical notes,
+  `HoneymoonPlanForm`); index grid links to full pages (six destinations); `?place=` redirects; `getDestination` in
+  api + contract; sitemap + audit updated.
+- **Blogs:** list page featured “Latest” band, richer `ArticleCard` excerpts, three new sample articles (ready for
+  Sanity later).
+- **Real weddings:** story page key-facts strip, three-column chapter photo grids, alternating ivory/white bands.
+- **Vendor profile:** portfolio heading and three-column grid.
+- `npm run typecheck`, `npm run test`, `npm run build` pass.
+
+Next up: optional browser pass on `/honeymoon/kerala-backwaters`, `/blogs`, `/real-weddings/udaipur-lake-wedding`.
+
 ### 2026-11-16 · Round 6: scale, mapping tests, remaining pages, SEO, re-audit
 
 Done:

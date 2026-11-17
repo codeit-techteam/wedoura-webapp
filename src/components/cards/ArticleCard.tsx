@@ -9,10 +9,17 @@ type Props = {
   post: BlogPost;
   sizes?: string;
   delay?: number;
+  /** Show the excerpt and read time under the title (list pages). */
+  showExcerpt?: boolean;
 };
 
 /** The one article card: large image, date · category, serif title. */
-export function ArticleCard({ post, sizes = "(min-width: 48rem) 33vw, 100vw", delay = 0 }: Props) {
+export function ArticleCard({
+  post,
+  sizes = "(min-width: 48rem) 33vw, 100vw",
+  delay = 0,
+  showExcerpt = true,
+}: Props) {
   return (
     <Link href={`/blogs/${post.slug}`} className="group block">
       <ImageReveal delay={delay}>
@@ -27,8 +34,12 @@ export function ArticleCard({ post, sizes = "(min-width: 48rem) 33vw, 100vw", de
       </ImageReveal>
       <p className="mt-4 text-small text-mute">
         {monthYear.format(new Date(post.date))} · {post.category}
+        {showExcerpt ? ` · ${post.readMinutes} min read` : ""}
       </p>
-      <h3 className="mt-1 font-serif text-h3 leading-snug">{post.title}</h3>
+      <h3 className="mt-1 font-serif text-h3 leading-snug transition-colors duration-300 ease-wedoura group-hover:text-mute">
+        {post.title}
+      </h3>
+      {showExcerpt && <p className="mt-3 line-clamp-3 max-w-prose text-mute">{post.excerpt}</p>}
     </Link>
   );
 }

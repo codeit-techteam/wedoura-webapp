@@ -132,13 +132,18 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
           <div className="min-w-0">
             {vendor.portfolio.length > 0 && (
               <section id="portfolio" aria-label="Portfolio" className="py-section-sm">
-                <Reveal>
-                  <PhotoGrid
-                    photos={vendor.portfolio}
-                    initialCount={PORTFOLIO_INITIAL}
-                    sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 33vw, 50vw"
-                  />
-                </Reveal>
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Portfolio"]} />
+                <p className="mt-3 max-w-prose text-mute">Recent work in natural light—the same frames you will see on your day.</p>
+                <div className="mt-8">
+                  <Reveal>
+                    <PhotoGrid
+                      photos={vendor.portfolio}
+                      columns={3}
+                      initialCount={PORTFOLIO_INITIAL}
+                      sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 33vw, 50vw"
+                    />
+                  </Reveal>
+                </div>
               </section>
             )}
 

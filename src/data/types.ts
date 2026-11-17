@@ -328,6 +328,11 @@ export interface BlogPost {
   body: { heading?: string; paragraphs: string[]; photo?: Photo }[];
 }
 
+export interface DestinationExperience {
+  title: string;
+  description: string;
+}
+
 export interface Destination {
   slug: string;
   name: string;
@@ -335,8 +340,16 @@ export interface Destination {
   bestMonths: string;
   summary: string;
   cover: Photo;
-  /** Three short lines for the detail panel. */
+  /** Teaser lines on the index grid. */
   highlights: string[];
+  /** Opening copy for the detail page. */
+  overview: string[];
+  experiences: DestinationExperience[];
+  gallery: Photo[];
+  /** Why couples pick this place for a first trip. */
+  whyCouples: string[];
+  /** Practical notes (getting there, stays, pace). */
+  practical: { label: string; value: string }[];
 }
 
 export interface SitePromise {

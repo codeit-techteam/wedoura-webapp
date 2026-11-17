@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import {
   listArticles,
   listCategoryCityPairs,
+  listDestinations,
   listVendors,
   listWeddings,
 } from "@/lib/api";
@@ -13,11 +14,12 @@ import { absoluteUrl } from "@/lib/site-config";
  * listing that is not published, which listVendors guarantees.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [vendors, weddings, articles, pairs] = await Promise.all([
+  const [vendors, weddings, articles, pairs, places] = await Promise.all([
     listVendors({ limit: 10000 }),
     listWeddings({ limit: 10000 }),
     listArticles({ limit: 10000 }),
     listCategoryCityPairs(),
+    listDestinations(),
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -44,5 +46,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pairs.map((p) => ({ url: absoluteUrl(`/vendors/${p.category}/${p.city}`) })),
     ...weddings.items.map((w) => ({ url: absoluteUrl(`/real-weddings/${w.slug}`), lastModified: w.date })),
     ...articles.items.map((a) => ({ url: absoluteUrl(`/blogs/${a.slug}`), lastModified: a.date })),
+    ...places.map((d) => ({ url: absoluteUrl(`/honeymoon/${d.slug}`) })),
   ];
 }

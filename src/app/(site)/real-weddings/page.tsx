@@ -74,28 +74,29 @@ export default async function RealWeddingsPage({ searchParams }: PageProps<"/rea
           />
         </div>
 
-        <div className="mt-10">
-          {visible.length === 0 ? (
-            <EmptyState
-              title="No stories in that corner yet."
-              text="Try another style or city, or read everything."
-              action={{ label: "Show all stories", href: PATHNAME }}
-            />
-          ) : (
-            <ul className="grid grid-cols-1 gap-2 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-              {visible.map((wedding) => (
-                <li key={wedding.slug}>
-                  <StoryCard
-                    wedding={wedding}
-                    cityName={cityNames[wedding.city]}
-                    sizes="(min-width: 48rem) 33vw, 100vw"
-                    variant="small"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      </Container>
+
+      <Container width="wide" className="mt-10">
+        {visible.length === 0 ? (
+          <EmptyState
+            title="No stories in that corner yet."
+            text="Try another style or city, or read everything."
+            action={{ label: "Show all stories", href: PATHNAME }}
+          />
+        ) : (
+          <ul className="grid grid-cols-1 gap-2 gap-y-10 md:grid-cols-3" aria-label="Wedding stories">
+            {visible.map((wedding) => (
+              <li key={wedding.slug}>
+                <StoryCard
+                  wedding={wedding}
+                  cityName={cityNames[wedding.city]}
+                  sizes="(min-width: 48rem) 33vw, 100vw"
+                  variant="small"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
         <LoadMore
           shown={visible.length}
           total={total}

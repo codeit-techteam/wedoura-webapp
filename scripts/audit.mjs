@@ -269,11 +269,14 @@ await page.$eval('button[aria-pressed="true"]', (el) => el.click());
 await sleep(500);
 check("story removed from saved", await page.evaluate(() => document.body.innerText.includes("No stories saved yet")));
 
-// Honeymoon panel (destination tiles are links that set ?place=)
+// Honeymoon destination detail page
 await goto("/honeymoon");
 await page.$eval('ul[aria-label="Destinations"] a', (el) => el.click());
 await sleep(900);
-check("honeymoon panel opens via URL", page.url().includes("place=") && !!(await page.$('section[aria-label]')));
+check(
+  "honeymoon detail page loads",
+  page.url().includes("/honeymoon/") && !!(await page.$('section[aria-label="Plan it with us"]')),
+);
 
 // Blogs filter + article
 await goto("/blogs");

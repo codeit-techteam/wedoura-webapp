@@ -114,6 +114,108 @@ const sampleBlogPosts: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "sangeet-timings-that-work",
+    title: "Sangeet timings that actually work",
+    excerpt:
+      "Start late enough that everyone has eaten, end before the bar closes, and leave the photographer a clean hour in the middle.",
+    category: "Planning",
+    date: "2025-10-22",
+    readMinutes: 6,
+    cover: photos.p09,
+    body: [
+      {
+        paragraphs: [
+          "The sangeet is where energy peaks and schedules collapse. Guests arrive straight from work, elders get tired by ten, and the bar queue becomes the real headliner.",
+          "A run sheet that respects hunger and sleep beats an extra dance number. The best evenings we see start with food visible—not canapés only—and end while people still want one more song.",
+        ],
+        photo: photos.p06,
+      },
+      {
+        heading: "When to open the floor",
+        paragraphs: [
+          "Doors at seven, dinner service by eight-thirty. Family performances before the buffet opens, main DJ set after most plates are full. Cousins who insist on opening the show can go first while tables are still filling.",
+          "If you are in a hotel ballroom, ask when staff need access to reset for the next day. A hard end at eleven beats angry housekeeping and blown sound limits.",
+        ],
+        photo: photos.p05,
+      },
+      {
+        heading: "Light for photographs",
+        paragraphs: [
+          "Harsh overhead spots turn everyone shiny. Dim house lights, one follow spot for the stage, and warm wash on tables. Your photographer will move during the golden twenty minutes when performances and candid meet.",
+          "Tell performers the photo window: one song fully lit, no phone flash from the front row if you want clean images.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "beach-wedding-weekend-packing",
+    title: "Packing for a beach wedding weekend",
+    excerpt:
+      "One outfit per function, linen you can steam in the shower, and shoes you are willing to lose in the sand.",
+    category: "Planning",
+    date: "2025-09-14",
+    readMinutes: 5,
+    cover: photos.p30,
+    body: [
+      {
+        paragraphs: [
+          "Beach weekends punish over-packing. Salt, wind and shuttle bags destroy anything precious. Bring fewer things and plan to wear them twice with a rinse in between.",
+          "Check whether venues allow heels on sand or boards only. That single answer saves you a duplicate shoe purchase on arrival.",
+        ],
+        photo: photos.p31,
+      },
+      {
+        heading: "Fabrics that survive",
+        paragraphs: [
+          "Linen, light cotton and breathable silk blends dry overnight on a balcony. Avoid heavy brocade unless the ceremony is fully indoors.",
+          "A small handheld steamer is lighter than an extra garment bag. Most seaside rooms have hooks; use the bathroom steam if you must.",
+        ],
+        photo: photos.p32,
+      },
+      {
+        heading: "What guests forget",
+        paragraphs: [
+          "SPF, lip balm, a wrap for windy dinners, and sandals with grip for wet decks. Sunscreen in welcome bags saves a pharmacy run.",
+          "If you are the couple, assign someone to hold rings and a backup speech printout off the beach—pockets and sand do not mix.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "morning-of-wedding-calm",
+    title: "A calm morning on the wedding day",
+    excerpt:
+      "Eat something, protect the hour before hair and makeup, and keep vendors on one WhatsApp thread—not three.",
+    category: "Planning",
+    date: "2025-08-05",
+    readMinutes: 4,
+    cover: photos.p02,
+    body: [
+      {
+        paragraphs: [
+          "The morning sets the tone your face will carry in every photograph. Rush shows up as tight jawlines and glazed eyes; margin shows up as breath.",
+          "Block ninety minutes before anyone with a brush arrives. Phone on silent except one group chat with your planner or sibling.",
+        ],
+        photo: photos.p01,
+      },
+      {
+        heading: "Food and movement",
+        paragraphs: [
+          "Something warm and simple—upma, toast, fruit—not just coffee. A ten-minute walk or stretch keeps shoulders down before the saree or sherwani goes on.",
+          "If tradition keeps you fasting until a ritual, agree on water and who breaks the fast with you after.",
+        ],
+      },
+      {
+        heading: "One thread for vendors",
+        paragraphs: [
+          "Photographer, makeup, and driver in a single chat reduces Chinese whispers. Your planner posts ETA updates; you do not manage traffic from the chair.",
+          "Put cash tips and thank-you notes in one envelope the night before so you are not hunting drawers at noon.",
+        ],
+        photo: photos.p10,
+      },
+    ],
+  },
 ];
 /** With WEDOURA_SEED=1 extra articles are appended so the blog pages. */
 export const blogPosts: BlogPost[] =
