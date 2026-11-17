@@ -44,7 +44,7 @@ export function WeddingsScroller({ weddings, cityNames }: Props) {
   }
 
   return (
-    <div ref={pinRef} className="h-[280vh]">
+    <div ref={pinRef} className="h-[220vh]">
       <div className="sticky top-0 flex h-dvh flex-col justify-center overflow-hidden">
         <motion.ul className="flex gap-2 pl-gutter will-change-transform" style={{ x }}>
           {weddings.map((wedding) => (
