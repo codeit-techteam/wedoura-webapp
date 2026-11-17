@@ -34,7 +34,7 @@ export function DemoVendorCards({ excludeSlugs, category, city, categories, citi
   if (shown.length === 0) return null;
 
   return (
-    <ul className="mt-2 grid grid-cols-2 gap-2 gap-y-8 lg:grid-cols-3 min-[80rem]:grid-cols-4" aria-label="Recently published vendors">
+    <ul className="mt-2 grid grid-cols-1 gap-card-gap gap-y-14 sm:grid-cols-2 lg:grid-cols-3" aria-label="Recently published vendors">
       {shown.map((listing) => (
         <li key={listing.slug}>
           <VendorCard vendor={listingToSummary(listing, categories, cities)} />

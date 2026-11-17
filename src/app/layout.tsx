@@ -4,7 +4,7 @@ import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, webSiteSchema } from "@/lib/schema";
 import { SITE_URL } from "@/lib/site-config";
-import { dmSans, instrument } from "@/styles/fonts";
+import { cormorant, jost } from "@/styles/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -38,7 +38,7 @@ export const viewport: Viewport = {
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${instrument.variable} ${dmSans.variable} h-full`}>
+    <html lang="en" className={`${cormorant.variable} ${jost.variable} h-full`}>
       <head>
         {/* Motion components server-render their hidden initial state (opacity,
             transforms, masks). Without JS nothing would animate in, so undo it. */}

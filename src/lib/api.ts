@@ -12,6 +12,7 @@ import { categories } from "@/data/categories";
 import { cities } from "@/data/cities";
 import { promises, siteFaq } from "@/data/faq";
 import { destinations } from "@/data/honeymoon";
+import { partners } from "@/data/partners";
 import { photoList } from "@/data/photos";
 import { realWeddings } from "@/data/real-weddings";
 import type {
@@ -23,6 +24,8 @@ import type {
   Faq,
   Film,
   Paged,
+  Partner,
+  PartnerPlacement,
   Photo,
   RealWedding,
   SitePromise,
@@ -386,6 +389,20 @@ export async function getSiteFaq(): Promise<Faq[]> {
 
 export async function getPromises(): Promise<SitePromise[]> {
   return promises;
+}
+
+/** Active partners for a placement (GET /partners?placement=). Like the
+ *  listing rule, visibility is enforced here: only active partners whose
+ *  date window includes today ever reach a page. */
+export async function listPartners(placement: PartnerPlacement): Promise<Partner[]> {
+  const today = new Date().toISOString().slice(0, 10);
+  return partners.filter(
+    (p) =>
+      p.placement === placement &&
+      p.active &&
+      (!p.startDate || p.startDate <= today) &&
+      (!p.endDate || p.endDate >= today),
+  );
 }
 
 /* -------------------------------------------------------------- search */

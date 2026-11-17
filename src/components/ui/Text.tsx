@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 
 type Props = {
   children: ReactNode;
-  /** Lead is serif and larger, for standfirsts. */
+  /** Lead is larger and light (Jost 300, 20px+), for standfirsts. */
   variant?: "body" | "lead" | "small";
   tone?: "ink" | "mute";
   className?: string;
@@ -13,7 +13,7 @@ export function Text({ children, variant = "body", tone = "ink", className }: Pr
   return (
     <p
       className={cn(
-        variant === "lead" && "font-serif text-lead",
+        variant === "lead" && "text-lead font-light",
         variant === "small" && "text-small",
         tone === "mute" ? "text-mute" : "text-ink",
         className,

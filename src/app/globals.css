@@ -12,7 +12,8 @@
     overflow-x: clip;
   }
 
-  /* DM Sans 400 everywhere; 500 is for emphasis only. 17px -> 18px at md. */
+  /* Jost 400 everywhere; 500 is for nav/buttons/labels, 300 only for large
+     lead paragraphs (20px and up). 17px -> 18px at md. */
   body {
     font-family: var(--font-sans);
     font-weight: 400;
@@ -29,19 +30,29 @@
     }
   }
 
-  /* Instrument Serif ships one weight; headlines are regular, tight. */
+  /* Cormorant Garamond light headlines, tight. Components that want 400
+     (vendor names, card titles) say font-regular. */
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-serif);
-    font-weight: 400;
+    font-weight: 300;
     letter-spacing: var(--tracking-tight);
     text-wrap: balance;
   }
 
   em {
     font-style: italic;
+  }
+
+  /* The one italic accent word per headline is gold (decorative, large type
+     only — never body text). */
+  h1 em,
+  h2 em,
+  .accent-em em {
+    font-style: italic;
+    color: var(--color-gold);
   }
 
   a {
@@ -101,9 +112,9 @@
 
 @utility nav-link {
   font-family: var(--font-sans);
-  font-size: var(--text-label-lg); /* 15px */
-  line-height: var(--text-label-lg--line-height);
-  font-weight: 400;
+  font-size: var(--text-nav);
+  line-height: var(--text-nav--line-height);
+  font-weight: 500;
   letter-spacing: var(--tracking-nav);
   text-transform: uppercase;
 }
@@ -156,9 +167,9 @@
   min-width: var(--tap-target);
 }
 
-/* Vendor profile: in-page anchors clear navbar + section subnav. */
+/* Vendor profile: in-page anchors clear the main navbar only (subnav scrolls away). */
 @utility scroll-profile-anchor {
-  scroll-margin-top: calc(var(--profile-sticky-top) + 0.5rem);
+  scroll-margin-top: calc(var(--nav-h) + 0.5rem);
 }
 
 @utility container-site {

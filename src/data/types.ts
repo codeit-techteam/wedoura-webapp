@@ -364,3 +364,34 @@ export interface SitePromise {
   title: string;
   text: string;
 }
+
+/* ------------------------------------------------------------- partners */
+
+/** Where a partner band can appear; only the homepage for now. */
+export type PartnerPlacement = "home";
+
+/**
+ * A brand partnership shown as a quiet editorial band. Managed from the
+ * admin app later; the public site only ever sees active partners whose
+ * date window includes today (enforced in api.ts, like the listing rule).
+ */
+export interface Partner {
+  id: string;
+  /** Brand name; also the logo's accessible name. */
+  name: string;
+  /** Brand logo. Optional: without one the name renders as a wordmark. */
+  logo?: Photo;
+  /** The band's one large photograph. */
+  image: Photo;
+  /** One large line, e.g. the campaign line. */
+  headline: string;
+  /** One short supporting line. */
+  line: string;
+  /** Outbound link; the band is unlinked without it. */
+  href?: string;
+  placement: PartnerPlacement;
+  /** ISO dates; open-ended when absent. */
+  startDate?: string;
+  endDate?: string;
+  active: boolean;
+}

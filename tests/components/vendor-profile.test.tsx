@@ -79,7 +79,7 @@ describe("a full profile", () => {
     for (const service of listing.services) expect(text).toContain(service);
     expect(text).toContain("Editorial, Candid"); // styles, as a key fact
     expect(text).toContain("Photography + film"); // the category select value
-    expect(text).toContain("Second shooter included"); // the true toggle
+    expect(text).toContain("Second shooter"); // the true toggle
     expect(text).toContain("Across India and abroad"); // travels
     expect(text).toContain("Also serves Goa"); // the other city served
     // Price and packages

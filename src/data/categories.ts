@@ -21,7 +21,7 @@ export const categories: Category[] = [
         options: ["Photography", "Film", "Photography + film"],
         filterable: true,
       },
-      { key: "secondShooter", label: "Second shooter included", input: "toggle", filterable: false },
+      { key: "secondShooter", label: "Second shooter", input: "toggle", filterable: false },
     ],
   },
   {

@@ -164,7 +164,7 @@ export function Navbar({ categories, cities }: Props) {
                   className={cn(linkClass(panel === "vendors" || isActive("/vendors")), "inline-flex gap-1.5")}
                 >
                   Vendors
-                  <Icon name="chevron-down" size={12} className={cn("transition-chrome", panel === "vendors" && "rotate-180")} />
+                  <Icon name="chevron-down" size={10} className={cn("transition-chrome", panel === "vendors" && "rotate-180")} />
                 </button>
               </li>
               {PRIMARY_LINKS.map((link) => (
@@ -192,7 +192,7 @@ export function Navbar({ categories, cities }: Props) {
               onClick={() => open("search")}
               className="hidden tap items-center justify-center transition-chrome hover:opacity-70 md:inline-flex"
             >
-              <Icon name="search" />
+              <Icon name="search" size={18} />
             </button>
             <Link
               href="/saved"
@@ -204,7 +204,7 @@ export function Navbar({ categories, cities }: Props) {
             </Link>
             <Link
               href="/list-your-business"
-              className="nav-link hidden tap items-center border border-current px-5 transition-chrome hover:opacity-70 lg:inline-flex"
+              className="nav-link hidden tap items-center border border-current px-4 py-2 transition-chrome hover:opacity-70 lg:inline-flex"
             >
               List Your Business
             </Link>

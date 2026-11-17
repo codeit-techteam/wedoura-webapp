@@ -1,43 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import { PhotoTile } from "@/components/cards/PhotoTile";
+import { Reveal } from "@/components/motion/Reveal";
 import type { Category } from "@/data/types";
 
 type Props = { categories: (Category & { count?: number })[] };
 
 /**
- * One full-width row of six tall photo tiles, rendered once: a snap carousel
- * below md, a single row from md where the hovered or focused tile widens.
+ * Six category tiles: snap carousel on small screens; from md, two rows of
+ * three with staggered reveal and a quiet lift on hover or focus.
  */
 export function CategoryTiles({ categories }: Props) {
-  const [active, setActive] = useState<number | null>(null);
-
   return (
     <ul
-      className="no-scrollbar -mx-gutter flex snap-x snap-mandatory gap-2 overflow-x-auto px-gutter md:mx-0 md:snap-none md:overflow-visible md:px-0"
+      className="no-scrollbar -mx-gutter flex snap-x snap-mandatory gap-2 overflow-x-auto px-gutter md:mx-0 md:grid md:grid-cols-3 md:gap-card-gap md:gap-y-14 md:snap-none md:overflow-visible md:px-0"
       aria-label="Vendor categories"
     >
       {categories.map((category, i) => (
-        <li
+        <Reveal
+          as="li"
           key={category.slug}
-          className="relative w-3/4 shrink-0 snap-start overflow-hidden transition-all duration-700 ease-wedoura md:w-auto md:min-w-0 md:shrink md:grow-(--grow) md:basis-0"
-          style={{ "--grow": active === i ? 2.4 : 1 } as React.CSSProperties}
-          onMouseEnter={() => setActive(i)}
-          onMouseLeave={() => setActive((c) => (c === i ? null : c))}
-          onFocus={() => setActive(i)}
-          onBlur={() => setActive((c) => (c === i ? null : c))}
+          delay={i * 0.08}
+          className="relative w-3/4 shrink-0 snap-start transition-transform duration-700 ease-wedoura md:w-auto md:shrink md:hover:z-10 md:hover:-translate-y-1 md:hover:scale-[1.02] md:focus-within:z-10 md:focus-within:-translate-y-1 md:focus-within:scale-[1.02]"
         >
-          <div className="aspect-3/4 md:aspect-auto md:h-[72vh] md:min-h-96">
+          <div className="aspect-card overflow-hidden">
             <PhotoTile
               photo={category.cover}
               title={category.name}
               meta={category.count ? `${category.count} vendor${category.count === 1 ? "" : "s"}` : undefined}
               href={`/vendors?category=${category.slug}`}
-              sizes="(min-width: 48rem) 30vw, 72vw"
+              sizes="(min-width: 48rem) 33vw, 72vw"
             />
           </div>
-        </li>
+        </Reveal>
       ))}
     </ul>
   );

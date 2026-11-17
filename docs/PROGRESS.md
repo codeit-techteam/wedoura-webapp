@@ -18,8 +18,53 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 10 | Polish pass: motion, speed, accessibility, small screens | ✅ Done (2026-11-14, see docs/AUDIT.md) |
 | 11 | Scale (~200 vendors), mapping tests, SEO, full re-audit | ✅ Done (2026-11-16, see docs/AUDIT.md) |
 | 12 | Portal ↔ profile field parity, seeded live vendor, profile + portal redesign | ✅ Done (2026-11-17, see docs/field-map.md, docs/screenshots/round-5) |
+| 13 | Round 6: client design feedback (Cormorant/Jost, colour, magazine spacing, cards, hero video, partner band) | ✅ Done (2026-11-17, see docs/screenshots/round-6) |
 
 ## Session log
+
+### 2026-11-17 · Round 6: client design feedback across the public site
+
+Done:
+- **Typography.** Cormorant Garamond 300/400 (+ light italic) replaces Instrument Serif; Jost 300/400/500
+  replaces DM Sans (`src/styles/fonts.ts`, token font stacks). Headlines default to weight 300 (`h1–h4` in
+  globals.css; `font-regular` where 400 is wanted — card/vendor names). Sizes up because Cormorant runs small:
+  hero 44→88px, section titles (h1 token) 34→64px, display to 128px. Labels 12px / label-lg 13px at Jost 500
+  uppercase with 0.26–0.32em tracking (`label`, `nav-link`); `Text lead` is now Jost 300 at 20px+ (was serif).
+  Floor is now: body ≥16px (17px standard), labels may be 12px, nothing under 12px (CLAUDE.md updated).
+- **Colour.** Ink `#1a1816`, mute `#5f5a52`; new `gold-deep #8A6D3B` for small gold labels
+  (`Label tone="gold"`). One italic accent word per headline is gold via a global `h1 em, h2 em` rule
+  (+ `.accent-em`); accents added to the homepage section headlines. Styleguide hexes/copy updated.
+- **Space.** `--spacing-section: clamp(96px,12vw,170px)`; `--container-site` 1680→**1360px**;
+  new `--spacing-card-gap: clamp(20px,3vw,44px)` on every card grid. Homepage sections moved from
+  section-sm to full section rhythm; featured/blog grids moved from container-wide to container-site.
+- **Vendor cards.** New `--aspect-card: 3/4.4`; text moved **below** the image (avatar + serif name,
+  city · category, hairline price row with the price in gold-deep); no more gradients; save button keeps a
+  quiet ink/30 disc. Grids are 1 / sm:2 / lg:3 everywhere (home, /vendors, category-in-city, saved, demo cards);
+  the 4-across tier is gone. Homepage shows 6 featured (was 8), 3 weddings (was 6), 3 journal posts, each with
+  its "See all" link (already present).
+- **Hero video.** `HeroV2` accepts `video={src,poster}`; the homepage passes it when `public/films/hero.mp4`
+  + `hero.jpg` exist (fs check; crossfade otherwise — today's state). Muted loop, plays only in view, off under
+  reduced motion and `navigator.connection.saveData`, poster until `onPlaying`. Steady scrim: flat ink/35 +
+  bottom-up gradient in both modes.
+- **Partner band.** `Partner` type + `listPartners(placement)` (active + date-window rule enforced in api.ts,
+  like the listing rule) + `src/data/partners.ts` (one clearly generic "Maison Example" placeholder, no real
+  brand); `GET /partners?placement=` row + note in api-contract.md. `PartnerBand` renders after the hero —
+  gold "In partnership with" label, brand wordmark (logo when supplied), one image, one line — hidden when no
+  active partner exists.
+- **Verification.** Lint, typecheck, 69/69 tests, seedless build (85 pages) and `build:seed` (330 pages) both
+  pass; `scripts/screenshots-round6.mjs` against `next start`: 8/8 checks (no overflow at 1440/390, partner
+  band present, six featured cards), no console errors; full-page screenshots in `docs/screenshots/round-6/`
+  (home + aperture-marigold profile at 1440 and 390). Spot-checked /vendors grid, a pinned category-city page,
+  a story and the styleguide.
+
+Decisions / gotchas:
+- The `h1 em`/`h2 em` gold rule is decorative and global; don't put `<em>` in headlines that shouldn't carry
+  the accent (none of the data-driven names do).
+- Screenshot text checks against `innerText` must be case-insensitive: labels are CSS-uppercased.
+- Real hero film + poster, and the real partner brand's name/logo/image, still pending from the client.
+
+Next up: swap in real partner assets and hero film when supplied; consider gold-deep for more meta accents if
+the client asks; re-run `scripts/audit.mjs` after the next content drop.
 
 ### 2026-11-17 · Vendor avatar + card and hero polish
 

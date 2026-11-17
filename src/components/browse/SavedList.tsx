@@ -92,7 +92,7 @@ export function SavedList({ cityNames }: Props) {
                 action={{ label: "Read real weddings", href: "/real-weddings" }}
               />
             ) : (
-              <ul className="grid grid-cols-1 gap-2 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-card-gap gap-y-12 sm:grid-cols-2 xl:grid-cols-3">
                 {shownStories.map((wedding) => (
                   <li key={wedding.slug}>
                     <StoryCard
@@ -114,7 +114,7 @@ export function SavedList({ cityNames }: Props) {
               action={{ label: "Browse vendors", href: "/vendors" }}
             />
           ) : (
-            <ul className="grid grid-cols-2 gap-2 gap-y-8 xl:grid-cols-4">
+            <ul className="grid grid-cols-1 gap-card-gap gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
               {shownVendors.map((vendor) => (
                 <li key={vendor.slug}>
                   <VendorCard vendor={vendor} />
