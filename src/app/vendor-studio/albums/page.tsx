@@ -31,7 +31,7 @@ export default function AlbumsPage() {
       <div className="max-w-3xl">
         <ScreenHeader title="Albums" text="Whole weddings, each its own sequence on your profile." right={<SaveState status={status} error={error} />} />
         <div className="mt-8">
-          <EmptyState title="No albums yet." text="An album is one wedding told start to finish. Aim for three." action={{ label: "Create your first album", onClick: create }} tone="white" />
+          <EmptyState title="No albums yet." text="An album is one wedding told start to finish. Aim for three." action={{ label: "Create your first album", onClick: create }} tone="white" className="border border-line" />
         </div>
       </div>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Field, ScreenHeader, inputClass, selectClass } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard, inputClass, selectClass } from "@/components/studio/Field";
 import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, TagListInput, useListingForm } from "@/components/studio/screen";
 import type { Category, CategoryFieldDef, CategorySlug, VenueDetails } from "@/data/types";
@@ -50,7 +50,8 @@ export default function CategoryPage() {
         text="Your main category drives the filters couples use; each category asks its own questions."
         right={<SaveState status={status} error={error} />}
       />
-      <div className="mt-8 grid gap-7">
+      <div className="mt-8 grid gap-6">
+        <StudioCard title="Category">
         <Field id="ca-category" label="Main category">
           <select
             id="ca-category"
@@ -69,7 +70,10 @@ export default function CategoryPage() {
             ))}
           </select>
         </Field>
+        </StudioCard>
 
+        <StudioCard title="Services & styles">
+        <div className="grid gap-6">
         <Field id="ca-services" label="Services" hint="What you offer, shown on your profile.">
           <TagListInput
             id="ca-services"
@@ -82,24 +86,24 @@ export default function CategoryPage() {
         <Field id="ca-styles" label="Styles" hint="Short words couples recognise, e.g. Editorial, Candid.">
           <TagListInput id="ca-styles" values={form.styles} onChange={(styles) => apply({ styles }, { styles })} placeholder="e.g. Editorial" />
         </Field>
+        </div>
+        </StudioCard>
 
         {/* Category-specific fields, generated from the definitions. */}
         {active && active.fields.length > 0 && (
-          <div className="border-t border-line pt-7">
-            <p className="label text-mute">{active.shortName} details</p>
-            <div className="mt-4 grid gap-7">
+          <StudioCard title={`${active.shortName} details`} text="Each category asks its own questions; these drive the filters couples use.">
+            <div className="grid gap-6">
               {active.fields.map((def) => (
                 <CategoryFieldInput key={def.key} def={def} value={form.categoryValues[def.key]} onChange={(v) => setValue(def.key, v)} />
               ))}
             </div>
-          </div>
+          </StudioCard>
         )}
 
         {/* Venues: capacity, spaces and the 360° tour. */}
         {form.category === "venues" && (
-          <div className="border-t border-line pt-7">
-            <p className="label text-mute">The venue</p>
-            <div className="mt-4 grid gap-7">
+          <StudioCard title="The venue">
+            <div className="grid gap-6">
               <div className="grid grid-cols-2 gap-5">
                 <Field id="ve-min" label="Capacity, from">
                   <input
@@ -127,7 +131,7 @@ export default function CategoryPage() {
               </Field>
               <TourEditor venue={venue} onChange={setVenue} />
             </div>
-          </div>
+          </StudioCard>
         )}
       </div>
     </div>

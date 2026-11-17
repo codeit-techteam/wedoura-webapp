@@ -46,17 +46,15 @@ export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
       {featured && (
         <Container width="wide" className="mt-10 md:mt-12">
           <Reveal>
-            <Link href={`/blogs/${featured.slug}`} className="group grid gap-2 bg-ivory md:grid-cols-2">
-              <ImageReveal>
-                <div className="relative aspect-4/3 overflow-hidden md:aspect-auto md:min-h-[22rem]">
-                  <Photo
-                    photo={featured.cover}
-                    mode="cover"
-                    sizes="(min-width: 48rem) 50vw, 100vw"
-                    className="transition-transform duration-1200 ease-wedoura group-hover:scale-104"
-                    priority
-                  />
-                </div>
+            <Link href={`/blogs/${featured.slug}`} className="group grid bg-ivory md:grid-cols-2 md:items-stretch">
+              <ImageReveal className="relative aspect-4/3 min-h-0 overflow-hidden md:aspect-auto md:h-full md:min-h-[18rem]">
+                <Photo
+                  photo={featured.cover}
+                  mode="cover"
+                  sizes="(min-width: 48rem) 50vw, 100vw"
+                  className="transition-transform duration-1200 ease-wedoura group-hover:scale-104"
+                  priority
+                />
               </ImageReveal>
               <div className="flex flex-col justify-center px-6 py-8 md:px-12 md:py-10">
                 <Label>Latest</Label>
@@ -74,7 +72,7 @@ export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
         </Container>
       )}
 
-      <Container className={featured ? "mt-14 md:mt-16" : "mt-10"}>
+      <Container className={featured ? "mt-10 md:mt-12" : "mt-10"}>
         <UnderlineTabs
           param="category"
           label="Article categories"

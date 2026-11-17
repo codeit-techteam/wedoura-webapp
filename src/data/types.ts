@@ -95,6 +95,8 @@ export interface Package {
   priceINR?: number;
   unit: PriceUnit;
   note?: string;
+  /** "What's included" bullets, shown as a check list on the profile. */
+  inclusions?: string[];
 }
 
 /* ---------------------------------------------------------------- misc */

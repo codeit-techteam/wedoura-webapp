@@ -11,12 +11,16 @@ type Props = {
   "aria-label"?: string;
 };
 
+function hasCustomVerticalPad(className?: string) {
+  return className?.split(/\s+/).some((c) => c.startsWith("pt-") || c.startsWith("pb-") || c.startsWith("py-"));
+}
+
 export function Section({ children, tone = "white", size = "default", className, ...rest }: Props) {
   return (
     <section
       {...rest}
       className={cn(
-        size === "default" ? "py-section" : "py-section-sm",
+        !hasCustomVerticalPad(className) && (size === "default" ? "py-section" : "py-section-sm"),
         tone === "ivory" && "bg-ivory",
         className,
       )}

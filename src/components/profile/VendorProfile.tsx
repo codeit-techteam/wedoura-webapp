@@ -4,6 +4,7 @@ import { PhotoTile } from "@/components/cards/PhotoTile";
 import { FilmPreview } from "@/components/media/FilmPreview";
 import { Photo } from "@/components/media/Photo";
 import { PhotoGrid } from "@/components/media/PhotoGrid";
+import { ImageReveal } from "@/components/motion/ImageReveal";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { AlbumList } from "@/components/profile/AlbumList";
@@ -30,9 +31,63 @@ type Props = {
 
 const PORTFOLIO_INITIAL = 12;
 
+/** Room for the sticky navbar + subnav when jumping to a section anchor. */
+const ANCHOR_OFFSET = "scroll-mt-10";
+
+/** "mumbai-suburbs" -> "Mumbai Suburbs"; cities served arrive as slugs. */
+function cityLabel(slug: string): string {
+  return slug
+    .split("-")
+    .map((word) => (word ? word[0].toUpperCase() + word.slice(1) : word))
+    .join(" ");
+}
+
+/** The gold verification mark: a rosette with a check. A mark, never text. */
+function VerifiedMark({ size = 18 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="shrink-0 text-gold"
+    >
+      <path d="M12 2.8 14.3 5l3.2-.4.8 3.1 2.8 1.7-1.2 3 1.2 3-2.8 1.7-.8 3.1-3.2-.4L12 21.9 9.7 19.8l-3.2.4-.8-3.1-2.8-1.7 1.2-3-1.2-3 2.8-1.7.8-3.1 3.2.4z" />
+      <path d="m8.7 12.4 2.3 2.3 4.3-4.9" />
+    </svg>
+  );
+}
+
+/** A small gold check for package inclusions. */
+function InclusionMark() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="mt-1 shrink-0 text-gold"
+    >
+      <path d="m4.5 12.5 5 5 10-11" />
+    </svg>
+  );
+}
+
 /**
- * The vendor profile: the most important page on the site. A full-bleed
- * cover, a strip of key facts, then the work in a wide column with a
+ * The vendor profile: the most important page on the site, set like a
+ * magazine feature. A full-bleed cover with the essentials over a quiet
+ * gradient, a strip of inline key facts separated by hairlines, a sticky
+ * section subnav, then the work in a wide column with a grouped
  * price-and-inquiry panel beside it from lg (the same panel sits after the
  * content on phones, where the bottom action bar takes over). Every section
  * renders only when the listing has content for it; films only with a real
@@ -72,6 +127,12 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
     ...fieldFacts,
   ].filter((f): f is { label: string; value: string } => f !== undefined);
 
+  // Other cities the vendor covers, shown as a quiet line under the facts.
+  const alsoServes = vendor.citiesServed.filter((slug) => slug !== vendor.baseCity).map(cityLabel);
+
+  // Services and styles as quiet chips in the about section, deduplicated.
+  const chips = [...new Set([...vendor.services, ...vendor.styles])];
+
   const sections: SubnavSection[] = [
     ...(vendor.portfolio.length ? [{ id: "portfolio", label: "Portfolio" }] : []),
     ...(vendor.venue ? [{ id: "venue", label: "The venue" }] : []),
@@ -85,13 +146,13 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
 
   return (
     <main className="pb-24 lg:pb-0">
-      {/* Opener: full-bleed cover with name, category, city and starting price. */}
-      <section data-nav-dark className="relative -mt-nav flex min-h-[75vh] flex-col justify-end bg-ink text-white">
+      {/* Opener: full-bleed cover with the essentials over a soft gradient. */}
+      <section data-nav-dark className="relative -mt-nav flex min-h-[75svh] flex-col justify-end bg-ink text-white">
         {vendor.cover && (
           <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={75} objectPosition="50% 45%" />
         )}
-        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/85 via-ink/25 to-ink/20" />
-        <Container className="relative pb-10 md:pb-14">
+        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/90 via-ink/30 to-ink/15" />
+        <Container className="relative pb-10 md:pb-16">
           <Breadcrumb
             tone="white"
             items={[
@@ -100,26 +161,45 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
               { label: vendor.name },
             ]}
           />
-          <MaskedHeading as="h1" className="mt-5 max-w-4xl font-serif text-hero" lines={[vendor.name]} />
-          <p className="mt-4 text-body-lg text-white/90">
-            {vendor.categoryName} · {vendor.cityName} · {startingPrice}
+          <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 md:mt-9">
+            <Label as="span" tone="white" className="opacity-85">
+              {vendor.categoryName}
+            </Label>
+            {vendor.verified && (
+              <span className="inline-flex items-center gap-2">
+                <VerifiedMark />
+                <span className="label text-white">Verified</span>
+              </span>
+            )}
+          </div>
+          <MaskedHeading as="h1" className="mt-4 max-w-4xl font-serif text-hero" lines={[vendor.name]} />
+          {vendor.tagline && <p className="mt-4 max-w-xl text-lead text-white/85">{vendor.tagline}</p>}
+          <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-body-lg text-white/90">
+            <span>{vendor.cityName}</span>
+            <span aria-hidden="true" className="h-px w-6 bg-gold" />
+            <span>{startingPrice}</span>
           </p>
-          {vendor.tagline && <p className="mt-2 max-w-xl text-body text-white/80">{vendor.tagline}</p>}
         </Container>
       </section>
 
-      {/* Key facts strip. */}
+      {/* Key facts: inline stats, serif values under label captions, hairlines between. */}
       {facts.length > 0 && (
         <section aria-label="Key facts" className="border-b border-line bg-white">
-          <Container>
-            <dl className="grid grid-cols-2 gap-x-8 gap-y-5 py-6 md:grid-cols-4 md:py-7">
+          <Container className="py-8 md:py-12">
+            <dl className="grid grid-cols-2 gap-y-8 md:grid-cols-4 md:gap-y-10">
               {facts.map((fact) => (
-                <div key={fact.label}>
+                <div
+                  key={fact.label}
+                  className="border-l border-line pr-4 pl-5 odd:border-l-0 odd:pl-0 md:pl-8 md:odd:border-l md:odd:pl-8 md:nth-[4n+1]:border-l-0 md:nth-[4n+1]:pl-0"
+                >
                   <dt className="label text-mute">{fact.label}</dt>
-                  <dd className="mt-1 font-serif text-h3">{fact.value}</dd>
+                  <dd className="mt-2 font-serif text-h3">{fact.value}</dd>
                 </div>
               ))}
             </dl>
+            {alsoServes.length > 0 && (
+              <p className="hairline mt-8 pt-5 text-small text-mute">Also serves {alsoServes.join(", ")}.</p>
+            )}
           </Container>
         </section>
       )}
@@ -127,14 +207,16 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
       <StickySubnav sections={sections} />
 
       <Container>
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start lg:gap-14 xl:gap-20 lg:pt-2">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start lg:gap-14 xl:gap-20">
           {/* The work, in a wide column. */}
           <div className="min-w-0">
             {vendor.portfolio.length > 0 && (
-              <section id="portfolio" aria-label="Portfolio" className="py-section-sm">
+              <section id="portfolio" aria-label="Portfolio" className={`py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["Portfolio"]} />
-                <p className="mt-3 max-w-prose text-mute">Recent work in natural light—the same frames you will see on your day.</p>
-                <div className="mt-8">
+                <p className="mt-3 max-w-prose text-mute">
+                  Recent work in natural light—the same frames you will see on your day.
+                </p>
+                <div className="mt-10">
                   <Reveal>
                     <PhotoGrid
                       photos={vendor.portfolio}
@@ -148,9 +230,9 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
             )}
 
             {vendor.venue && (
-              <section id="venue" aria-label="The venue" className="border-t border-line py-section-sm">
+              <section id="venue" aria-label="The venue" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["The venue"]} />
-                <div className="mt-8 grid gap-10 md:grid-cols-[1fr_2fr] md:gap-14">
+                <div className="mt-10 grid gap-10 md:grid-cols-[1fr_2fr] md:gap-14">
                   <div>
                     <Label>Capacity</Label>
                     <p className="mt-2 font-serif text-h3">
@@ -193,19 +275,19 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
             )}
 
             {vendor.albums.length > 0 && (
-              <section id="albums" aria-label="Albums" className="border-t border-line py-section-sm">
+              <section id="albums" aria-label="Albums" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["Albums"]} />
                 <p className="mt-3 max-w-prose text-mute">Whole weddings, each one its own sequence.</p>
-                <div className="mt-8">
+                <div className="mt-10">
                   <AlbumList albums={vendor.albums} />
                 </div>
               </section>
             )}
 
             {films.length > 0 && (
-              <section id="films" aria-label="Films" className="border-t border-line py-section-sm">
+              <section id="films" aria-label="Films" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["Films"]} />
-                <div className="mt-8 grid gap-2 md:grid-cols-2">
+                <div className="mt-10 grid gap-2 md:grid-cols-2">
                   {films.map((film) => (
                     <FilmPreview key={film.id} film={film} sizes="(min-width: 64rem) 33vw, (min-width: 48rem) 50vw, 100vw" />
                   ))}
@@ -214,7 +296,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
             )}
 
             {vendor.about.length > 0 && (
-              <section id="about" aria-label="About" className="border-t border-line py-section-sm">
+              <section id="about" aria-label="About" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)] md:gap-14">
                   <div>
                     <MaskedHeading as="h2" className="font-serif text-h2" lines={[`About ${vendor.name}`]} />
@@ -225,33 +307,51 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
                         </Text>
                       ))}
                     </div>
-                    {vendor.services.length > 0 && (
-                      <p className="mt-6 text-small text-mute">{vendor.services.join(" · ")}</p>
+                    {chips.length > 0 && (
+                      <ul aria-label="Services and styles" className="mt-8 flex flex-wrap gap-2">
+                        {chips.map((chip) => (
+                          <li key={chip} className="border border-line px-3.5 py-2 text-small text-ink">
+                            {chip}
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
                   {vendor.aboutPhoto && (
-                    <Reveal delay={0.1}>
+                    <ImageReveal delay={0.1}>
                       <div className="relative overflow-hidden bg-ivory">
                         <Photo photo={vendor.aboutPhoto} sizes="(min-width: 48rem) 18rem, 100vw" />
                       </div>
-                    </Reveal>
+                    </ImageReveal>
                   )}
                 </div>
               </section>
             )}
 
             {vendor.packages.length > 0 && (
-              <section id="pricing" aria-label="Pricing" className="border-t border-line py-section-sm">
+              <section id="pricing" aria-label="Pricing" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["Pricing"]} />
                 <p className="mt-3 max-w-prose text-mute">Starting points. Exact quotes come from {vendor.name}.</p>
-                <ul className="mt-8 grid gap-2 md:grid-cols-3">
+                <ul className="mt-10 grid gap-2 md:grid-cols-3">
                   {vendor.packages.map((pkg, i) => (
-                    <Reveal as="li" key={pkg.label} delay={i * 0.08} className="flex flex-col justify-between gap-6 bg-ivory p-6 md:p-7">
-                      <div>
+                    <Reveal as="li" key={pkg.label} delay={i * 0.08} className="flex flex-col border border-line bg-white">
+                      <div className="p-6 md:p-7">
                         <p className="font-serif text-h3">{pkg.label}</p>
-                        {pkg.note && <p className="mt-2 text-small text-mute">{pkg.note}</p>}
+                        <p className="mt-3 text-body-lg font-medium">{formatPrice(pkg.priceINR, pkg.unit)}</p>
                       </div>
-                      <p className="text-body-lg font-medium">{formatPrice(pkg.priceINR, pkg.unit)}</p>
+                      {pkg.inclusions && pkg.inclusions.length > 0 && (
+                        <ul aria-label={`What ${pkg.label} includes`} className="flex flex-col gap-3 border-t border-line p-6 md:p-7">
+                          {pkg.inclusions.map((item) => (
+                            <li key={item} className="flex items-start gap-3 text-small text-ink">
+                              <InclusionMark />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      {pkg.note && (
+                        <p className="mt-auto border-t border-line px-6 py-5 text-small text-mute md:px-7">{pkg.note}</p>
+                      )}
                     </Reveal>
                   ))}
                 </ul>
@@ -259,9 +359,13 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
             )}
 
             {vendor.faqs.length > 0 && (
-              <section id="faq" aria-label="Frequently asked questions" className="border-t border-line py-section-sm">
+              <section
+                id="faq"
+                aria-label="Frequently asked questions"
+                className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}
+              >
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["Good to know"]} />
-                <div className="mt-8">
+                <div className="mt-10">
                   <Accordion items={vendor.faqs} />
                 </div>
               </section>
@@ -269,40 +373,45 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
           </div>
 
           {/* Price, save, WhatsApp and a compact inquiry form beside the work
-              from lg; after it on phones (one set of markup). */}
+              from lg (sticky under the chrome); after it on phones, where the
+              bottom action bar carries the same actions (one set of markup). */}
           <aside
             id="inquiry"
             aria-label="Price and inquiry"
-            className="border-t border-line py-section-sm lg:border-0 lg:py-0 lg:pt-section-sm"
+            className={`no-scrollbar border-t border-line py-section-sm ${ANCHOR_OFFSET} lg:sticky lg:top-nav lg:max-h-[calc(100svh-var(--nav-h))] lg:self-start lg:overflow-y-auto lg:border-0 lg:py-0 lg:pt-section-sm lg:pb-section-sm`}
           >
-            <div className="border border-line bg-white p-6 md:p-8">
-              <Label>Starting from</Label>
-              <p className="mt-1 font-serif text-h2">{startingPrice}</p>
-              <p className="mt-2 text-small text-mute">
-                {vendor.categoryName} · {vendor.cityName}
-              </p>
-              <div className={`mt-6 grid gap-2 ${whatsappHref ? "grid-cols-2" : "grid-cols-1"}`}>
-                <SaveButton
-                  slug={vendor.slug}
-                  name={vendor.name}
-                  tone="ink"
-                  withLabel
-                  className="border border-line px-4 py-3 hover:border-ink"
-                />
-                {whatsappHref && (
-                  <a
-                    href={whatsappHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`WhatsApp ${vendor.name}`}
-                    className="tap inline-flex items-center justify-center gap-2 border border-line px-4 py-3 text-ink transition-chrome hover:border-ink"
-                  >
-                    <Icon name="whatsapp" size={20} />
-                    <span className="label">WhatsApp</span>
-                  </a>
-                )}
+            <div className="border border-line bg-white">
+              <div className="p-6 md:p-8">
+                <Label>Starting from</Label>
+                <p className="mt-2 font-serif text-h2">{startingPrice}</p>
+                <p className="mt-2 text-small text-mute">
+                  {vendor.categoryName} · {vendor.cityName}
+                </p>
               </div>
-              <div className="mt-8 border-t border-line pt-8">
+              <div className="border-t border-line p-6 md:p-8">
+                <div className={`grid gap-2 ${whatsappHref ? "grid-cols-2" : "grid-cols-1"}`}>
+                  <SaveButton
+                    slug={vendor.slug}
+                    name={vendor.name}
+                    tone="ink"
+                    withLabel
+                    className="border border-line px-4 py-3 hover:border-ink"
+                  />
+                  {whatsappHref && (
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`WhatsApp ${vendor.name}`}
+                      className="tap inline-flex items-center justify-center gap-2 border border-line px-4 py-3 text-ink transition-chrome hover:border-ink"
+                    >
+                      <Icon name="whatsapp" size={20} />
+                      <span className="label">WhatsApp</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="border-t border-line p-6 md:p-8">
                 <h2 className="font-serif text-h3">Write to {vendor.name}</h2>
                 <p className="mt-2 text-small text-mute">Straight to the vendor. No middlemen, no call centre.</p>
                 <div className="mt-6">

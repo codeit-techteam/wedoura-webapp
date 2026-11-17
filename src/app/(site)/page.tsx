@@ -76,8 +76,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       />
 
       {/* 2 · Categories: one full-width row of six tall tiles. */}
-      <section aria-label="Vendor categories" className="py-section-sm md:py-section">
-        <Container className="mb-8 md:mb-10">
+      <section aria-label="Vendor categories" className="pt-section-sm pb-section-sm">
+        <Container className="mb-6 md:mb-8">
           <MaskedHeading as="h2" className="font-serif text-h1" lines={["Six kinds of wedding people."]} />
         </Container>
         <Container width="wide">
@@ -86,8 +86,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 3 · Featured vendors: tabs over a near-edge-to-edge grid. */}
-      <section aria-label="Featured vendors" className="py-section-sm md:py-section">
-        <Container className="mb-8 flex flex-wrap items-end justify-between gap-6">
+      <section aria-label="Featured vendors" className="pb-section-sm">
+        <Container className="mb-6 flex flex-wrap items-end justify-between gap-6">
           <MaskedHeading as="h2" className="font-serif text-h1" lines={["The ones to meet first."]} />
           <Button href="/vendors" variant="link">
             See all vendors
@@ -112,8 +112,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 4 · Real weddings: pinned horizontal scroll (carousel on phones). */}
-      <section aria-label="Real weddings" className="py-section-sm md:pt-section md:pb-0">
-        <Container className="mb-8 flex flex-wrap items-end justify-between gap-6">
+      <section aria-label="Real weddings" className="pb-0 pt-section-sm">
+        <Container className="mb-6 flex flex-wrap items-end justify-between gap-6">
           <MaskedHeading as="h2" className="font-serif text-h1" lines={["Whole weddings, as they happened."]} />
           <Button href="/real-weddings" variant="link">
             All stories
@@ -127,17 +127,15 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {playableFilms.length > 0 && <FilmsShowcase films={playableFilms} />}
 
       {/* 6 · Cities: an uneven photo mosaic. */}
-      <section aria-label="Browse by city" className="py-section-sm md:py-section">
-        <Container className="mb-8 md:mb-10">
-          <MaskedHeading as="h2" className="font-serif text-h1" lines={["Start with your city."]} />
-        </Container>
+      <section aria-label="Browse by city" className="pb-section-sm pt-10 md:pt-12">
         <Container width="wide">
+          <MaskedHeading as="h2" className="mb-6 font-serif text-h1 md:mb-8" lines={["Start with your city."]} />
           <CityMosaic cities={cities} />
         </Container>
       </section>
 
       {/* 7 · Why couples choose Wedoura: three explained points beside one tall photograph. */}
-      <Section tone="ivory" aria-label="Why couples choose Wedoura">
+      <Section tone="ivory" size="small" className="pb-section-sm pt-section-sm" aria-label="Why couples choose Wedoura">
         <Container>
           <div className="grid gap-10 md:grid-cols-2 md:gap-16 xl:gap-24">
             <div>
@@ -164,8 +162,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </Section>
 
       {/* 8 · Blog: three cards with large images. */}
-      <section aria-label="From the blog" className="py-section-sm md:py-section">
-        <Container className="mb-8 flex flex-wrap items-end justify-between gap-6">
+      <section aria-label="From the blog" className="pb-section-sm pt-section-sm">
+        <Container className="mb-6 flex flex-wrap items-end justify-between gap-6">
           <MaskedHeading as="h2" className="font-serif text-h1" lines={["Worth reading first."]} />
           <Button href="/blogs" variant="link">
             All articles
@@ -198,7 +196,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 9 · FAQ. The footer links here. */}
-      <Section tone="ivory" id="faq" aria-label="Frequently asked questions">
+      <Section tone="ivory" size="small" className="pb-section-sm pt-section-sm" id="faq" aria-label="Frequently asked questions">
         <Container>
           <div className="grid gap-10 md:grid-cols-[1fr_2fr]">
             <Reveal>

@@ -9,8 +9,9 @@ export type SubnavSection = { id: string; label: string };
 type Props = { sections: SubnavSection[] };
 
 /**
- * Profile section links in a bordered strap. Scrollspy highlights the section
- * in view; the bar stays in normal document flow (not sticky).
+ * Profile section links in a sticky hairline strap under the navbar.
+ * Small-caps labels; scrollspy underlines the section in view with an ink
+ * rule. The row scrolls sideways on phones without a visible scrollbar.
  */
 export function StickySubnav({ sections }: Props) {
   const [active, setActive] = useState(sections[0]?.id ?? "");
@@ -50,19 +51,19 @@ export function StickySubnav({ sections }: Props) {
   }, [sections]);
 
   return (
-    <Container className="pb-6 md:pb-8">
-      <nav aria-label="Profile sections" className="border border-line bg-white">
-        <ul className="no-scrollbar flex divide-x divide-line overflow-x-auto">
+    <nav aria-label="Profile sections" className="sticky top-nav z-20 border-b border-line bg-white">
+      <Container>
+        <ul className="no-scrollbar flex gap-7 overflow-x-auto md:gap-10">
           {sections.map((section) => (
-            <li key={section.id} className="min-w-[max-content] flex-1 shrink-0">
+            <li key={section.id} className="shrink-0">
               <a
                 href={`#${section.id}`}
                 aria-current={active === section.id ? "true" : undefined}
                 className={cn(
-                  "tap flex items-center justify-center px-4 py-3.5 text-label-lg whitespace-nowrap transition-chrome md:px-5 md:py-4",
+                  "label tap inline-flex items-center justify-center whitespace-nowrap border-b-2 pt-4 pb-3.5 transition-chrome",
                   active === section.id
-                    ? "bg-ivory font-medium text-ink"
-                    : "text-mute hover:bg-ivory hover:text-ink",
+                    ? "border-ink text-ink"
+                    : "border-transparent text-mute hover:border-line hover:text-ink",
                 )}
               >
                 {section.label}
@@ -70,7 +71,7 @@ export function StickySubnav({ sections }: Props) {
             </li>
           ))}
         </ul>
-      </nav>
-    </Container>
+      </Container>
+    </nav>
   );
 }

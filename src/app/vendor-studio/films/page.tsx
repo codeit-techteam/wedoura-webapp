@@ -2,10 +2,10 @@
 
 import { useRef, useState } from "react";
 import { FilmPreview } from "@/components/media/FilmPreview";
-import { Field, ScreenHeader, inputClass } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard, inputClass } from "@/components/studio/Field";
 import { PhotoPicker } from "@/components/studio/PhotoPicker";
 import { SaveState } from "@/components/studio/autosave";
-import { ScreenSkeleton, useListingForm } from "@/components/studio/screen";
+import { ReorderButtons, ScreenSkeleton, moveItem, useListingForm } from "@/components/studio/screen";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Film, Photo } from "@/data/types";
 
@@ -64,27 +64,39 @@ export default function FilmsPage() {
 
       {form.films.length === 0 ? (
         <div className="mt-8">
-          <EmptyState title="No films yet." text="A 10-second muted preview brings a profile to life." tone="white" />
+          <EmptyState
+            title="No films yet."
+            text="A 10-second muted preview brings a profile to life. Add one below."
+            tone="white"
+            className="border border-line"
+          />
         </div>
       ) : (
         <ul className="mt-8 grid gap-4 sm:grid-cols-2">
-          {form.films.map((film) => (
+          {form.films.map((film, i) => (
             <li key={film.id} className="border border-line bg-white p-2">
               <FilmPreview film={film} sizes="(min-width: 40rem) 24rem, 100vw" />
-              <div className="flex items-center justify-between px-1 pt-2">
-                <p className="truncate text-small text-mute">{film.title}</p>
-                <button type="button" onClick={() => save(form.films.filter((f) => f.id !== film.id))} className="label tap px-2 text-mute transition-chrome hover:text-ink">
-                  Delete
-                </button>
+              <div className="flex items-center justify-between gap-2 px-1 pt-2">
+                <p className="min-w-0 truncate text-small text-ink">{film.title}</p>
+                <span className="flex shrink-0 items-center gap-1">
+                  <ReorderButtons
+                    index={i}
+                    total={form.films.length}
+                    onMove={(f, t) => save(moveItem(form.films, f, t))}
+                    label={film.title || "film"}
+                  />
+                  <button type="button" onClick={() => save(form.films.filter((f) => f.id !== film.id))} className="label tap px-2 text-mute transition-chrome hover:text-ink">
+                    Delete
+                  </button>
+                </span>
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      <div className="mt-10 border border-line bg-white p-5">
-        <p className="label text-mute">Add a film</p>
-        <div className="mt-4 grid gap-6">
+      <StudioCard title="Add a film" className="mt-8">
+        <div className="grid gap-6">
           <Field id="fi-title" label="Title">
             <input id="fi-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. A lake-palace morning" className={inputClass} />
           </Field>
@@ -98,14 +110,16 @@ export default function FilmsPage() {
             />
           </Field>
           <Field id="fi-link" label="Video link" hint={`A direct .mp4/.webm link, or add a file up to ${MAX_FILE_MB}MB.`}>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input id="fi-link" type="url" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://" className={inputClass} />
-              <button type="button" onClick={addLink} className="label tap shrink-0 border border-ink px-4 text-ink transition-chrome hover:bg-ink hover:text-white">
-                Add link
-              </button>
-              <button type="button" onClick={() => fileRef.current?.click()} className="label tap shrink-0 border border-line px-4 text-ink transition-chrome hover:border-ink">
-                Add file
-              </button>
+              <div className="flex shrink-0 gap-2">
+                <button type="button" onClick={addLink} className="label tap flex-1 border border-ink px-4 py-2.5 text-ink transition-chrome hover:bg-ink hover:text-white sm:flex-none sm:py-0">
+                  Add link
+                </button>
+                <button type="button" onClick={() => fileRef.current?.click()} className="label tap flex-1 border border-line px-4 py-2.5 text-ink transition-chrome hover:border-ink sm:flex-none sm:py-0">
+                  Add file
+                </button>
+              </div>
               <input
                 ref={fileRef}
                 type="file"
@@ -126,7 +140,7 @@ export default function FilmsPage() {
             </p>
           )}
         </div>
-      </div>
+      </StudioCard>
     </div>
   );
 }

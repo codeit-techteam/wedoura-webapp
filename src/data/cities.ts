@@ -7,5 +7,5 @@ export const cities: City[] = [
   { slug: "goa", name: "Goa", state: "Goa", cover: photos.p27 },
   { slug: "bengaluru", name: "Bengaluru", state: "Karnataka", cover: photos.p40 },
   { slug: "mumbai", name: "Mumbai", state: "Maharashtra", cover: photos.p45 },
-  { slug: "delhi", name: "Delhi", state: "Delhi", cover: photos.p44 },
+  { slug: "delhi", name: "Delhi", state: "Delhi", cover: photos.p28 },
 ];

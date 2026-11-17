@@ -3,6 +3,7 @@
 import { VendorCard } from "@/components/cards/VendorCard";
 import type { Category, City } from "@/data/types";
 import { listingToSummary } from "@/lib/listing-view";
+import { SAMPLE_ID_PREFIX } from "@/lib/mock-store";
 import { useDemoPublishedListings } from "@/lib/vendor-api";
 
 type Props = {
@@ -24,6 +25,8 @@ export function DemoVendorCards({ excludeSlugs, category, city, categories, citi
   const exclude = new Set(excludeSlugs);
   const shown = published.filter(
     (l) =>
+      // Sample rows (incl. the demo-owned lst-01) are already server-rendered.
+      !l.id.startsWith(SAMPLE_ID_PREFIX) &&
       !exclude.has(l.slug) &&
       (!category || l.category === category) &&
       (!city || l.baseCity === city || l.citiesServed.includes(city)),

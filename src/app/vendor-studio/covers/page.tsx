@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { VendorCard } from "@/components/cards/VendorCard";
 import { Photo as PhotoImg } from "@/components/media/Photo";
-import { Field, ScreenHeader } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard } from "@/components/studio/Field";
 import { PhotoPicker } from "@/components/studio/PhotoPicker";
 import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, useListingForm } from "@/components/studio/screen";
@@ -46,7 +46,9 @@ export default function CoversPage() {
         right={<SaveState status={status} error={error} />}
       />
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_20rem]">
-        <div className="grid gap-9">
+        <div className="grid gap-6">
+          <StudioCard title="Choose from your portfolio">
+          <div className="grid gap-8">
           <Field id="cv-cover" label="Cover photo" hint="One photo. It is shown full-bleed, so wide images work best.">
             <PhotoPicker
               label="Choose the cover"
@@ -74,10 +76,13 @@ export default function CoversPage() {
               max={1}
             />
           </Field>
+          </div>
+          </StudioCard>
         </div>
 
         {/* Live previews, exactly as couples see them. */}
         <aside aria-label="Previews" className="lg:sticky lg:top-6 lg:self-start">
+          <StudioCard title="How couples see it">
           <p className="label text-mute">Your card in lists</p>
           <div className="mt-3 max-w-60">
             {summary.cardPhotos.length > 0 ? (
@@ -103,6 +108,7 @@ export default function CoversPage() {
               <p className="border border-line bg-white p-4 text-small text-mute">Pick a cover to see the opener.</p>
             )}
           </div>
+          </StudioCard>
         </aside>
       </div>
     </div>

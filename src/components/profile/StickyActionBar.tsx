@@ -30,7 +30,7 @@ export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) 
           <p className="truncate font-serif text-h3 md:hidden">{name}</p>
           {startingPrice && <p className="truncate text-small text-mute">{startingPrice}</p>}
         </div>
-        <div className="flex shrink-0 items-center gap-2 md:gap-4">
+        <div className="flex shrink-0 items-stretch gap-2 border-l border-line pl-3 md:gap-3 md:pl-4">
           <SaveButton slug={slug} name={name} tone="ink" withLabel className="hidden px-2 sm:inline-flex" />
           <SaveButton slug={slug} name={name} tone="ink" className="sm:hidden" />
           {wa && (

@@ -50,7 +50,7 @@ export function FilmsShowcase({ films }: Props) {
 
   return (
     <section className="bg-ink text-white" aria-label="Wedding films">
-      <div className="pt-section">{heading}</div>
+      <div className="pt-section-sm">{heading}</div>
       <div ref={pinRef} className="h-[220vh]">
         <div className="sticky top-0 flex h-dvh items-center justify-center overflow-hidden">
           <motion.div className="w-[94vw] will-change-transform" style={{ scale }}>
@@ -58,7 +58,7 @@ export function FilmsShowcase({ films }: Props) {
           </motion.div>
         </div>
       </div>
-      <div className="container-wide pb-section">{rest.length > 0 && row(rest)}</div>
+      <div className="container-wide pb-section-sm">{rest.length > 0 && row(rest)}</div>
     </section>
   );
 }

@@ -23,13 +23,13 @@ export default function FaqsPage() {
       />
       {form.faqs.length === 0 ? (
         <div className="mt-8">
-          <EmptyState title="No FAQs yet." text="Booking lead time, travel and delivery are the three everyone asks." action={{ label: "Add a question", onClick: add }} tone="white" />
+          <EmptyState title="No FAQs yet." text="Booking lead time, travel and delivery are the three everyone asks." action={{ label: "Add a question", onClick: add }} tone="white" className="border border-line" />
         </div>
       ) : (
         <>
           <ul className="mt-8 grid gap-4">
             {form.faqs.map((faq, i) => (
-              <li key={i} className="grid gap-4 border border-line bg-white p-4">
+              <li key={i} className="grid gap-5 border border-line bg-white p-5 md:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <Field id={`fq-q-${i}`} label={`Question ${i + 1}`} className="min-w-0 flex-1">
                     <input id={`fq-q-${i}`} type="text" value={faq.question} onChange={(e) => update(i, { question: e.target.value })} className={inputClass} />

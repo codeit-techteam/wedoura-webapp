@@ -31,7 +31,7 @@ export default function InquiriesPage() {
       <div className="max-w-3xl">
         <ScreenHeader title="Inquiries" text="Messages from couples land here and on your WhatsApp." />
         <div className="mt-8">
-          <EmptyState title="No inquiries yet." text="Once your profile is live, messages from couples appear here." tone="white" />
+          <EmptyState title="No inquiries yet." text="Once your profile is live, messages from couples appear here." tone="white" className="border border-line" />
         </div>
       </div>
     );

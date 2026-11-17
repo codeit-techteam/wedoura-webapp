@@ -29,19 +29,19 @@ const NAV: { group: string; items: { href: string; label: string }[] }[] = [
     ],
   },
   {
-    group: "Work",
+    group: "Media",
     items: [
       { href: "/vendor-studio/photos", label: "Photos" },
       { href: "/vendor-studio/covers", label: "Cover & card photos" },
       { href: "/vendor-studio/albums", label: "Albums" },
       { href: "/vendor-studio/films", label: "Films" },
-      { href: "/vendor-studio/pricing", label: "Pricing" },
-      { href: "/vendor-studio/faqs", label: "FAQs" },
     ],
   },
   {
     group: "Business",
     items: [
+      { href: "/vendor-studio/pricing", label: "Pricing" },
+      { href: "/vendor-studio/faqs", label: "FAQs" },
       { href: "/vendor-studio/inquiries", label: "Inquiries" },
       { href: "/vendor-studio/submit", label: "Submit for review" },
       { href: "/vendor-studio/account", label: "Account" },
@@ -96,11 +96,11 @@ export function StudioShell({
   };
 
   const nav = (onNavigate?: () => void) => (
-    <nav aria-label="Studio sections" className="flex flex-1 flex-col gap-6 overflow-y-auto py-6">
+    <nav aria-label="Studio sections" className="flex flex-1 flex-col gap-7 overflow-y-auto py-6">
       {NAV.map((section) => (
         <div key={section.group}>
           <p className="label px-5 text-mute/70">{section.group}</p>
-          <ul className="mt-2">
+          <ul className="mt-2.5">
             {section.items.map((item) => {
               const active = pathname === item.href;
               return (
@@ -116,7 +116,7 @@ export function StudioShell({
                       "tap flex items-center border-l-2 px-5 py-2.5 text-label-lg transition-chrome",
                       active
                         ? "border-ink bg-ivory font-medium text-ink"
-                        : "border-transparent text-mute hover:bg-ivory hover:text-ink",
+                        : "border-transparent text-mute hover:border-line hover:bg-ivory/60 hover:text-ink",
                     )}
                   >
                     {item.label}
@@ -168,21 +168,21 @@ export function StudioShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-line bg-white px-gutter py-3 lg:hidden">
-          <div className="min-w-0">
-            <p className="truncate font-serif text-h3">{listing?.name ?? account.contactName}</p>
-            {listing && <StatusBadge status={listing.status} className="mt-1" />}
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white px-gutter py-2.5 lg:hidden">
+          <p className="min-w-0 truncate font-serif text-h3">{listing?.name ?? account.contactName}</p>
+          <div className="flex shrink-0 items-center gap-3">
+            {listing && <StatusBadge status={listing.status} className="hidden sm:inline-flex" />}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(true)}
+              aria-haspopup="dialog"
+              aria-expanded={menuOpen}
+              className="tap inline-flex items-center gap-2 text-label-lg font-medium text-ink"
+            >
+              <Icon name="menu" size={20} />
+              Menu
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            aria-haspopup="dialog"
-            aria-expanded={menuOpen}
-            className="tap inline-flex items-center gap-2 text-label-lg font-medium text-ink"
-          >
-            <Icon name="menu" size={20} />
-            Menu
-          </button>
         </header>
 
         <main className="min-w-0 flex-1 px-gutter py-8 lg:px-10 lg:py-10">{children}</main>
@@ -203,22 +203,26 @@ export function StudioShell({
               role="dialog"
               aria-modal="true"
               aria-label="Studio menu"
-              className="relative flex h-full w-80 max-w-[85vw] flex-col overflow-y-auto bg-white"
+              className="relative flex h-full w-80 max-w-[85vw] flex-col bg-white"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ duration: 0.35, ease: EASE }}
             >
-              <div className="flex items-center justify-between border-b border-line px-5 py-4">
-                <Wordmark size="menu" />
-                <button
-                  type="button"
-                  onClick={() => setMenuOpen(false)}
-                  aria-label="Close menu"
-                  className="tap inline-flex items-center justify-center text-ink"
-                >
-                  <Icon name="close" size={22} />
-                </button>
+              <div className="border-b border-line px-5 py-4">
+                <div className="flex items-center justify-between">
+                  <Wordmark size="menu" />
+                  <button
+                    type="button"
+                    onClick={() => setMenuOpen(false)}
+                    aria-label="Close menu"
+                    className="tap inline-flex items-center justify-center text-ink"
+                  >
+                    <Icon name="close" size={22} />
+                  </button>
+                </div>
+                <p className="mt-3 truncate font-serif text-h3">{listing?.name ?? account.contactName}</p>
+                {listing && <StatusBadge status={listing.status} className="mt-2" />}
               </div>
               {nav(() => setMenuOpen(false))}
               {footer}
