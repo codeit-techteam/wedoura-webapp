@@ -59,14 +59,24 @@ page.on("pageerror", (e) => problems.push(`checks: pageerror ${e.message}`));
 await page.goto(`${BASE}/vendors?category=venues`, { waitUntil: "load", timeout: 60000 });
 await sleep(1200);
 const countText = await page.evaluate(() => document.body.innerText.match(/\d+ vendors?/)?.[0] ?? "");
-check(`/vendors?category=venues count reads "2 vendors" (got "${countText}")`, countText === "2 vendors");
+check(`/vendors?category=venues shows a count (got "${countText}")`, /^\d+ vendors?$/.test(countText));
 
-// 2. Changing the city select updates the URL.
-await page.select("select", "");
-const selects = await page.$$("select");
-await selects[1].select("jaipur");
+// 2. Picking a city in the filter strap updates the URL.
+await page.evaluate(() => {
+  const trigger = Array.from(document.querySelectorAll('button[aria-haspopup="listbox"]')).find(
+    (b) => b.closest("div")?.querySelector(".label")?.textContent?.trim() === "City",
+  );
+  trigger?.click();
+});
+await sleep(400);
+await page.evaluate(() => {
+  const option = Array.from(document.querySelectorAll('[role="option"] button')).find(
+    (b) => b.textContent?.trim() === "Jaipur",
+  );
+  option?.click();
+});
 await sleep(700);
-check("city select writes ?city=jaipur to the URL", page.url().includes("city=jaipur"));
+check("city filter writes ?city=jaipur to the URL", page.url().includes("city=jaipur"));
 
 // 3. Save button toggles the navbar count.
 await page.goto(`${BASE}/vendors`, { waitUntil: "load", timeout: 60000 });

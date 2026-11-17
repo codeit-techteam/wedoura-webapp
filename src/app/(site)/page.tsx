@@ -22,11 +22,20 @@ import {
   listArticles,
   listCategoriesWithCounts,
   listCitiesWithCounts,
+  listFeatured,
   listFilms,
-  listVendors,
   listWeddings,
 } from "@/lib/api";
+import { absoluteUrl } from "@/lib/site-config";
 import { pickParams } from "@/lib/url";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: { absolute: "Wedoura · Wedding vendors across India" },
+  description:
+    "See wedding photographers, venues, makeup artists, decorators, caterers and musicians through their real work, and talk to them directly.",
+  alternates: { canonical: absoluteUrl("/") },
+};
 
 const monthYear = new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" });
 
@@ -41,10 +50,11 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       getPhoto("p35"),
       listCategoriesWithCounts(),
       listCitiesWithCounts(),
-      // Two full rows of four from 1280px, featured first.
-      listVendors({ category: params.category || undefined, limit: 8 }),
-      listWeddings(),
-      listFilms(),
+      // Two full rows of four from 1280px: featured by order, then newest.
+      // Fixed at eight at any vendor count; "See all vendors" sits beside it.
+      listFeatured(params.category || undefined, 8),
+      listWeddings({ page: 1, limit: 6 }),
+      listFilms(6),
       getPromises(),
       listArticles({ limit: 3 }),
       getSiteFaq(),
@@ -92,7 +102,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             params={params}
           />
           <ul className="mt-6 grid grid-cols-2 gap-2 gap-y-8 md:mt-8 lg:grid-cols-3 min-[80rem]:grid-cols-4">
-            {featured.items.map((vendor) => (
+            {featured.map((vendor) => (
               <li key={vendor.slug}>
                 <VendorCard vendor={vendor} />
               </li>

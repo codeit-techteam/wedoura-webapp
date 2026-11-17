@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { getPromises, listAllCategories, listAllCities, listFeatured } from "@/lib/api";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "List Your Business",
   description: "Show your work to couples who are looking. A Wedoura profile is your portfolio, pricing and a direct line.",
+  alternates: { canonical: absoluteUrl("/list-your-business") },
 };
 
 export default async function ListYourBusinessPage() {

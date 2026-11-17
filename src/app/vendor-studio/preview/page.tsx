@@ -32,7 +32,11 @@ export default function PreviewPage() {
       </div>
       {/* Public components offset themselves against the site navbar; there is none here. */}
       <div style={{ "--nav-h": "0px" } as React.CSSProperties} className="bg-white">
-        <VendorProfile vendor={detail} similar={[]} />
+        <VendorProfile
+          vendor={detail}
+          similar={[]}
+          categoryFields={categories.find((c) => c.slug === listing.category)?.fields}
+        />
       </div>
     </div>
   );

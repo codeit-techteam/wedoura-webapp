@@ -93,7 +93,7 @@ await page.keyboard.press("Escape");
 await page.$eval('button[aria-label="Search"]', (el) => el.click());
 await sleep(600);
 await page.type("#site-search", "udai");
-await sleep(400);
+await sleep(1200); // debounce + /api/search fetch
 const suggestion = await page.$("#search-suggestions a");
 check("search suggests for 'udai'", !!suggestion);
 if (suggestion) {
@@ -102,29 +102,83 @@ if (suggestion) {
   check("suggestion navigates", page.url().includes("city=udaipur") || page.url().includes("/vendors"));
 }
 
-// Home tabs crossfade
+// Home tabs (UnderlineTabs renders real links)
 await goto("/");
-await page.$$eval('[role="tab"]', (tabs) => tabs.find((t) => t.textContent === "Venues")?.click());
-await sleep(600);
+await page.$$eval('nav[aria-label="Vendor categories"] a', (tabs) => tabs.find((t) => t.textContent === "Venues")?.click());
+await sleep(900);
 check("home tab writes ?category=venues", page.url().includes("category=venues"));
 
-// Vendors: budget filter + load more + bottom sheet at 390
+// Vendors: budget filter + sort + load more (count-agnostic: the dataset
+// size differs between seed-off and seed-on runs).
+const vendorCountOn = async () => {
+  const m = await page.evaluate(() => document.body.innerText.match(/(\d+) vendors?/)?.[1]);
+  return Number(m ?? 0);
+};
+const openFilter = async (label) => {
+  await page.evaluate((wanted) => {
+    const trigger = Array.from(document.querySelectorAll('button[aria-haspopup="listbox"]')).find((b) =>
+      b.closest("div")?.querySelector(".label")?.textContent?.trim() === wanted,
+    );
+    trigger?.click();
+  }, label);
+  await sleep(400);
+};
+const pickOption = async (label) => {
+  await page.evaluate((wanted) => {
+    const option = Array.from(document.querySelectorAll('[role="option"] button')).find(
+      (b) => b.textContent?.trim() === wanted,
+    );
+    option?.click();
+  }, label);
+  await sleep(700);
+};
 await goto("/vendors");
-const selects = await page.$$("select");
-await selects[2].select("b3");
-await sleep(600);
-const b3Count = await page.evaluate(() => document.body.innerText.match(/\d+ vendors?/)?.[0]);
-check(`budget b3 filters (got "${b3Count}")`, b3Count === "2 vendors");
-await selects[3].select("price-asc");
-await sleep(500);
+const totalVendors = await vendorCountOn();
+check(`vendors count line present (got ${totalVendors})`, totalVendors >= 1);
+await openFilter("Budget");
+await pickOption("₹5 lakh and above");
+const b3Count = await vendorCountOn();
+check(`budget b3 filters down (${b3Count} of ${totalVendors})`, page.url().includes("budget=b3") && b3Count >= 0 && b3Count <= totalVendors);
+await openFilter("Sort");
+await pickOption("Price, low to high");
 check("sort writes URL", page.url().includes("sort=price-asc"));
 await goto("/vendors");
-await page.$$eval("a", (links) => links.find((a) => a.textContent?.trim() === "Show more")?.click());
-await sleep(800);
-const afterMore = await page.evaluate(
-  () => document.querySelectorAll('main a[href^="/vendors/"] img').length,
+const cardsBefore = await page.evaluate(() => document.querySelectorAll('main a[href^="/vendors/"] img').length);
+const hasMore = await page.evaluate(() => Array.from(document.querySelectorAll("a")).some((a) => a.textContent?.trim() === "Show more"));
+if (hasMore) {
+  await page.$$eval("a", (links) => links.find((a) => a.textContent?.trim() === "Show more")?.click());
+  await sleep(900);
+  const afterMore = await page.evaluate(() => document.querySelectorAll('main a[href^="/vendors/"] img').length);
+  check(
+    `load more grows the grid (${cardsBefore} -> ${afterMore} of ${totalVendors})`,
+    afterMore > cardsBefore && afterMore <= Math.max(cardsBefore + 8, cardsBefore),
+  );
+} else {
+  check(`no load more needed (${cardsBefore} cards = total)`, cardsBefore === totalVendors);
+}
+
+// Category-in-city pages
+await goto("/vendors/photography-films/jaipur");
+check(
+  "category-in-city page renders with its own title",
+  (await page.title()).includes("in Jaipur") &&
+    (await page.evaluate(() => document.body.innerText.includes("vendor"))),
 );
-check(`load more shows all 10 published cards (got ${afterMore})`, afterMore === 10);
+check(
+  "category-in-city links sibling cities",
+  await page.evaluate(() => !!document.querySelector('a[href^="/vendors/photography-films/"]')),
+);
+{
+  const bad = await browser.newPage();
+  const resp = await bad.goto(`${BASE}/vendors/aperture-marigold/jaipur`, { waitUntil: "load" });
+  check("profile slug with an extra segment 404s", resp.status() === 404);
+  await bad.close();
+}
+await goto("/vendors?category=photography-films");
+check(
+  "filtered /vendors links the pretty pages",
+  await page.evaluate(() => !!document.querySelector('a[href="/vendors/photography-films/jaipur"]')),
+);
 
 const mobile = await browser.newPage();
 await mobile.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
@@ -191,8 +245,8 @@ if (spaceButtons[1]) {
 
 // Gallery filter + viewer + vendor link
 await goto("/gallery");
-await page.$$eval('[role="tab"]', (tabs) => tabs.find((t) => t.textContent === "Venues")?.click());
-await sleep(600);
+await page.$$eval('nav[aria-label="Photo categories"] a', (tabs) => tabs.find((t) => t.textContent === "Venues")?.click());
+await sleep(900);
 check("gallery filter writes URL", page.url().includes("category=venues"));
 await page.$eval('main button[aria-label^="Open"]', (el) => el.click());
 await sleep(800);
@@ -205,25 +259,29 @@ await page.$eval('button[aria-label^="Save"]', (el) => el.click());
 await goto("/vendors");
 await page.$eval('button[aria-label^="Save"]', (el) => el.click());
 await goto("/saved");
+await sleep(900); // the by-slugs fetches
 const vendorCount = await page.evaluate(() => document.body.innerText.includes("Vendors (1)"));
 const storyCount = await page.evaluate(() => document.body.innerText.includes("Stories (1)"));
 check("saved shows one vendor and one story", vendorCount && storyCount);
-await page.$$eval('[role="tab"]', (tabs) => tabs.find((t) => t.textContent?.startsWith("Stories"))?.click());
-await sleep(500);
+await page.$$eval('nav[aria-label="Saved"] a', (tabs) => tabs.find((t) => t.textContent?.startsWith("Stories"))?.click());
+await sleep(700);
 await page.$eval('button[aria-pressed="true"]', (el) => el.click());
 await sleep(500);
 check("story removed from saved", await page.evaluate(() => document.body.innerText.includes("No stories saved yet")));
 
-// Honeymoon panel
+// Honeymoon destination detail page
 await goto("/honeymoon");
-await page.$eval('ul[aria-label="Destinations"] button', (el) => el.click());
-await sleep(700);
-check("honeymoon panel opens via URL", page.url().includes("place=") && !!(await page.$('section[aria-label]')));
+await page.$eval('ul[aria-label="Destinations"] a', (el) => el.click());
+await sleep(900);
+check(
+  "honeymoon detail page loads",
+  page.url().includes("/honeymoon/") && !!(await page.$('section[aria-label="Plan it with us"]')),
+);
 
 // Blogs filter + article
 await goto("/blogs");
-await page.$$eval('[role="tab"]', (tabs) => tabs.find((t) => t.textContent === "Venues")?.click());
-await sleep(500);
+await page.$$eval('nav[aria-label="Article categories"] a', (tabs) => tabs.find((t) => t.textContent === "Venues")?.click());
+await sleep(900);
 check("blogs filter works", page.url().includes("category=venues"));
 
 // Signup: one short form
@@ -252,10 +310,10 @@ await page.$eval('button[type="submit"]', (el) => el.click());
 await sleep(300);
 check("login validates", (await page.$$('[role="alert"]')).length === 2);
 
-// Studio gate (fresh browser state: logged out)
+// Studio gate (fresh browser state: logged out → redirected to /login)
 await goto("/vendor-studio");
-await sleep(500);
-check("studio shows the logged-out gate", await page.evaluate(() => document.body.innerText.includes("Log in to manage your profile")));
+await sleep(1200);
+check("logged-out studio redirects to /login", page.url().includes("/login"));
 
 // 404 (on an unwatched page: the 404 response itself logs a console error)
 {
@@ -274,6 +332,95 @@ await goto("/about");
 await page.$$eval('a[href="/faq"]', (links) => links[0]?.click());
 await sleep(1200);
 check("footer FAQ link opens /faq", page.url().includes("/faq") && (await page.evaluate(() => document.body.innerText.includes("Is Wedoura free for couples?"))));
+
+// -------------------------------------------- 2.5 · sitemap, robots, search
+{
+  const sitemapRes = await fetch(`${BASE}/sitemap.xml`);
+  const sitemap = sitemapRes.ok ? await sitemapRes.text() : "";
+  check("sitemap.xml responds", sitemapRes.ok);
+  check(
+    "sitemap lists profiles, stories, articles and category-in-city pages",
+    sitemap.includes("/vendors/aperture-marigold") &&
+      sitemap.includes("/venues/bagh-e-noor-palace") &&
+      sitemap.includes("/real-weddings/") &&
+      sitemap.includes("/blogs/") &&
+      sitemap.includes("/vendors/photography-films/jaipur"),
+  );
+  check(
+    "sitemap excludes private and unpublished pages",
+    !sitemap.includes("/demo") &&
+      !sitemap.includes("/login") &&
+      !sitemap.includes("/vendor-studio") &&
+      !sitemap.includes("/saved") &&
+      !sitemap.includes("/styleguide") &&
+      !sitemap.includes("kohl-and-rose") && // in_review
+      !sitemap.includes("baraat-collective"), // draft
+  );
+  const robotsRes = await fetch(`${BASE}/robots.txt`);
+  const robots = robotsRes.ok ? await robotsRes.text() : "";
+  check(
+    "robots.txt disallows /demo, /login, /vendor-studio",
+    robotsRes.ok &&
+      robots.includes("Disallow: /demo") &&
+      robots.includes("Disallow: /login") &&
+      robots.includes("Disallow: /vendor-studio") &&
+      robots.toLowerCase().includes("sitemap:"),
+  );
+  const searchRes = await fetch(`${BASE}/api/search?q=a`);
+  const suggestions = searchRes.ok ? await searchRes.json() : null;
+  check(
+    "api/search caps suggestions (≤5/≤3/≤3)",
+    !!suggestions &&
+      suggestions.vendors.length <= 5 &&
+      suggestions.cities.length <= 3 &&
+      suggestions.categories.length <= 3,
+  );
+}
+
+// ------------------------------------------------------- 2.6 · portal pass
+{
+  const studio = await browser.newPage();
+  await studio.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
+  watch(studio, "studio");
+  await studio.goto(`${BASE}/login`, { waitUntil: "load", timeout: 60000 });
+  await sleep(1200);
+  await studio.type("#login-email", "vendor@gmail.com");
+  await studio.type("#login-password", "123456");
+  await studio.$eval('button[type="submit"]', (el) => el.click());
+  await sleep(1500);
+  check("demo login reaches the studio", studio.url().includes("/vendor-studio"));
+  const screens = [
+    "", "business", "category", "locations", "photos", "covers", "albums", "films",
+    "pricing", "faqs", "contact", "inquiries", "preview", "submit", "account",
+  ];
+  const studioFailures = [];
+  for (const screen of screens) {
+    await studio.goto(`${BASE}/vendor-studio${screen ? `/${screen}` : ""}`, { waitUntil: "load", timeout: 60000 });
+    await sleep(900);
+    const report = await studio.evaluate(() => ({
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+      hasHeading: !!document.querySelector("h1, h2"),
+      body: document.body.innerText.length,
+    }));
+    if (report.overflow > 0) studioFailures.push(`${screen || "overview"} overflows ${report.overflow}px`);
+    if (!report.hasHeading || report.body < 40) studioFailures.push(`${screen || "overview"} looks empty`);
+  }
+  check(`portal: all ${screens.length} screens render signed in`, studioFailures.length === 0, studioFailures.join("; "));
+  // 390px spot check: the studio menu drawer
+  await studio.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
+  await studio.goto(`${BASE}/vendor-studio`, { waitUntil: "load", timeout: 60000 });
+  await sleep(1000);
+  const studioMobile = await studio.evaluate(() => ({
+    overflow: document.documentElement.scrollWidth - window.innerWidth,
+    menuButton: !!Array.from(document.querySelectorAll("button")).find((b) => b.textContent?.trim().includes("Menu")),
+  }));
+  check("portal overview fits 390px with a menu button", studioMobile.overflow <= 0 && studioMobile.menuButton);
+  await studio.evaluate(() => {
+    window.localStorage.removeItem("wedoura:mock-db");
+    window.localStorage.removeItem("wedoura:saved");
+  });
+  await studio.close();
+}
 
 // ------------------------------------------------------------- 3 · keyboard
 await goto("/");

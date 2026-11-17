@@ -7,13 +7,16 @@ Frontend only; a backend comes later. Full brief: `docs/reference/brief.md`. Pro
 
 ```
 npm run dev          # http://localhost:3000  (styleguide at /styleguide)
+npm run dev:seed     # same, with ~200 generated vendors (WEDOURA_SEED=1; src/data/seed.ts)
 npm run build        # production build, run before calling a page done
+npm run build:seed   # seeded production build; delete .next when flipping seed modes
+npm run test         # vitest: mapping, lifecycle, paging, seed, schema, component tests (tests/)
 npm run lint         # eslint .  (next lint no longer exists in Next 16)
 npm run typecheck    # next typegen && tsc --noEmit
 npm run photos       # regenerate src/data/photos.ts from public/photos + alt.json
 npm run extract-reference  # regenerate docs/reference/extracted from the mockups
 node scripts/screenshots-core.mjs  # core-page screenshots + behaviour checks (needs next start on 3001)
-node scripts/audit.mjs     # full crawl + interaction + keyboard + CLS audit (needs next start on 3001)
+node scripts/audit.mjs     # full crawl + interactions + portal + SEO + keyboard + CLS (needs next start on 3001)
 BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboard/reduced-motion checks (needs a running server)
 ```
 
@@ -63,6 +66,20 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
   (saved, studio). Collapsed content (FAQ answers, "See all" photos) stays in the markup and is hidden with CSS.
   Never render separate desktop and mobile copies of the same content; pinned sections upgrade one copy via
   `useIsDesktop()` (src/lib/media.ts).
+- **Nothing ships the whole dataset.** Search suggestions come from `/api/search` (≤5/3/3, debounced in
+  `SearchOverlay`); `/saved` fetches only its shortlisted slugs (`/api/vendors/by-slugs`, `/api/weddings/by-slugs`);
+  the homepage is fixed-size (8 featured via `listFeatured`: featured → featuredOrder → `publishedAt` desc).
+  Never pass a full vendor list to a client component. The vendor directory is `<VendorBrowse>`
+  (src/components/browse), rendered bare by `/vendors` and pinned by `/vendors/[category]/[city]`
+  (the `[slug]` segment doubles as the category; non-category slugs 404 there).
+- **Scale testing.** `WEDOURA_SEED=1` (server-only env; `npm run dev:seed` / `build:seed` / `start:seed`)
+  appends ~190 deterministic listings, 24 stories and 12 articles from `src/data/seed.ts`. Dynamic routes read
+  the flag at request time, so `next start` needs it too, not just the build. The mock store always seeds from
+  `sampleListings` only. Test list pages in both modes; delete `.next` when flipping.
+- **SEO.** Every page sets a canonical (`absoluteUrl` from src/lib/site-config.ts — also the one config for
+  site name, email and socials; empty social = hidden). JSON-LD builders live in src/lib/schema.ts (never
+  aggregateRating/review/priceRange), rendered by `<JsonLd>`. app/sitemap.ts + app/robots.ts exclude
+  /demo, /login, /vendor-studio, /saved, /styleguide; the studio layout is a server wrapper exporting noindex.
 
 ## Motion (these patterns, nothing else)
 
@@ -102,7 +119,8 @@ src/components/chrome  Navbar (+SiteHeader), VendorsPanel, SearchOverlay, Mobile
 src/components/media   Photo, PhotoCard, CardRow, FilmPreview, PhotoGrid (uncropped grid + viewer)
 src/components/cards   VendorCard, StoryCard, ArticleCard, PhotoTile  (the one card per content type)
 src/components/browse  Rail, UnderlineTabs (links), FilterBar+FilterSelect, BottomSheet, LoadMore (?show=),
-                       SavedList  (list pages render their own grids; see src/lib/url.ts)
+                       SavedList (fetches its shortlist), VendorBrowse (THE vendor directory, bare + pinned)
+src/components/seo     JsonLd (renders src/lib/schema.ts builders)
 src/components/profile VendorProfile (cover, key facts, content column + sticky inquiry aside), StickySubnav,
                        StickyActionBar (below lg), InquiryForm (compact variant), AlbumList (large covers),
                        VenueTour (360), VendorSignupForm (one-step application), AuthForms (login+contact),
@@ -115,13 +133,16 @@ src/components/studio  the portal: StudioShell (sidebar/drawer), StatusScreens, 
                        maps to VendorListing; reads/writes only through vendor-api (hooks + updateMyListing).
 src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis),
                        MaskedHeading, ImageReveal
-src/data           typed sample content (types.ts, photos.ts generated)
+src/data           typed sample content (types.ts, photos.ts generated, seed.ts behind WEDOURA_SEED)
+src/app/api        search + by-slugs route handlers (contract: GET /search, ?slugs=)
+tests/             vitest suites (api mapping/lifecycle/paging, seed, schema, component render)
 src/lib            api.ts (public reads, published-only), vendor-api.ts (vendor/admin calls + reactive hooks),
                    listing-view.ts (THE listing→public mapper, pending-media filter; api, previews and the
                    demo overlay all use it), upload.ts (simulated uploads: ≥800px, data URLs, 12px blur),
                    mock-store.ts (localStorage mock db), demo-credentials.ts (deletable), format.ts
                    (formatPrice), url.ts (server-safe param/href helpers), url-state.ts (client hook),
-                   media.ts (useIsDesktop), motion.ts, cn.ts, saved.ts (shortlist store), focus-trap.ts
+                   media.ts (useIsDesktop, useMounted), motion.ts, cn.ts, saved.ts (shortlist store),
+                   focus-trap.ts, site-config.ts (name/email/socials/absoluteUrl), schema.ts (JSON-LD)
 src/styles         tokens.css, fonts.ts
 public/photos      placeholder photographs + alt.json (replace, then npm run photos)
 docs/screenshots   chrome captures from scripts/screenshots.mjs
@@ -129,5 +150,5 @@ docs/screenshots   chrome captures from scripts/screenshots.mjs
 
 ## Definition of done
 
-Lint and typecheck pass, `npm run build` succeeds, the page works at 390px, and `docs/PROGRESS.md` is updated at
-the end of every session (status per build step, session log, next up).
+Lint, typecheck and `npm run test` pass, `npm run build` succeeds, the page works at 390px, and
+`docs/PROGRESS.md` is updated at the end of every session (status per build step, session log, next up).

@@ -7,6 +7,7 @@ import { Container } from "@/components/ui/Container";
 export const metadata: Metadata = {
   title: "Vendor Login",
   description: "Sign in to your Wedoura vendor profile.",
+  robots: { index: false, follow: false },
 };
 
 export default function LoginPage() {

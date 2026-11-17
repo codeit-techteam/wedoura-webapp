@@ -185,6 +185,9 @@ export interface VendorListing {
   /** Photo/film ids added while published; hidden publicly until the admin
    *  approves them. */
   pendingMediaIds?: string[];
+  /** ISO date set by the system when the listing is first published.
+   *  Breaks featured-order ties: newest published first. */
+  publishedAt?: string;
   /* Identity */
   name: string;
   slug: string;
@@ -237,6 +240,8 @@ export interface VendorSummary {
   cardPhotos: Photo[];
   featured: boolean;
   verified: boolean;
+  /** ISO date of first publication; sorts "newest" and feeds sitemap lastmod. */
+  publishedAt?: string;
 }
 
 /** What the public profile receives: the listing minus account and admin
@@ -323,6 +328,11 @@ export interface BlogPost {
   body: { heading?: string; paragraphs: string[]; photo?: Photo }[];
 }
 
+export interface DestinationExperience {
+  title: string;
+  description: string;
+}
+
 export interface Destination {
   slug: string;
   name: string;
@@ -330,8 +340,16 @@ export interface Destination {
   bestMonths: string;
   summary: string;
   cover: Photo;
-  /** Three short lines for the detail panel. */
+  /** Teaser lines on the index grid. */
   highlights: string[];
+  /** Opening copy for the detail page. */
+  overview: string[];
+  experiences: DestinationExperience[];
+  gallery: Photo[];
+  /** Why couples pick this place for a first trip. */
+  whyCouples: string[];
+  /** Practical notes (getting there, stays, pace). */
+  practical: { label: string; value: string }[];
 }
 
 export interface SitePromise {

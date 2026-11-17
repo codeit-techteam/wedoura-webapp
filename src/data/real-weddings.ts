@@ -1,7 +1,8 @@
 import { photos } from "./photos";
+import { generateSeedWeddings } from "./seed";
 import type { RealWedding } from "./types";
 
-export const realWeddings: RealWedding[] = [
+const sampleWeddings: RealWedding[] = [
   {
     slug: "udaipur-lake-wedding",
     title: "Three days by the lake",
@@ -167,3 +168,7 @@ export const realWeddings: RealWedding[] = [
     ],
   },
 ];
+
+/** With WEDOURA_SEED=1 extra stories are appended so the list pages page. */
+export const realWeddings: RealWedding[] =
+  process.env.WEDOURA_SEED === "1" ? [...sampleWeddings, ...generateSeedWeddings()] : sampleWeddings;

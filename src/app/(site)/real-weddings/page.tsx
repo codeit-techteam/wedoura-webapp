@@ -9,10 +9,12 @@ import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listCitiesWithCounts, listWeddings, listWeddingStyles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Real Weddings",
   description: "Whole weddings across India, told the way they happened, with the people who made them.",
+  alternates: { canonical: absoluteUrl("/real-weddings") },
 };
 
 const PAGE = 6;
@@ -20,18 +22,21 @@ const PATHNAME = "/real-weddings";
 
 export default async function RealWeddingsPage({ searchParams }: PageProps<"/real-weddings">) {
   const params = pickParams(await searchParams, ["style", "city", "show"]);
-  const [allWeddings, filtered, styles, cities] = await Promise.all([
-    listWeddings(),
-    listWeddings({ style: params.style, city: params.city }),
+  const shown = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
+  // listWeddings sorts the featured story first, so one extra row covers the
+  // cover-story slot; the grid never refetches the whole dataset.
+  const [coverPage, filtered, styles, cities] = await Promise.all([
+    listWeddings({ page: 1, limit: 1 }),
+    listWeddings({ style: params.style, city: params.city, page: 1, limit: shown + 1 }),
     listWeddingStyles(),
     listCitiesWithCounts(),
   ]);
   const cityNames = Object.fromEntries(cities.map((c) => [c.slug, c.name]));
-  const featured = allWeddings.items.find((w) => w.featured) ?? allWeddings.items[0];
+  const featured = coverPage.items[0];
   const rest = filtered.items.filter((w) => w.slug !== featured?.slug);
-
-  const shown = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
   const visible = rest.slice(0, shown);
+  const coverInFilter = filtered.items.some((w) => w.slug === featured?.slug);
+  const total = filtered.total - (coverInFilter ? 1 : 0);
 
   return (
     <main className="pb-section-sm">
@@ -69,31 +74,32 @@ export default async function RealWeddingsPage({ searchParams }: PageProps<"/rea
           />
         </div>
 
-        <div className="mt-10">
-          {visible.length === 0 ? (
-            <EmptyState
-              title="No stories in that corner yet."
-              text="Try another style or city, or read everything."
-              action={{ label: "Show all stories", href: PATHNAME }}
-            />
-          ) : (
-            <ul className="grid grid-cols-1 gap-2 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-              {visible.map((wedding) => (
-                <li key={wedding.slug}>
-                  <StoryCard
-                    wedding={wedding}
-                    cityName={cityNames[wedding.city]}
-                    sizes="(min-width: 48rem) 33vw, 100vw"
-                    variant="small"
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      </Container>
+
+      <Container width="wide" className="mt-10">
+        {visible.length === 0 ? (
+          <EmptyState
+            title="No stories in that corner yet."
+            text="Try another style or city, or read everything."
+            action={{ label: "Show all stories", href: PATHNAME }}
+          />
+        ) : (
+          <ul className="grid grid-cols-1 gap-2 gap-y-10 md:grid-cols-3" aria-label="Wedding stories">
+            {visible.map((wedding) => (
+              <li key={wedding.slug}>
+                <StoryCard
+                  wedding={wedding}
+                  cityName={cityNames[wedding.city]}
+                  sizes="(min-width: 48rem) 33vw, 100vw"
+                  variant="small"
+                />
+              </li>
+            ))}
+          </ul>
+        )}
         <LoadMore
           shown={visible.length}
-          total={rest.length}
+          total={total}
           moreHref={patchedHref(PATHNAME, params, { show: String(shown + PAGE) })}
           noun="stories"
         />

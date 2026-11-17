@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
+import { LoadMore } from "@/components/browse/LoadMore";
 import { UnderlineTabs } from "@/components/browse/UnderlineTabs";
 import { PhotoGrid, type PhotoLink } from "@/components/media/PhotoGrid";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listCategoriesWithCounts, listGalleryPhotos } from "@/lib/api";
-import { pickParams } from "@/lib/url";
+import { patchedHref, pickParams } from "@/lib/url";
+import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Gallery",
   description: "Photographs from weddings across India, each linked to the people who made it.",
+  alternates: { canonical: absoluteUrl("/gallery") },
 };
 
-export default async function GalleryPage({ searchParams }: PageProps<"/gallery">) {
-  const params = pickParams(await searchParams, ["category"]);
-  const [gallery, categories] = await Promise.all([listGalleryPhotos(1, 200), listCategoriesWithCounts()]);
-  const items = gallery.items;
-  const usedCategories = new Set(items.map((i) => i.category).filter(Boolean));
+const PAGE = 60;
+const PATHNAME = "/gallery";
 
-  const shown = params.category ? items.filter((i) => i.category === params.category) : items;
+export default async function GalleryPage({ searchParams }: PageProps<"/gallery">) {
+  const params = pickParams(await searchParams, ["category", "show"]);
+  const shownCount = Math.max(PAGE, Number.parseInt(params.show ?? "", 10) || PAGE);
+  // The category filter runs inside the api, before paging, so no photo is
+  // ever lost behind the page boundary.
+  const [gallery, categories] = await Promise.all([
+    listGalleryPhotos(1, shownCount, params.category || undefined),
+    listCategoriesWithCounts(),
+  ]);
+  const shown = gallery.items;
   const links: Record<string, PhotoLink> = {};
   for (const item of shown) {
     if (item.vendor) links[item.photo.id] = { href: `/vendors/${item.vendor.slug}`, label: `By ${item.vendor.name}` };
@@ -37,19 +46,25 @@ export default async function GalleryPage({ searchParams }: PageProps<"/gallery"
         <UnderlineTabs
           param="category"
           label="Photo categories"
-          tabs={categories
-            .filter((c) => usedCategories.has(c.slug))
-            .map((c) => ({ value: c.slug, label: c.shortName }))}
-          pathname="/gallery"
+          // Every counted category has at least one published vendor, and
+          // every published vendor has card photos, so each tab has photos.
+          tabs={categories.map((c) => ({ value: c.slug, label: c.shortName }))}
+          pathname={PATHNAME}
           params={params}
         />
         <div className="mt-10">
           {shown.length === 0 ? (
-            <EmptyState title="No photographs here yet." action={{ label: "Show everything", href: "/gallery" }} />
+            <EmptyState title="No photographs here yet." action={{ label: "Show everything", href: PATHNAME }} />
           ) : (
             <PhotoGrid photos={shown.map((i) => i.photo)} links={links} />
           )}
         </div>
+        <LoadMore
+          shown={shown.length}
+          total={gallery.total}
+          moreHref={patchedHref(PATHNAME, params, { show: String(shownCount + PAGE) })}
+          noun="photographs"
+        />
       </Container>
     </main>
   );

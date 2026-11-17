@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
+import { useMounted } from "@/lib/media";
 
 type Props = { title: string; path: string; /** When false, only copy link is shown. */ social?: boolean };
 
 /** Share to WhatsApp or Pinterest, or copy the link. No tracking. */
 export function ShareButtons({ title, path, social = true }: Props) {
   const [copied, setCopied] = useState(false);
-  // Match SSR (relative path) on first paint, then absolute URL after mount.
-  const [shareUrl, setShareUrl] = useState(path);
-
-  useEffect(() => {
-    setShareUrl(new URL(path, window.location.origin).toString());
-  }, [path]);
+  // Match SSR (relative path) on first paint, then the absolute URL once mounted.
+  const mounted = useMounted();
+  const shareUrl = mounted ? new URL(path, window.location.origin).toString() : path;
 
   const links = useMemo(
     () => [

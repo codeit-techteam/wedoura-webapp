@@ -1,5 +1,6 @@
 import { films } from "./films";
 import { photos } from "./photos";
+import { generateSeedListings } from "./seed";
 import type { Faq, Package, VendorListing } from "./types";
 
 /**
@@ -31,7 +32,7 @@ const photoPackages: Package[] = [
   { label: "Full wedding week", unit: "on_request", note: "Every event, both of us, all week" },
 ];
 
-export const listings: VendorListing[] = [
+export const sampleListings: VendorListing[] = [
   {
     id: "lst-01",
     accountId: "acc-01",
@@ -39,6 +40,7 @@ export const listings: VendorListing[] = [
     featured: true,
     featuredOrder: 1,
     verified: true,
+    publishedAt: "2025-01-12",
     name: "Aperture & Marigold",
     slug: "aperture-marigold",
     tagline: "Quiet, editorial wedding photography",
@@ -108,6 +110,7 @@ export const listings: VendorListing[] = [
     featured: true,
     featuredOrder: 2,
     verified: true,
+    publishedAt: "2025-02-03",
     name: "Saffron Frames",
     slug: "saffron-frames",
     tagline: "Films that feel like the day did",
@@ -175,6 +178,7 @@ export const listings: VendorListing[] = [
     featured: true,
     featuredOrder: 3,
     verified: true,
+    publishedAt: "2025-02-18",
     name: "The Courtyard House",
     slug: "courtyard-house",
     tagline: "A heritage home with a lawn to the sea",
@@ -253,6 +257,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: true,
+    publishedAt: "2025-03-07",
     name: "Mehr Studio",
     slug: "mehr-studio",
     tagline: "Skin-first bridal makeup",
@@ -323,6 +328,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: false,
+    publishedAt: "2025-04-21",
     name: "Petal & Thread",
     slug: "petal-and-thread",
     tagline: "Florals and mandaps with restraint",
@@ -393,6 +399,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: false,
+    publishedAt: "2025-05-14",
     name: "Coastal Table",
     slug: "coastal-table",
     tagline: "Goan and Konkan menus, cooked live",
@@ -463,6 +470,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: false,
+    publishedAt: "2025-06-02",
     name: "Dhol & Brass",
     slug: "dhol-and-brass",
     tagline: "Baraat bands and late-night sets",
@@ -533,6 +541,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: true,
+    publishedAt: "2025-06-27",
     name: "Bagh-e-Noor Palace",
     slug: "bagh-e-noor-palace",
     tagline: "A fort courtyard under open sky",
@@ -682,6 +691,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: false,
+    publishedAt: "2025-08-09",
     name: "Marigold House",
     slug: "marigold-house",
     tagline: "Genda phool, done properly",
@@ -752,6 +762,7 @@ export const listings: VendorListing[] = [
     status: "published",
     featured: false,
     verified: false,
+    publishedAt: "2025-09-16",
     name: "Saffron & Smoke",
     slug: "saffron-and-smoke",
     tagline: "Live tandoors and family recipes",
@@ -888,3 +899,13 @@ export const listings: VendorListing[] = [
     contact: { whatsapp: SAMPLE_WHATSAPP },
   },
 ];
+
+/**
+ * The dataset src/lib/api.ts reads. With WEDOURA_SEED=1 (a dev/test switch,
+ * see docs/api-contract.md, "Mock specifics") a deterministic generator
+ * appends enough listings to exercise the site at roughly 200 published
+ * vendors. Server-only: the flag is never inlined into client bundles, and
+ * the mock store seeds from sampleListings so localStorage stays small.
+ */
+export const listings: VendorListing[] =
+  process.env.WEDOURA_SEED === "1" ? [...sampleListings, ...generateSeedListings()] : sampleListings;

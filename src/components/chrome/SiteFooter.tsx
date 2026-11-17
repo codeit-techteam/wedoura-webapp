@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
+import { SOCIALS } from "@/lib/site-config";
 
 const columns = [
   {
@@ -36,12 +37,16 @@ const columns = [
   },
 ];
 
-// Placeholder handles until the client confirms theirs.
-const socials: { href: string; label: string; icon: IconName }[] = [
-  { href: "https://www.instagram.com/", label: "Instagram", icon: "instagram" },
-  { href: "https://www.pinterest.com/", label: "Pinterest", icon: "pinterest" },
-  { href: "https://www.youtube.com/", label: "YouTube", icon: "youtube" },
-];
+// One config for social links (src/lib/site-config.ts); an empty href there
+// hides the network, and a network without an icon here never renders.
+const SOCIAL_ICONS: Record<string, IconName> = {
+  instagram: "instagram",
+  pinterest: "pinterest",
+  youtube: "youtube",
+};
+const socials = SOCIALS.map((s) => ({ ...s, icon: SOCIAL_ICONS[s.label.toLowerCase()] })).filter(
+  (s): s is { label: string; href: string; icon: IconName } => s.icon !== undefined && s.href.length > 0,
+);
 
 export function SiteFooter() {
   return (
@@ -54,6 +59,7 @@ export function SiteFooter() {
               Wedding vendors across India. See their real work, shortlist the ones you love, and talk to them
               directly.
             </Text>
+            {socials.length > 0 && (
             <ul className="mt-8 flex items-center gap-2" aria-label="Social">
               {socials.map((social) => (
                 <li key={social.label}>
@@ -69,6 +75,7 @@ export function SiteFooter() {
                 </li>
               ))}
             </ul>
+            )}
           </div>
 
           <nav aria-label="Footer" className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-3">
