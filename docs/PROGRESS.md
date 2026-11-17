@@ -17,8 +17,53 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 9 | Venue profile with the 360-degree view | ✅ Done (2026-11-14, placeholder imagery) |
 | 10 | Polish pass: motion, speed, accessibility, small screens | ✅ Done (2026-11-14, see docs/AUDIT.md) |
 | 11 | Scale (~200 vendors), mapping tests, SEO, full re-audit | ✅ Done (2026-11-16, see docs/AUDIT.md) |
+| 12 | Portal ↔ profile field parity, seeded live vendor, profile + portal redesign | ✅ Done (2026-11-17, see docs/field-map.md, docs/screenshots/round-5) |
 
 ## Session log
+
+### 2026-11-17 · Round 5 follow-up: live demo vendor, field parity, profile and portal redesign
+
+Done:
+- **Seeded live vendor.** `vendor@gmail.com / 123456` now owns the published **Aperture & Marigold** listing
+  (`lst-01`): the first demo login upgrades the slim seed row in place to the full sample listing (status and
+  prior edits preserved), so the studio opens on real, editable, Published data. All of it stays in
+  `src/lib/demo-credentials.ts` (delete with the backend). Demo inquiries re-pointed at `lst-01`; `/demo`
+  still acts on every listing.
+- **Edits show on the live profile.** `/vendors/[slug]` now renders `DemoPublicProfile` as a hydration overlay
+  on known slugs too: the server-rendered profile stays the SEO content, and a store-published version of the
+  same slug (i.e. studio edits) swaps in client-side through the shared `listing-view` mapper. `DemoVendorCards`
+  excludes sample-prefixed rows so Aperture never appears twice in `/vendors`. Verified end-to-end with a
+  scripted login → tagline edit → autosave → public page check.
+- **Field parity.** `Package.inclusions?: string[]` added to the contract ("what's included" bullets; sample
+  packages filled). New `docs/field-map.md` maps every publicly rendered element → `VendorListing` field →
+  portal screen; `tests/docs/field-map.test.ts` fails the run when a field `listingToDetail` exposes publicly
+  has no row (it caught a missing FAQ row immediately). Category-specific fields remain generated from
+  `Category.fields` on both sides.
+- **Public profile redesign** (`src/components/profile/`): magazine cover (softer gradient, gold Verified mark,
+  city · price under a short gold rule), key facts as inline serif stats with hairline separators, new quiet
+  "Also serves …" line (`citiesServed`), truly sticky subnav with ink underline on the active section, albums
+  2-up with formatted `album.date`, About with services + styles as hairline chips and ImageReveal portrait,
+  pricing cards with `inclusions` as a gold-check list, calmer grouped inquiry aside (sticky from lg) and
+  action bar, InquiryForm with helper text + aria-invalid wiring.
+- **Portal redesign** (`src/components/studio/`, `src/app/vendor-studio/`): sidebar regrouped
+  Studio / Profile / Media / Business with pinned View preview + Sign out; every screen is ScreenHeader +
+  white `StudioCard` groups; SaveState is a quiet Saving/Saved chip; Overview checklist is visual (progress
+  bar, each item links to its screen) with status, review-note and pending-media notices plus recent
+  inquiries; Pricing gains a per-package **inclusions editor** (add/reorder/remove); PhotoManager gets a
+  media-manager toolbar, upload and rejected states; Albums/Films/FAQs get designed empty states and film
+  reordering. Autosave, lifecycle and mock-store mechanics untouched.
+- **Verification.** Lint, typecheck, 69/69 tests (8 files), `npm run build`; `scripts/screenshots-round5.mjs`
+  against `next start` on 3001: 14/14 checks (no overflow at 390/1440, login lands in studio, Aperture &
+  Marigold Published), no console errors; screenshots in `docs/screenshots/round-5/` (profile, portal
+  overview/photos/pricing at 1440 + 390). `docs/api-contract.md` updated (inclusions, demo seed, overlay).
+
+Decisions / gotchas:
+- The public profile overlay only swaps in when the store row has content (`useDemoPublishedListings` guard),
+  so untouched browsers keep the pure server render.
+- Seeded build (`build:seed`) not re-run this session: list rendering and seed generation are untouched.
+
+Next up: optional browser pass on the venue profile variant; consider rendering `contact.instagram`/`website`
+links on the profile (currently JSON-LD only, mapped in field-map.md).
 
 ### 2026-11-17 · Honeymoon detail pages, blogs, stories and profile polish
 

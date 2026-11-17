@@ -27,9 +27,26 @@ const vendorFaq: Faq[] = [
 ];
 
 const photoPackages: Package[] = [
-  { label: "One day, photography", priceINR: 150000, unit: "per_event", note: "Two photographers, edited gallery" },
-  { label: "Two days, photography and film", priceINR: 320000, unit: "per_event", note: "Adds a filmmaker and a 4 minute film" },
-  { label: "Full wedding week", unit: "on_request", note: "Every event, both of us, all week" },
+  {
+    label: "One day, photography",
+    priceINR: 150000,
+    unit: "per_event",
+    note: "Two photographers, edited gallery",
+    inclusions: ["Two photographers all day", "Edited online gallery", "Preview within two weeks"],
+  },
+  {
+    label: "Two days, photography and film",
+    priceINR: 320000,
+    unit: "per_event",
+    note: "Adds a filmmaker and a 4 minute film",
+    inclusions: ["Everything in one day", "Dedicated filmmaker", "A 4 minute wedding film"],
+  },
+  {
+    label: "Full wedding week",
+    unit: "on_request",
+    note: "Every event, both of us, all week",
+    inclusions: ["Every event, start to finish", "Both photographers and film", "Priority editing"],
+  },
 ];
 
 export const sampleListings: VendorListing[] = [

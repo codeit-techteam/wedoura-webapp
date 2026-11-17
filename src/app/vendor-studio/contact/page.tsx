@@ -1,6 +1,6 @@
 "use client";
 
-import { Field, ScreenHeader, inputClass } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard, inputClass } from "@/components/studio/Field";
 import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, useListingForm } from "@/components/studio/screen";
 
@@ -41,7 +41,9 @@ export default function ContactPage() {
         text="How couples reach you from your profile."
         right={<SaveState status={status} error={error} />}
       />
-      <div className="mt-8 grid gap-7">
+      <div className="mt-8 grid gap-6">
+        <StudioCard title="Shown on your profile">
+        <div className="grid gap-6">
         <Field
           id="ct-whatsapp"
           label="WhatsApp number"
@@ -59,9 +61,13 @@ export default function ContactPage() {
         <Field id="ct-website" label="Website" error={err(form.website, URL_RE, "A full link (https://…).")}>
           <input id="ct-website" type="url" placeholder="https://" value={form.website} onChange={(e) => save({ ...form, website: e.target.value })} className={inputClass} />
         </Field>
-        <Field id="ct-phone" label="Phone (never shown publicly)" hint="Only Wedoura uses this to reach you. It never appears on your profile or anywhere public.">
+        </div>
+        </StudioCard>
+        <StudioCard title="Only for Wedoura" text="Never shown on your profile or anywhere public.">
+        <Field id="ct-phone" label="Phone" hint="Only Wedoura uses this to reach you.">
           <input id="ct-phone" type="tel" inputMode="tel" value={form.phone} onChange={(e) => save({ ...form, phone: e.target.value })} className={inputClass} />
         </Field>
+        </StudioCard>
       </div>
     </div>
   );

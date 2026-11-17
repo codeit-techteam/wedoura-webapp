@@ -47,7 +47,18 @@ const refs = {
 afterEach(cleanup);
 
 describe("a full profile", () => {
-  const listing = makeFullListing();
+  const listing = makeFullListing({
+    packages: [
+      {
+        label: "One day",
+        priceINR: 175000,
+        unit: "per_event",
+        note: "Two of us",
+        inclusions: ["Two photographers through the day", "An online gallery within six weeks"],
+      },
+      { label: "Full week", unit: "on_request", inclusions: ["Everything in One day, every day"] },
+    ],
+  });
   const detail = listingToDetail(listing, refs.categories, refs.cities);
   const similar = [listingToSummary(makeMinimalListing(), refs.categories, refs.cities)];
 
@@ -70,15 +81,33 @@ describe("a full profile", () => {
     expect(text).toContain("Photography + film"); // the category select value
     expect(text).toContain("Second shooter included"); // the true toggle
     expect(text).toContain("Across India and abroad"); // travels
+    expect(text).toContain("Also serves Goa"); // the other city served
     // Price and packages
     expect(text).toContain(formatPrice(175000, "per_event"));
-    for (const pkg of listing.packages) expect(text).toContain(pkg.label);
+    for (const pkg of listing.packages) {
+      expect(text).toContain(pkg.label);
+      for (const inclusion of pkg.inclusions ?? []) expect(text).toContain(inclusion);
+    }
     // Albums and FAQs (collapsed content stays in the markup)
     expect(text).toContain("A test album");
+    expect(text).toContain("January 2026"); // the album date, formatted
     expect(text).toContain("A test question?");
     expect(text).toContain("A test answer.");
     // Similar rail
     expect(text).toContain("Bare Minimum Studio");
+  });
+
+  it("marks a verified vendor", () => {
+    const { container } = render(<VendorProfile vendor={detail} similar={[]} />);
+    expect(container.textContent).toContain("Verified");
+  });
+
+  it("renders services and styles as individual chips", () => {
+    const { container } = render(<VendorProfile vendor={detail} similar={[]} />);
+    const chips = container.querySelector('ul[aria-label="Services and styles"]');
+    expect(chips).not.toBeNull();
+    const items = [...chips!.querySelectorAll("li")].map((li) => li.textContent?.trim());
+    for (const entry of [...listing.services, ...listing.styles]) expect(items).toContain(entry);
   });
 
   it("renders the photographs with alt text and a WhatsApp link", () => {
@@ -125,6 +154,9 @@ describe("a minimal profile", () => {
     // No stray content from sections the listing does not have.
     expect(text).not.toContain("A test album");
     expect(text).not.toContain("A test question?");
+    // Unverified, serving only its own city: no mark, no "also serves" line.
+    expect(text).not.toContain("Verified");
+    expect(text).not.toContain("Also serves");
     // The minimal page renders strictly fewer sections than the full one,
     // and no heading is an empty shell.
     expect(headings.length).toBeLessThan(fullHeadings.length);

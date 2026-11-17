@@ -8,6 +8,7 @@
  */
 import {
   DEMO_EMAIL,
+  DEMO_LISTING_ID,
   DEMO_PASSWORD,
   demoAccount,
   demoInquiries,
@@ -144,8 +145,26 @@ export async function login(emailRaw: string, password: string): Promise<Result<
       db = {
         ...db,
         accounts: [...db.accounts, account],
-        listings: [...db.listings, demoListing()],
         inquiries: [...db.inquiries, ...demoInquiries().filter((i) => !db.inquiries.some((e) => e.id === i.id))],
+      };
+    }
+    // The demo vendor owns the Aperture & Marigold sample row (lst-01). The
+    // seed mirrors it slim (no content), so on login we upgrade it in place
+    // to the full listing — keeping any status the admin set since, and any
+    // edits the vendor already made (a row with content is left alone).
+    const existing = db.listings.find((l) => l.id === DEMO_LISTING_ID);
+    if (!existing || (existing.portfolio.length === 0 && existing.about.length === 0)) {
+      const full: VendorListing = { ...demoListing(), ...(existing ? { status: existing.status } : {}) };
+      db = {
+        ...db,
+        listings: existing
+          ? db.listings.map((l) => (l.id === DEMO_LISTING_ID ? full : l))
+          : [...db.listings, full],
+      };
+    } else if (existing.accountId !== account.id) {
+      db = {
+        ...db,
+        listings: db.listings.map((l) => (l.id === DEMO_LISTING_ID ? { ...l, accountId: account.id } : l)),
       };
     }
     writeDb({ ...db, sessionAccountId: account.id });

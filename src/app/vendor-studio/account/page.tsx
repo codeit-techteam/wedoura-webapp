@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Field, ScreenHeader, inputClass } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard, inputClass } from "@/components/studio/Field";
 import { ScreenSkeleton } from "@/components/studio/screen";
 import { Button } from "@/components/ui/Button";
 import { logout, useMyAccount } from "@/lib/vendor-api";
@@ -44,7 +44,8 @@ export default function AccountPage() {
           </Button>
         </div>
       ) : (
-        <form onSubmit={onSubmit} noValidate className="mt-8 grid gap-7">
+        <StudioCard title="Login details" className="mt-8">
+        <form onSubmit={onSubmit} noValidate className="grid gap-6">
           <Field id="ac-email" label="Email" error={errors.email}>
             <input id="ac-email" type="email" autoComplete="email" value={emailValue} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
           </Field>
@@ -58,6 +59,7 @@ export default function AccountPage() {
             <Button type="submit">Save changes</Button>
           </div>
         </form>
+        </StudioCard>
       )}
       <p className="mt-10 border-t border-line pt-5">
         <button

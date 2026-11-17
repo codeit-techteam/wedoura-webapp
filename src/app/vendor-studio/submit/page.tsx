@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ScreenHeader } from "@/components/studio/Field";
+import { ScreenHeader, StudioCard } from "@/components/studio/Field";
 import { checklistProgress, computeChecklist } from "@/components/studio/checklist";
 import { ScreenSkeleton } from "@/components/studio/screen";
 import { STATUS_EXPLANATION, StatusBadge } from "@/components/studio/status";
@@ -19,7 +19,11 @@ export default function SubmitPage() {
 
   return (
     <div className="max-w-2xl">
-      <ScreenHeader title="Submit for review" right={<StatusBadge status={listing.status} />} />
+      <ScreenHeader
+        title="Submit for review"
+        text="Profiles are reviewed by hand before going live."
+        right={<StatusBadge status={listing.status} />}
+      />
       <p className="mt-5 max-w-prose text-body text-mute">{STATUS_EXPLANATION[listing.status]}</p>
 
       {listing.status === "changes_requested" && listing.reviewNote && (
@@ -30,10 +34,18 @@ export default function SubmitPage() {
       )}
 
       {(listing.status === "draft" || listing.status === "changes_requested") && (
-        <>
-          <ul className="mt-8 border-t border-line bg-white" aria-label="Checklist">
+        <StudioCard
+          title="Before you submit"
+          className="mt-8"
+          right={
+            <p className="label text-mute">
+              {done} of {total}
+            </p>
+          }
+        >
+          <ul className="divide-y divide-line" aria-label="Checklist">
             {items.map((item) => (
-              <li key={item.key} className="flex items-center justify-between gap-6 border-b border-line px-4 py-3">
+              <li key={item.key} className="flex items-center justify-between gap-6 py-3">
                 <span className={item.done ? "text-small text-mute line-through" : "text-small text-ink"}>{item.label}</span>
                 {item.done ? (
                   <span className="label text-mute">Done</span>
@@ -45,7 +57,7 @@ export default function SubmitPage() {
               </li>
             ))}
           </ul>
-          <p className="mt-5 max-w-prose text-small text-mute">
+          <p className="mt-5 max-w-prose border-t border-line pt-4 text-small text-mute">
             {complete
               ? "Everything is in place. We review profiles by hand, usually within a few days, and nothing locks while you wait — you can keep editing."
               : `${total - done} item${total - done === 1 ? "" : "s"} left before you can submit.`}
@@ -56,7 +68,7 @@ export default function SubmitPage() {
             onClick={() => {
               void submitListingForReview().then((r) => setError(r.ok ? null : r.error));
             }}
-            className="label tap mt-6 inline-flex items-center justify-center bg-ink px-7 py-3.5 text-white transition-chrome hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
+            className="label tap mt-5 inline-flex items-center justify-center bg-ink px-7 py-3.5 text-white transition-chrome hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
           >
             Submit for review
           </button>
@@ -65,7 +77,7 @@ export default function SubmitPage() {
               {error}
             </p>
           )}
-        </>
+        </StudioCard>
       )}
 
       {listing.status === "in_review" && (

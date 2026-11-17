@@ -1,6 +1,6 @@
 "use client";
 
-import { Field, ScreenHeader, inputClass } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard, inputClass } from "@/components/studio/Field";
 import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, useListingForm } from "@/components/studio/screen";
 
@@ -29,7 +29,9 @@ export default function BusinessPage() {
         text="The name, the one-line tagline and the about text couples read on your profile."
         right={<SaveState status={status} error={error} />}
       />
-      <div className="mt-8 grid gap-7">
+      <div className="mt-8 grid gap-6">
+        <StudioCard title="Name & tagline">
+          <div className="grid gap-6">
         <Field id="bd-name" label="Business name" error={form.name.trim() ? undefined : "The name cannot be empty."}>
           <input
             id="bd-name"
@@ -51,7 +53,11 @@ export default function BusinessPage() {
             className={inputClass}
           />
         </Field>
-        <Field id="bd-about" label="About" hint="A blank line starts a new paragraph.">
+          </div>
+        </StudioCard>
+
+        <StudioCard title="About" text="The text couples read on your profile. A blank line starts a new paragraph.">
+        <Field id="bd-about" label="About text">
           <textarea
             id="bd-about"
             rows={7}
@@ -70,7 +76,10 @@ export default function BusinessPage() {
             className={inputClass + " resize-y"}
           />
         </Field>
-        <div className="grid gap-7 sm:grid-cols-2">
+        </StudioCard>
+
+        <StudioCard title="The facts">
+        <div className="grid gap-6 sm:grid-cols-2">
           <Field id="bd-team" label="Team" hint="E.g. “Two photographers”.">
             <input
               id="bd-team"
@@ -101,6 +110,7 @@ export default function BusinessPage() {
             />
           </Field>
         </div>
+        </StudioCard>
       </div>
     </div>
   );

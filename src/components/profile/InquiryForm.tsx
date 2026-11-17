@@ -37,7 +37,8 @@ const field =
 
 /**
  * The inquiry form. Screen only: validates, shows a success state, sends
- * nothing anywhere yet.
+ * nothing anywhere yet. Labels sit over hairline fields; helpers are quiet
+ * muted lines, errors appear inline under the field they belong to.
  */
 export function InquiryForm({ vendorName, compact = false }: Props) {
   const [values, setValues] = useState<Values>(EMPTY);
@@ -77,10 +78,17 @@ export function InquiryForm({ vendorName, compact = false }: Props) {
 
   const error = (key: keyof Values) =>
     errors[key] ? (
-      <p className="mt-2 text-small text-ink" role="alert">
+      <p id={`inq-${key}-error`} role="alert" className="mt-2 flex items-baseline gap-2 text-small text-ink">
+        <span aria-hidden="true" className="h-px w-3 shrink-0 self-center bg-gold" />
         {errors[key]}
       </p>
     ) : null;
+
+  const fieldProps = (key: keyof Values, helpId?: string) => ({
+    "aria-invalid": errors[key] ? true : undefined,
+    "aria-describedby": errors[key] ? `inq-${key}-error` : helpId,
+    className: cn(field, "mt-3", errors[key] && "border-ink"),
+  });
 
   return (
     <form onSubmit={onSubmit} noValidate className={cn("grid gap-y-6", !compact && "gap-x-10 gap-y-8 md:grid-cols-2")}>
@@ -88,14 +96,14 @@ export function InquiryForm({ vendorName, compact = false }: Props) {
         <label htmlFor="inq-name" className="label text-mute">
           Your name
         </label>
-        <input id="inq-name" type="text" autoComplete="name" value={values.name} onChange={set("name")} className={cn(field, "mt-3")} />
+        <input id="inq-name" type="text" autoComplete="name" value={values.name} onChange={set("name")} {...fieldProps("name")} />
         {error("name")}
       </div>
       <div>
         <label htmlFor="inq-partner" className="label text-mute">
           Partner&apos;s name (optional)
         </label>
-        <input id="inq-partner" type="text" value={values.partner} onChange={set("partner")} className={cn(field, "mt-3")} />
+        <input id="inq-partner" type="text" value={values.partner} onChange={set("partner")} {...fieldProps("partner")} />
       </div>
       <div>
         <label htmlFor="inq-whatsapp" className="label text-mute">
@@ -109,21 +117,25 @@ export function InquiryForm({ vendorName, compact = false }: Props) {
           placeholder="+91"
           value={values.whatsapp}
           onChange={set("whatsapp")}
-          className={cn(field, "mt-3")}
+          {...fieldProps("whatsapp", "inq-whatsapp-help")}
         />
-        {error("whatsapp")}
+        {error("whatsapp") ?? (
+          <p id="inq-whatsapp-help" className="mt-2 text-small text-mute">
+            The vendor replies here. 10 digits, with or without +91.
+          </p>
+        )}
       </div>
       <div>
         <label htmlFor="inq-date" className="label text-mute">
           Wedding date (if you have one)
         </label>
-        <input id="inq-date" type="date" value={values.date} onChange={set("date")} className={cn(field, "mt-3")} />
+        <input id="inq-date" type="date" value={values.date} onChange={set("date")} {...fieldProps("date")} />
       </div>
       <div>
         <label htmlFor="inq-city" className="label text-mute">
           City
         </label>
-        <input id="inq-city" type="text" value={values.city} onChange={set("city")} className={cn(field, "mt-3")} />
+        <input id="inq-city" type="text" value={values.city} onChange={set("city")} {...fieldProps("city")} />
         {error("city")}
       </div>
       <div className={cn(!compact && "md:col-span-2")}>
@@ -136,7 +148,8 @@ export function InquiryForm({ vendorName, compact = false }: Props) {
           value={values.message}
           onChange={set("message")}
           placeholder="Dates, places, what you have in mind."
-          className={cn(field, "mt-3 resize-y")}
+          {...fieldProps("message")}
+          className={cn(field, "mt-3 resize-y", errors.message && "border-ink")}
         />
         {error("message")}
       </div>

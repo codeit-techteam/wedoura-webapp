@@ -18,7 +18,11 @@ type Props = {
 /** Pick photos from the uploaded pool; selection order is shown. */
 export function PhotoPicker({ photos, selectedIds, onToggle, max, label }: Props) {
   if (photos.length === 0) {
-    return <p className="text-small text-mute">Upload photographs first; they appear here to choose from.</p>;
+    return (
+      <p className="border border-dashed border-line bg-white px-4 py-6 text-center text-small text-mute">
+        Upload photographs first; they appear here to choose from.
+      </p>
+    );
   }
   return (
     <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6" aria-label={label}>

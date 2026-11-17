@@ -137,46 +137,85 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
 
       {/* Upload progress */}
       {uploading.length > 0 && (
-        <ul className="mt-4 flex flex-col gap-2" aria-label="Uploading">
-          {uploading.map((u) => (
-            <li key={u.key} className="flex items-center gap-4">
-              <span className="min-w-0 flex-1 truncate text-small text-mute">{u.name}</span>
-              <span className="relative h-1 w-32 overflow-hidden bg-line" aria-hidden="true">
-                <span className="absolute inset-y-0 left-0 bg-ink transition-all" style={{ width: `${u.progress}%` }} />
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-4 border border-line bg-white px-4 py-3">
+          <p className="label text-mute">Uploading</p>
+          <ul className="mt-2 flex flex-col gap-2" aria-label="Uploading">
+            {uploading.map((u) => (
+              <li key={u.key} className="flex items-center gap-4">
+                <span className="min-w-0 flex-1 truncate text-small text-mute">{u.name}</span>
+                <span className="relative h-1 w-32 overflow-hidden bg-line" aria-hidden="true">
+                  <span className="absolute inset-y-0 left-0 bg-ink transition-all" style={{ width: `${u.progress}%` }} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* Rejected files */}
       {rejected.length > 0 && (
-        <div className="mt-4 border border-ink bg-white px-4 py-3" role="alert">
-          {rejected.map((message) => (
-            <p key={message} className="text-small text-ink">
-              {message}
-            </p>
-          ))}
+        <div className="mt-4 flex items-start justify-between gap-4 border border-ink bg-white px-4 py-3" role="alert">
+          <div className="min-w-0">
+            <p className="label text-ink">Not added</p>
+            {rejected.map((message) => (
+              <p key={message} className="mt-1 text-small text-ink">
+                {message}
+              </p>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setRejected([])}
+            className="label tap shrink-0 px-2 text-mute transition-chrome hover:text-ink"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* Bulk bar */}
-      {selected.size > 0 && (
-        <div className="mt-6 flex items-center justify-between gap-4 border border-line bg-white px-4 py-2.5">
-          <p className="text-small text-mute">{selected.size} selected</p>
-          <button
-            type="button"
-            onClick={() => remove([...selected])}
-            className="label tap px-3 text-ink transition-chrome hover:opacity-70"
-          >
-            Delete selected
-          </button>
+      {/* Toolbar: count, selection and the bulk actions */}
+      {photos.length > 0 && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border border-line bg-white px-4 py-2">
+          <p className="text-small text-mute">
+            {selected.size > 0
+              ? `${selected.size} of ${photos.length} selected`
+              : `${photos.length} photograph${photos.length === 1 ? "" : "s"} — drag to reorder`}
+          </p>
+          <div className="flex items-center gap-1">
+            {selected.size < photos.length && (
+              <button
+                type="button"
+                onClick={() => setSelected(new Set(photos.map((p) => p.id)))}
+                className="label tap px-3 text-mute transition-chrome hover:text-ink"
+              >
+                Select all
+              </button>
+            )}
+            {selected.size > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setSelected(new Set())}
+                  className="label tap px-3 text-mute transition-chrome hover:text-ink"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove([...selected])}
+                  className="label tap border border-ink px-3 py-1.5 text-ink transition-chrome hover:bg-ink hover:text-white"
+                >
+                  Delete selected
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
 
       {/* Grid */}
       {photos.length > 0 && (
-        <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4" aria-label="Photographs">
+        <ul className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4" aria-label="Photographs">
           {photos.map((photo, i) => (
             <li
               key={photo.id}
@@ -202,7 +241,8 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
                   />
                 </label>
                 {pending.has(photo.id) && (
-                  <span className="label absolute right-1.5 bottom-1.5 bg-white/90 px-2 py-1 text-mute">
+                  <span className="label absolute right-1.5 bottom-1.5 inline-flex items-center gap-1.5 bg-white/90 px-2 py-1 text-mute">
+                    <span aria-hidden="true" className="size-1.5 rounded-full bg-gold" />
                     Pending review
                   </span>
                 )}

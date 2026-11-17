@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Field, ScreenHeader, inputClass, selectClass } from "@/components/studio/Field";
+import { Field, ScreenHeader, StudioCard, inputClass, selectClass } from "@/components/studio/Field";
 import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, useListingForm } from "@/components/studio/screen";
 import type { City } from "@/data/types";
@@ -36,7 +36,8 @@ export default function LocationsPage() {
         text="Where you are based, the cities you serve and how far you travel."
         right={<SaveState status={status} error={error} />}
       />
-      <div className="mt-8 grid gap-7">
+      <div className="mt-8 grid gap-6">
+        <StudioCard title="Home base">
         <Field id="lo-base" label="Base city">
           <select
             id="lo-base"
@@ -51,6 +52,9 @@ export default function LocationsPage() {
             ))}
           </select>
         </Field>
+        </StudioCard>
+        <StudioCard title="Where you work">
+        <div className="grid gap-6">
         <Field id="lo-served" label="Cities served" hint="Couples filtering by these cities will find you.">
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {cities.map((city) => (
@@ -77,6 +81,8 @@ export default function LocationsPage() {
             className={inputClass}
           />
         </Field>
+        </div>
+        </StudioCard>
       </div>
     </div>
   );

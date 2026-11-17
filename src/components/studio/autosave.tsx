@@ -102,10 +102,29 @@ export function useListingAutosave() {
   return { status, error, schedule, flush };
 }
 
-/** The visible Saving → Saved indicator. */
+/** The visible Saving → Saved indicator: one quiet chip, the same on every screen. */
 export function SaveState({ status, error, className }: { status: SaveStatus; error?: string; className?: string }) {
   return (
-    <p aria-live="polite" className={cn("label", status === "error" ? "text-ink" : "text-mute", className)}>
+    <p
+      aria-live="polite"
+      className={cn(
+        "label inline-flex min-h-8 items-center gap-2 border bg-white px-3 py-1.5",
+        status === "error" ? "border-ink text-ink" : "border-line text-mute",
+        status === "idle" && "invisible",
+        className,
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className={cn(
+          "size-1.5 shrink-0 rounded-full",
+          status === "saving" && "animate-pulse bg-gold",
+          status === "saved" && "bg-ink",
+          status === "error" && "bg-gold",
+          status === "idle" && "bg-line",
+        )}
+      />
+      {status === "idle" && "Saved"}
       {status === "saving" && "Saving…"}
       {status === "saved" && "Saved"}
       {status === "error" && (error ?? "Could not save")}

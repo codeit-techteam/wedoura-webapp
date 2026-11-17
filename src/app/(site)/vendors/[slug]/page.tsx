@@ -45,7 +45,12 @@ export default async function VendorPage({ params }: PageProps<"/vendors/[slug]"
   }
   if (vendor.venue) redirect(`/venues/${vendor.slug}`);
 
-  const [similar, category] = await Promise.all([listSimilar(slug), getCategory(vendor.category)]);
+  const [similar, category, categories, cities] = await Promise.all([
+    listSimilar(slug),
+    getCategory(vendor.category),
+    listAllCategories(),
+    listAllCities(),
+  ]);
   return (
     <>
       <JsonLd
@@ -58,7 +63,15 @@ export default async function VendorPage({ params }: PageProps<"/vendors/[slug]"
           ]),
         ]}
       />
-      <VendorProfile vendor={vendor} similar={similar} categoryFields={category?.fields} />
+      {/* The store overlay lets studio edits to this listing show live in the
+          browser; the server-rendered profile below stays the SEO content. */}
+      <DemoPublicProfile
+        slug={slug}
+        categories={categories.map(({ slug: s, name, fields }) => ({ slug: s, name, fields }))}
+        cities={cities.map(({ slug: s, name }) => ({ slug: s, name }))}
+        similar={similar}
+        fallback={<VendorProfile vendor={vendor} similar={similar} categoryFields={category?.fields} />}
+      />
     </>
   );
 }
