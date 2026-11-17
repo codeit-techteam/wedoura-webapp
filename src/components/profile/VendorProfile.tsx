@@ -32,7 +32,7 @@ type Props = {
 const PORTFOLIO_INITIAL = 12;
 
 /** Room for the sticky navbar + subnav when jumping to a section anchor. */
-const ANCHOR_OFFSET = "scroll-mt-10";
+const ANCHOR_OFFSET = "scroll-profile-anchor";
 
 /** "mumbai-suburbs" -> "Mumbai Suburbs"; cities served arrive as slugs. */
 function cityLabel(slug: string): string {
@@ -130,6 +130,9 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
   // Other cities the vendor covers, shown as a quiet line under the facts.
   const alsoServes = vendor.citiesServed.filter((slug) => slug !== vendor.baseCity).map(cityLabel);
 
+  // The round mark on the hero; the first card photo stands in when unset.
+  const avatar = vendor.avatar ?? vendor.cardPhotos[0];
+
   // Services and styles as quiet chips in the about section, deduplicated.
   const chips = [...new Set([...vendor.services, ...vendor.styles])];
 
@@ -146,13 +149,14 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
 
   return (
     <main className="pb-24 lg:pb-0">
-      {/* Opener: full-bleed cover with the essentials over a soft gradient. */}
-      <section data-nav-dark className="relative -mt-nav flex min-h-[75svh] flex-col justify-end bg-ink text-white">
+      {/* Opener: fixed-height cover; the identity block sits in the scrimmed
+          lower band, so it never fights the subject of the photograph. */}
+      <section data-nav-dark className="relative -mt-nav flex h-[60svh] flex-col justify-end bg-ink text-white md:h-[72svh]">
         {vendor.cover && (
           <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={75} objectPosition="50% 45%" />
         )}
-        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/90 via-ink/30 to-ink/15" />
-        <Container className="relative pb-10 md:pb-16">
+        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/95 via-ink/45 to-ink/10" />
+        <Container className="relative pb-10 md:pb-14">
           <Breadcrumb
             tone="white"
             items={[
@@ -161,22 +165,24 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
               { label: vendor.name },
             ]}
           />
-          <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 md:mt-9">
-            <Label as="span" tone="white" className="opacity-85">
-              {vendor.categoryName}
-            </Label>
+          {avatar && (
+            <span className="relative mt-6 block size-18 overflow-hidden rounded-full border border-white/80 md:mt-8">
+              <Photo photo={avatar} mode="cover" sizes="72px" objectPosition="50% 30%" />
+            </span>
+          )}
+          <MaskedHeading as="h1" className="mt-4 max-w-4xl font-serif text-hero" lines={[vendor.name]} />
+          {vendor.tagline && <p className="mt-3 max-w-xl text-lead text-white/85">{vendor.tagline}</p>}
+          <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-body-lg text-white/90">
+            <span>{vendor.categoryName}</span>
             {vendor.verified && (
-              <span className="inline-flex items-center gap-2">
-                <VerifiedMark />
+              <span className="inline-flex items-center gap-1.5 border border-gold/70 px-2.5 py-1">
+                <VerifiedMark size={14} />
                 <span className="label text-white">Verified</span>
               </span>
             )}
-          </div>
-          <MaskedHeading as="h1" className="mt-4 max-w-4xl font-serif text-hero" lines={[vendor.name]} />
-          {vendor.tagline && <p className="mt-4 max-w-xl text-lead text-white/85">{vendor.tagline}</p>}
-          <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-body-lg text-white/90">
+            <span aria-hidden="true" className="size-1 rounded-full bg-white/60" />
             <span>{vendor.cityName}</span>
-            <span aria-hidden="true" className="h-px w-6 bg-gold" />
+            <span aria-hidden="true" className="size-1 rounded-full bg-white/60" />
             <span>{startingPrice}</span>
           </p>
         </Container>
@@ -185,15 +191,15 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
       {/* Key facts: inline stats, serif values under label captions, hairlines between. */}
       {facts.length > 0 && (
         <section aria-label="Key facts" className="border-b border-line bg-white">
-          <Container className="py-8 md:py-12">
-            <dl className="grid grid-cols-2 gap-y-8 md:grid-cols-4 md:gap-y-10">
+          <Container className="py-7 md:py-10">
+            <dl className="grid grid-cols-2 gap-y-7 md:grid-cols-4 md:gap-y-8">
               {facts.map((fact) => (
                 <div
                   key={fact.label}
-                  className="border-l border-line pr-4 pl-5 odd:border-l-0 odd:pl-0 md:pl-8 md:odd:border-l md:odd:pl-8 md:nth-[4n+1]:border-l-0 md:nth-[4n+1]:pl-0"
+                  className="min-w-0 border-l border-line pr-4 pl-5 break-words odd:border-l-0 odd:pl-0 md:pl-8 md:odd:border-l md:odd:pl-8 md:nth-[4n+1]:border-l-0 md:nth-[4n+1]:pl-0"
                 >
                   <dt className="label text-mute">{fact.label}</dt>
-                  <dd className="mt-2 font-serif text-h3">{fact.value}</dd>
+                  <dd className="mt-1.5 font-serif text-h3 leading-tight">{fact.value}</dd>
                 </div>
               ))}
             </dl>
@@ -378,7 +384,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
           <aside
             id="inquiry"
             aria-label="Price and inquiry"
-            className={`no-scrollbar border-t border-line py-section-sm ${ANCHOR_OFFSET} lg:sticky lg:top-nav lg:max-h-[calc(100svh-var(--nav-h))] lg:self-start lg:overflow-y-auto lg:border-0 lg:py-0 lg:pt-section-sm lg:pb-section-sm`}
+            className={`no-scrollbar border-t border-line py-section-sm ${ANCHOR_OFFSET} lg:sticky lg:top-profile-sticky lg:z-10 lg:max-h-[calc(100svh-var(--profile-sticky-top)-1rem)] lg:self-start lg:overflow-y-auto lg:border-0 lg:py-0 lg:pt-4 lg:pb-section-sm`}
           >
             <div className="border border-line bg-white">
               <div className="p-6 md:p-8">

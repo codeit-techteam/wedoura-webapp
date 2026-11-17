@@ -197,6 +197,8 @@ export interface VendorListing {
   about: string[];
   /** Portrait or team photograph shown beside the about text. */
   aboutPhoto?: Photo;
+  /** Round mark shown on cards and the profile hero; first card photo when unset. */
+  avatar?: Photo;
   team?: string;
   yearsActive?: number;
   /* Categorisation */
@@ -240,6 +242,8 @@ export interface VendorSummary {
   startingPriceINR?: number;
   priceUnit: PriceUnit;
   cardPhotos: Photo[];
+  /** Round mark on the card; UI falls back to the first card photo. */
+  avatar?: Photo;
   featured: boolean;
   verified: boolean;
   /** ISO date of first publication; sorts "newest" and feeds sitemap lastmod. */
@@ -268,6 +272,8 @@ export interface VendorDetail {
   startingPriceINR?: number;
   priceUnit: PriceUnit;
   cover?: Photo;
+  /** Round mark on the hero; UI falls back to the first card photo. */
+  avatar?: Photo;
   cardPhotos: Photo[];
   portfolio: Photo[];
   albums: Album[];

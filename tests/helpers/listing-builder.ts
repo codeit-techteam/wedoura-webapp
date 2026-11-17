@@ -31,6 +31,7 @@ export function makeFullListing(overrides: Partial<VendorListing> = {}): VendorL
     tagline: "A very distinctive tagline",
     about: ["First about paragraph, quite unique.", "Second about paragraph, also unique."],
     aboutPhoto: photos.p46,
+    avatar: photos.p35,
     team: "Two photographers and a dog",
     yearsActive: 11,
     // Categorisation

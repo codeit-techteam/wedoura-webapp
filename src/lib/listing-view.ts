@@ -39,6 +39,7 @@ export function listingToSummary(
     startingPriceINR: listing.startingPriceINR,
     priceUnit: listing.priceUnit,
     cardPhotos: visiblePhotos(listing.cardPhotos, pending),
+    avatar: listing.avatar && !pending.has(listing.avatar.id) ? listing.avatar : undefined,
     featured: listing.featured,
     verified: listing.verified,
     publishedAt: listing.publishedAt,
@@ -74,6 +75,7 @@ export function listingToDetail(
     startingPriceINR: listing.startingPriceINR,
     priceUnit: listing.priceUnit,
     cover: listing.cover && !pending.has(listing.cover.id) ? listing.cover : undefined,
+    avatar: listing.avatar && !pending.has(listing.avatar.id) ? listing.avatar : undefined,
     cardPhotos: visiblePhotos(listing.cardPhotos, pending),
     portfolio: visiblePhotos(listing.portfolio, pending),
     albums: listing.albums
@@ -95,6 +97,7 @@ export function listingMediaIds(listing: VendorListing): Set<string> {
   for (const p of listing.cardPhotos) ids.add(p.id);
   if (listing.cover) ids.add(listing.cover.id);
   if (listing.aboutPhoto) ids.add(listing.aboutPhoto.id);
+  if (listing.avatar) ids.add(listing.avatar.id);
   for (const album of listing.albums) for (const p of album.photos) ids.add(p.id);
   for (const film of listing.films) ids.add(film.id);
   return ids;

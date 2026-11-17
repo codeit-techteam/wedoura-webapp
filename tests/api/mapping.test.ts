@@ -44,6 +44,7 @@ describe("the card (VendorSummary)", () => {
       startingPriceINR: 175000,
       priceUnit: "per_event",
       cardPhotos: listing.cardPhotos,
+      avatar: listing.avatar,
       featured: true,
       verified: true,
       publishedAt: "2026-03-05",
@@ -76,6 +77,7 @@ describe("the profile (VendorDetail)", () => {
     expect(detail!.startingPriceINR).toBe(listing.startingPriceINR);
     expect(detail!.priceUnit).toBe(listing.priceUnit);
     expect(detail!.cover).toEqual(listing.cover);
+    expect(detail!.avatar).toEqual(listing.avatar);
     expect(detail!.portfolio).toEqual(listing.portfolio);
     expect(detail!.albums).toEqual(listing.albums);
     expect(detail!.films).toEqual(listing.films);

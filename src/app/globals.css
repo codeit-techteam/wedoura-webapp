@@ -156,6 +156,11 @@
   min-width: var(--tap-target);
 }
 
+/* Vendor profile: in-page anchors clear navbar + section subnav. */
+@utility scroll-profile-anchor {
+  scroll-margin-top: calc(var(--profile-sticky-top) + 0.5rem);
+}
+
 @utility container-site {
   width: 100%;
   max-width: var(--container-site);

@@ -51,7 +51,7 @@ export function StickySubnav({ sections }: Props) {
   }, [sections]);
 
   return (
-    <nav aria-label="Profile sections" className="sticky top-nav z-20 border-b border-line bg-white">
+    <nav aria-label="Profile sections" className="sticky top-nav z-30 border-b border-line bg-white">
       <Container>
         <ul className="no-scrollbar flex gap-7 overflow-x-auto md:gap-10">
           {sections.map((section) => (
