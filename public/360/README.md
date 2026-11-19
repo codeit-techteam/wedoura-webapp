@@ -1,10 +1,18 @@
-# 360° placeholder panoramas
+# 360° panoramas
 
-These three files are ordinary venue photographs stretched to 2:1 and clearly
-captioned as placeholders. They exist only so the virtual tour works.
+Real equirectangular photographs (360°×180°, 2:1, 4096×2048), downscaled from
+Poly Haven's free 8K tonemapped JPGs. All are CC0 (public domain); credits are
+kept anyway in `alt.json` and shown small in the viewer.
 
-**To supply real imagery:** shoot or export equirectangular JPGs (full
-360°×180°, 2:1 aspect, at least 4096×2048, ideally 8192×4096), one per venue
-space, and replace `sample-01.jpg` … `sample-03.jpg` (or add more files and
-update the `tour` entries in `src/data/vendors.ts`: id, display name,
-panorama path, and which spaces each one links to).
+| File | Source asset | Author |
+| --- | --- | --- |
+| pano01.jpg | [Historic Cloister Passage](https://polyhaven.com/a/historic_cloister_passage) | Elvis Posa |
+| pano02.jpg | [Symmetrical Garden 02](https://polyhaven.com/a/symmetrical_garden_02) | Dimitrios Savva, Jarod Guest |
+| pano03.jpg | [Vestibule](https://polyhaven.com/a/vestibule) | Sergej Majboroda |
+| pano04.jpg | [Glass Passage](https://polyhaven.com/a/glass_passage) | Greg Zaal |
+
+**To add or replace:** drop in equirectangular JPGs (2:1, at least 4000px
+wide), add an `alt.json` entry (alt text, plus credit where one is due), then
+run `npm run photos` — they join `src/data/photos.ts` with
+`projection: "equirectangular"` and can be used in portfolios and venue tours
+(`venue.tour` in `src/data/vendors.ts` references them by photo id).

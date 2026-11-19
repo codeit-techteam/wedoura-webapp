@@ -4,7 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
+import { PhotoSphere } from "@/components/media/PhotoSphere";
 import type { Photo as PhotoData } from "@/data/types";
+import { cn } from "@/lib/cn";
 import { viewer } from "@/lib/motion";
 
 type Props = {
@@ -26,6 +28,7 @@ type Props = {
 export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "photo", links }: Props) {
   const photo = index === null ? null : (photos[index] ?? null);
   const open = photo !== null;
+  const is360 = photo?.projection === "equirectangular";
   const closeRef = useRef<HTMLButtonElement>(null);
   const reduce = useReducedMotion();
 
@@ -86,31 +89,39 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
               key={photo.id}
               layoutId={`${layoutPrefix}-${photo.id}`}
               transition={viewer.photo}
-              drag={reduce ? false : "x"}
+              drag={is360 || reduce ? false : "x"}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={(_, info) => {
                 if (info.offset.x < -60) step(1);
                 else if (info.offset.x > 60) step(-1);
               }}
-              className="relative w-full"
-              style={{
-                aspectRatio: `${photo.width} / ${photo.height}`,
-                maxWidth: `calc((100vh - 9rem) * ${photo.width / photo.height})`,
-              }}
+              className={cn("relative w-full", is360 && "h-full")}
+              style={
+                is360
+                  ? undefined
+                  : {
+                      aspectRatio: `${photo.width} / ${photo.height}`,
+                      maxWidth: `calc((100vh - 9rem) * ${photo.width / photo.height})`,
+                    }
+              }
             >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                sizes="100vw"
-                quality={90}
-                placeholder="blur"
-                blurDataURL={photo.blurDataURL}
-                className="object-contain select-none"
-                draggable={false}
-                priority
-              />
+              {is360 ? (
+                <PhotoSphere photo={photo} />
+              ) : (
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="100vw"
+                  quality={90}
+                  placeholder="blur"
+                  blurDataURL={photo.blurDataURL}
+                  className="object-contain select-none"
+                  draggable={false}
+                  priority
+                />
+              )}
             </motion.div>
 
             {photos.length > 1 && (
@@ -119,7 +130,10 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
                   type="button"
                   onClick={() => step(-1)}
                   aria-label="Previous photo"
-                  className="label tap absolute top-1/2 left-2 hidden -translate-y-1/2 px-3 text-white/70 hover:text-white md:block"
+                  className={cn(
+                    "label tap absolute top-1/2 left-2 z-10 -translate-y-1/2 px-3 text-white/70 hover:text-white",
+                    is360 ? "bg-ink/50" : "hidden md:block",
+                  )}
                 >
                   Prev
                 </button>
@@ -127,7 +141,10 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
                   type="button"
                   onClick={() => step(1)}
                   aria-label="Next photo"
-                  className="label tap absolute top-1/2 right-2 hidden -translate-y-1/2 px-3 text-white/70 hover:text-white md:block"
+                  className={cn(
+                    "label tap absolute top-1/2 right-2 z-10 -translate-y-1/2 px-3 text-white/70 hover:text-white",
+                    is360 ? "bg-ink/50" : "hidden md:block",
+                  )}
                 >
                   Next
                 </button>

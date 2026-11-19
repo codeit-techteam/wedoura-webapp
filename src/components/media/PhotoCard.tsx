@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Badge360 } from "@/components/media/Badge360";
 import { cardRatioClass, useCardRatio, type CardRatio } from "@/components/media/CardRow";
 import { Photo } from "@/components/media/Photo";
 import type { Photo as PhotoData } from "@/data/types";
@@ -75,6 +76,7 @@ export function PhotoCard({
           <Photo photo={photo} sizes={sizes} priority={priority} />
         )}
       </motion.div>
+      {photo.projection === "equirectangular" && <Badge360 />}
     </motion.div>
   );
 

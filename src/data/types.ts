@@ -17,6 +17,8 @@ export interface Photo {
   /** Photographer and source for sample images, e.g. "Alok Verma / Unsplash". */
   credit?: string;
   blurDataURL: string;
+  /** "equirectangular" marks a 360° photo (2:1, ≥4000px wide). Absent means "flat". */
+  projection?: "flat" | "equirectangular";
 }
 
 export interface Film {
@@ -115,12 +117,45 @@ export interface Contact {
   phone?: string;
 }
 
+/** One space in a venue's 360° tour. The photo it points at must be an
+ *  equirectangular photo in the listing's portfolio, so pending-media rules
+ *  apply to scenes for free. Angles are degrees: yaw 0–360 from the
+ *  panorama's centre, pitch -90 (down) to 90 (up). */
+export interface TourScene {
+  id: string;
+  /** Portfolio photo id of an equirectangular photo. */
+  photoId: string;
+  name: string;
+  /** Where the visitor looks first in this scene. Defaults to 0. */
+  startYaw?: number;
+}
+
+/** A one-way arrow between scenes, drawn at `yaw` inside `from`. */
+export interface TourLink {
+  from: string;
+  to: string;
+  yaw: number;
+}
+
+/** A labelled point of interest inside one scene. */
+export interface TourMarker {
+  scene: string;
+  yaw: number;
+  pitch: number;
+  label: string;
+}
+
+export interface VenueTourData {
+  scenes: TourScene[];
+  links: TourLink[];
+  markers?: TourMarker[];
+}
+
 export interface VenueDetails {
   capacity: { min: number; max: number };
-  view360Url?: string;
   spaces: string[];
-  /** 360° tour nodes; panorama is an equirectangular image path. */
-  tour?: { id: string; name: string; panorama: string; links: string[] }[];
+  /** Linked 360° tour over equirectangular portfolio photos. */
+  tour?: VenueTourData;
 }
 
 export type InquiryStatus = "new" | "replied" | "closed";

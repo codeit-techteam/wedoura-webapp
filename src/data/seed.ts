@@ -1,6 +1,9 @@
 import { categories } from "./categories";
 import { cities } from "./cities";
 import { photoList } from "./photos";
+
+// Seed content stays flat; the hand-written listings own the 360° demos.
+const flatPhotos = photoList.filter((p) => p.projection !== "equirectangular");
 import type {
   Album,
   BlogPost,
@@ -42,7 +45,7 @@ const chance = (random: () => number, p: number) => random() < p;
 /** k photos starting at a deterministic offset, wrapping around the pool. */
 function photosFrom(start: number, k: number): Photo[] {
   const result: Photo[] = [];
-  for (let i = 0; i < k; i++) result.push(photoList[(start + i) % photoList.length]);
+  for (let i = 0; i < k; i++) result.push(flatPhotos[(start + i) % flatPhotos.length]);
   return result;
 }
 
@@ -165,7 +168,7 @@ export function generateSeedListings(): VendorListing[] {
 
     // Varied completeness: every tenth listing is minimal but valid.
     const minimal = i % 10 === 7;
-    const photoStart = (i * 7) % photoList.length;
+    const photoStart = (i * 7) % flatPhotos.length;
     const cardPhotos = photosFrom(photoStart, 3);
     const portfolio = photosFrom(photoStart, minimal ? 4 : int(random, 8, 14));
 
@@ -236,7 +239,7 @@ export function generateSeedListings(): VendorListing[] {
       slug,
       tagline: pick(random, TAGLINES[category.slug]),
       about: minimal ? [pick(random, ABOUT_A)] : [pick(random, ABOUT_A), pick(random, ABOUT_B)],
-      ...(minimal ? {} : { aboutPhoto: photoList[(photoStart + 20) % photoList.length] }),
+      ...(minimal ? {} : { aboutPhoto: flatPhotos[(photoStart + 20) % flatPhotos.length] }),
       ...(minimal ? {} : { team: pick(random, ["A team of two", "A small studio", "Family run"] as const) }),
       ...(minimal ? {} : { yearsActive: int(random, 2, 18) }),
       category: category.slug,
@@ -287,7 +290,7 @@ export function generateSeedWeddings(): RealWedding[] {
 
   return Array.from({ length: WEDDING_COUNT }, (_, i) => {
     const city = cities[i % cities.length];
-    const photoStart = (i * 11) % photoList.length;
+    const photoStart = (i * 11) % flatPhotos.length;
     const photographer = published.filter((l) => l.category === "photography-films")[i % 20];
     const decorator = published.filter((l) => l.category === "decor-styling")[i % 20];
     // A few credits point at non-published seeds on purpose: the public
@@ -306,7 +309,7 @@ export function generateSeedWeddings(): RealWedding[] {
       date: isoDate(200 + i * 29),
       style: WEDDING_STYLES[i % WEDDING_STYLES.length],
       excerpt: "A wedding that kept its own pace, photographed as it happened.",
-      cover: photoList[photoStart],
+      cover: flatPhotos[photoStart],
       chapters: [
         {
           title: "Getting ready",
@@ -337,7 +340,7 @@ export function generateSeedArticles(): BlogPost[] {
   const random = rng(97);
   return Array.from({ length: ARTICLE_COUNT }, (_, i) => {
     const cat = ARTICLE_CATEGORIES[i % ARTICLE_CATEGORIES.length];
-    const photoStart = (i * 13 + 3) % photoList.length;
+    const photoStart = (i * 13 + 3) % flatPhotos.length;
     return {
       slug: `${cat.toLowerCase()}-notes-${String(i + 1).padStart(2, "0")}`,
       title: pick(random, [
@@ -349,14 +352,14 @@ export function generateSeedArticles(): BlogPost[] {
       category: cat,
       date: isoDate(300 + i * 23),
       readMinutes: int(random, 4, 9),
-      cover: photoList[photoStart],
+      cover: flatPhotos[photoStart],
       body: [
         {
           paragraphs: [
             "Start with the decisions that lock other decisions: the date, the city and the guest count. Everything else bends around those three.",
             "Write down what matters most to you both, in one sentence each. When budgets get tight later, that sentence settles the argument.",
           ],
-          photo: photoList[(photoStart + 2) % photoList.length],
+          photo: flatPhotos[(photoStart + 2) % flatPhotos.length],
         },
         {
           heading: "Before you pay an advance",

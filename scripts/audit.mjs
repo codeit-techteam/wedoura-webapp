@@ -240,7 +240,7 @@ check(`tour lists 3 spaces (got ${spaceButtons.length})`, spaceButtons.length ==
 if (spaceButtons[1]) {
   await spaceButtons[1].click();
   await sleep(2500);
-  check("space strip switches node", await page.evaluate(() => document.querySelector('[aria-label="Spaces in this tour"] button[aria-pressed="true"]')?.textContent === "The lawn"));
+  check("space strip switches node", await page.evaluate(() => document.querySelector('[aria-label="Spaces in this tour"] button[aria-pressed="true"]')?.textContent === "Palace gardens"));
 }
 
 // Gallery filter + viewer + vendor link

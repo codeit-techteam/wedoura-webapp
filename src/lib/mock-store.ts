@@ -26,7 +26,8 @@ import { sampleListings } from "@/data/vendors";
 
 const KEY = "wedoura:mock-db";
 const EVENT = "wedoura:mock-db-change";
-const VERSION = 1;
+// v2: VenueDetails.tour became { scenes, links, markers } over portfolio photo ids.
+const VERSION = 2;
 
 export interface MockDb {
   version: number;

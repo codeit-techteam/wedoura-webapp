@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useId, useState } from "react";
+import { Badge360 } from "@/components/media/Badge360";
 import { Photo } from "@/components/media/Photo";
 import { PhotoViewer } from "@/components/motion/PhotoViewer";
 import { Button } from "@/components/ui/Button";
@@ -45,9 +46,10 @@ export function PhotoGrid({ photos, columns = 3, sizes, className, links, initia
             key={photo.id + i}
             type="button"
             onClick={() => setIndex(i)}
-            aria-label={`Open ${photo.alt}`}
-            className={cn("group block w-full break-inside-avoid outline-offset-4", i >= limit && "hidden")}
+            aria-label={photo.projection === "equirectangular" ? `Open 360° view: ${photo.alt}` : `Open ${photo.alt}`}
+            className={cn("group relative block w-full break-inside-avoid outline-offset-4", i >= limit && "hidden")}
           >
+            {photo.projection === "equirectangular" && <Badge360 />}
             <motion.div layoutId={`${prefix}-${photo.id}`} className="relative overflow-hidden bg-ivory">
               <Photo
                 photo={photo}

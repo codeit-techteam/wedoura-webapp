@@ -232,3 +232,18 @@ body:has([data-nav-dark]) .site-nav:not([data-scrolled="true"]):not([data-open="
   border-color: transparent;
   color: var(--color-white);
 }
+
+/* Labelled points inside the 360° tour (Photo Sphere Viewer markers).
+   Rendered from VenueTour's marker html; tokens only, square corners. */
+.wedoura-tour-marker {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background: color-mix(in srgb, var(--color-ink) 70%, transparent);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}

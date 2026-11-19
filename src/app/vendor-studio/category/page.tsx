@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Field, ScreenHeader, StudioCard, inputClass, selectClass } from "@/components/studio/Field";
 import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, TagListInput, useListingForm } from "@/components/studio/screen";
 import type { Category, CategoryFieldDef, CategorySlug, VenueDetails } from "@/data/types";
 import { listAllCategories } from "@/lib/api";
-import { TOUR_MAX_LONG_EDGE, processPhotoFile } from "@/lib/upload";
 
 type Form = {
   category: CategorySlug;
@@ -129,7 +128,10 @@ export default function CategoryPage() {
               <Field id="ve-spaces" label="Spaces" hint="The areas couples can book, e.g. Sea lawn, Inner courtyard.">
                 <TagListInput id="ve-spaces" values={venue.spaces} onChange={(spaces) => setVenue({ ...venue, spaces })} placeholder="e.g. Main courtyard" />
               </Field>
-              <TourEditor venue={venue} onChange={setVenue} />
+              <p className="text-small text-mute">
+                The 360° walk-through is built on its own screen: upload 360° photos under Photos, then link them
+                under 360 tour.
+              </p>
             </div>
           </StudioCard>
         )}
@@ -212,87 +214,3 @@ function CategoryFieldInput({
   );
 }
 
-/** The 360° tour: named spaces with an equirectangular image each. */
-function TourEditor({ venue, onChange }: { venue: VenueDetails; onChange: (venue: VenueDetails) => void }) {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const tour = venue.tour ?? [];
-
-  const relink = (nodes: NonNullable<VenueDetails["tour"]>) =>
-    nodes.map((n) => ({ ...n, links: nodes.filter((o) => o.id !== n.id).map((o) => o.id) }));
-
-  async function addNode(file: File) {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      setMessage("Name the space first (e.g. The courtyard).");
-      return;
-    }
-    // Panoramas keep far more resolution than ordinary photos.
-    const result = await processPhotoFile(file, { maxLongEdge: TOUR_MAX_LONG_EDGE });
-    if (!result.ok) {
-      setMessage(result.error);
-      return;
-    }
-    setMessage(null);
-    const id = trimmed.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `space-${tour.length + 1}`;
-    const next = relink([...tour, { id, name: trimmed, panorama: result.photo.src, links: [] }]);
-    onChange({ ...venue, tour: next });
-    setName("");
-  }
-
-  return (
-    <Field id="ve-tour" label="360° tour" hint="One wide (equirectangular) image per space. Couples step between them on your profile.">
-      {tour.length > 0 && (
-        <ul className="mb-3 border-t border-line bg-white">
-          {tour.map((node) => (
-            <li key={node.id} className="flex items-center justify-between gap-4 border-b border-line px-3 py-2.5 text-small">
-              {node.name}
-              <button
-                type="button"
-                onClick={() => onChange({ ...venue, tour: relink(tour.filter((n) => n.id !== node.id)) })}
-                className="label tap px-2 text-mute transition-chrome hover:text-ink"
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="flex gap-2">
-        <input
-          id="ve-tour"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Space name, e.g. The lawn"
-          className={inputClass}
-        />
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="label tap shrink-0 border border-line px-4 text-ink transition-chrome hover:border-ink"
-        >
-          Add image
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          className="sr-only"
-          aria-label="Upload a 360 image"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) void addNode(file);
-            e.target.value = "";
-          }}
-        />
-      </div>
-      {message && (
-        <p className="mt-2 text-small text-ink" role="alert">
-          {message}
-        </p>
-      )}
-    </Field>
-  );
-}

@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { Photo } from "@/components/media/Photo";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+import { degToRad } from "@/lib/panorama";
+import { loadTour } from "@/lib/sphere";
+import type { ResolvedTour } from "@/lib/tour";
 import type { Photo as PhotoData } from "@/data/types";
 
-export type TourSpace = { id: string; name: string; panorama: string; links: string[] };
-
 type Props = {
-  spaces: TourSpace[];
+  tour: ResolvedTour;
   /** The still shown before the visitor steps inside. */
   still: PhotoData;
   venueName: string;
@@ -21,14 +22,15 @@ type TourHandle = {
 };
 
 /**
- * The venue's 360° tour. A still photograph until the visitor taps
+ * The venue's linked 360° tour. A still photograph until the visitor taps
  * "Step inside"; only then is Photo Sphere Viewer (core + virtual tour +
- * gyroscope) loaded. Drag to look around, arrows between spaces, a strip of
- * named spaces, full screen, fade between scenes.
+ * markers + gyroscope) loaded. Drag to look around, arrows placed where the
+ * vendor set them lead between spaces, a strip of named spaces, labelled
+ * markers, full screen, fade between scenes.
  */
-export function VenueTour({ spaces, still, venueName }: Props) {
+export function VenueTour({ tour, still, venueName }: Props) {
   const [started, setStarted] = useState(false);
-  const [current, setCurrent] = useState(spaces[0]?.id ?? "");
+  const [current, setCurrent] = useState(tour.scenes[0]?.id ?? "");
   const [failed, setFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<TourHandle | null>(null);
@@ -39,50 +41,56 @@ export function VenueTour({ spaces, still, venueName }: Props) {
 
     (async () => {
       try {
-        const [{ Viewer }, { VirtualTourPlugin }, { GyroscopePlugin }] = await Promise.all([
-          import("@photo-sphere-viewer/core"),
-          import("@photo-sphere-viewer/virtual-tour-plugin"),
-          import("@photo-sphere-viewer/gyroscope-plugin"),
-        ]);
-        await Promise.all([
-          import("@photo-sphere-viewer/core/index.css"),
-          import("@photo-sphere-viewer/virtual-tour-plugin/index.css"),
-        ]);
+        const { Viewer, VirtualTourPlugin, MarkersPlugin, GyroscopePlugin } = await loadTour();
         if (disposed || !containerRef.current) return;
 
+        const startYawByScene = new Map(tour.scenes.map((s) => [s.id, s.startYaw]));
         const viewer = new Viewer({
           container: containerRef.current,
           loadingTxt: "Opening the space…",
           navbar: ["zoom", "move", "caption", "gyroscope", "fullscreen"],
           touchmoveTwoFingers: false,
+          defaultYaw: degToRad(tour.scenes[0]?.startYaw ?? 0),
           plugins: [
+            MarkersPlugin,
             [
               VirtualTourPlugin,
               {
                 positionMode: "manual",
                 renderMode: "3d",
                 transitionOptions: { showLoader: false, speed: "20rpm", effect: "fade", rotation: false },
-                nodes: spaces.map((space, i) => ({
-                  id: space.id,
-                  panorama: space.panorama,
-                  name: space.name,
-                  caption: `${space.name} · ${venueName}`,
-                  links: space.links.map((nodeId, j) => ({
-                    nodeId,
-                    position: { yaw: ((j + 1) * Math.PI) / 2 + i, pitch: 0 },
-                  })),
+                nodes: tour.scenes.map((scene) => ({
+                  id: scene.id,
+                  panorama: scene.photo.src,
+                  name: scene.name,
+                  caption: `${scene.name} · ${venueName}${scene.photo.credit ? ` · ${scene.photo.credit}` : ""}`,
+                  links: tour.links
+                    .filter((link) => link.from === scene.id)
+                    .map((link) => ({ nodeId: link.to, position: { yaw: degToRad(link.yaw), pitch: 0 } })),
+                  markers: tour.markers
+                    .filter((marker) => marker.scene === scene.id)
+                    .map((marker, i) => ({
+                      id: `${scene.id}-marker-${i}`,
+                      position: { yaw: degToRad(marker.yaw), pitch: degToRad(marker.pitch) },
+                      tooltip: marker.label,
+                      html: `<span class="wedoura-tour-marker">${marker.label}</span>`,
+                    })),
                 })),
-                startNodeId: spaces[0]?.id,
+                startNodeId: tour.scenes[0]?.id,
               },
             ],
             GyroscopePlugin,
           ],
         });
 
-        const tour = viewer.getPlugin<InstanceType<typeof VirtualTourPlugin>>(VirtualTourPlugin);
-        tour.addEventListener("node-changed", (e) => setCurrent(e.node.id));
+        const plugin = viewer.getPlugin<InstanceType<typeof VirtualTourPlugin>>(VirtualTourPlugin);
+        plugin.addEventListener("node-changed", (e) => {
+          setCurrent(e.node.id);
+          const yaw = startYawByScene.get(e.node.id);
+          if (yaw !== undefined) viewer.rotate({ yaw: degToRad(yaw), pitch: 0 });
+        });
         handleRef.current = {
-          setNode: (id: string) => void tour.setCurrentNode(id),
+          setNode: (id: string) => void plugin.setCurrentNode(id),
           destroy: () => viewer.destroy(),
         };
       } catch {
@@ -95,9 +103,9 @@ export function VenueTour({ spaces, still, venueName }: Props) {
       handleRef.current?.destroy();
       handleRef.current = null;
     };
-  }, [started, spaces, venueName]);
+  }, [started, tour, venueName]);
 
-  if (spaces.length === 0) return null;
+  if (tour.scenes.length === 0) return null;
 
   return (
     <div>
@@ -125,18 +133,18 @@ export function VenueTour({ spaces, still, venueName }: Props) {
 
       {started && !failed && (
         <ul className="mt-3 flex flex-wrap gap-2" aria-label="Spaces in this tour">
-          {spaces.map((space) => (
-            <li key={space.id}>
+          {tour.scenes.map((scene) => (
+            <li key={scene.id}>
               <button
                 type="button"
-                onClick={() => handleRef.current?.setNode(space.id)}
-                aria-pressed={current === space.id}
+                onClick={() => handleRef.current?.setNode(scene.id)}
+                aria-pressed={current === scene.id}
                 className={cn(
                   "label tap border px-4 transition-chrome",
-                  current === space.id ? "border-ink bg-ink text-white" : "border-line text-ink hover:border-ink",
+                  current === scene.id ? "border-ink bg-ink text-white" : "border-line text-ink hover:border-ink",
                 )}
               >
-                {space.name}
+                {scene.name}
               </button>
             </li>
           ))}

@@ -14,13 +14,69 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 6 | Real weddings listing and story page | ✅ Done (2026-11-14) |
 | 7 | Blogs, gallery, honeymoon, saved, simple pages | ✅ Done (2026-11-14) |
 | 8 | Vendor signup, login and studio screens | ✅ Done (2026-11-14) |
-| 9 | Venue profile with the 360-degree view | ✅ Done (2026-11-14, placeholder imagery) |
+| 9 | Venue profile with the 360-degree view | ✅ Done (2026-11-14; real imagery + linked tours 2026-11-19) |
 | 10 | Polish pass: motion, speed, accessibility, small screens | ✅ Done (2026-11-14, see docs/AUDIT.md) |
 | 11 | Scale (~200 vendors), mapping tests, SEO, full re-audit | ✅ Done (2026-11-16, see docs/AUDIT.md) |
 | 12 | Portal ↔ profile field parity, seeded live vendor, profile + portal redesign | ✅ Done (2026-11-17, see docs/field-map.md, docs/screenshots/round-5) |
 | 13 | Round 6: client design feedback (Cormorant/Jost, colour, magazine spacing, cards, hero video, partner band) | ✅ Done (2026-11-17, see docs/screenshots/round-6) |
+| 14 | 360° photos everywhere + linked venue tours (detection, badges, sphere viewer, tour editor, real CC0 panoramas) | ✅ Done (2026-11-19, see docs/screenshots/360) |
 
 ## Session log
+
+### 2026-11-19 · 360° photo support for all vendors + linked venue tours
+
+Done:
+- **Data.** `Photo.projection?: "flat" | "equirectangular"` (absent = flat). `VenueDetails.tour` restructured
+  to `VenueTourData`: `scenes` (id, **photoId** into the listing's portfolio, name, startYaw), one-way `links`
+  (from, to, yaw) and `markers` (scene, yaw, pitch, label) — all angles in degrees. Scenes referencing
+  portfolio photos closes the old approval bypass: pending-media rules reach tours through the portfolio, and
+  `resolveTour` (src/lib/tour.ts) drops scenes whose photo is hidden. Dead `view360Url` removed. Mock-store
+  VERSION bumped to 2 (tour shape change resets the demo store). Contract + field-map updated.
+- **Upload detection** (src/lib/upload.ts + pure helpers in src/lib/panorama.ts, unit-tested): a photo is 360
+  when 2:1 within 1% or its XMP head carries GPano ProjectionType=equirectangular; detected 360s under 4000px
+  wide are rejected with a clear message, the rest keep up to 4096px (lower JPEG quality to respect the
+  localStorage budget) and get `projection: "equirectangular"`.
+- **Portal.** PhotoManager cards grew a "360° photo" toggle (blocked with a message when the stored photo is
+  under 4000px), a 360 badge and an inline live sphere preview. New venues-only **360 tour** screen
+  (/vendor-studio/tour, gated in StudioShell via a per-item `when(listing)` filter): pick 360 portfolio photos
+  as scenes, name and reorder them, set the starting view from the live preview ("Use current view"), place
+  arrows (per-link yaw) and markers. The old TourEditor on Category & services is gone.
+- **Public site.** `Badge360` marks equirectangular photos in PhotoGrid, PhotoCard and the portal. PhotoViewer
+  branches on projection: 360 photos open in Photo Sphere Viewer (new `PhotoSphere` component — drag/touch
+  look-around, scroll+pinch zoom, gyroscope, fullscreen, gentle auto-rotate until first interaction, flat
+  poster until ready and on failure, credit line bottom-right); flat photos are untouched. Arrow keys still
+  step photos (PSV keyboard off); on 360 slides framer drag is off and the Prev/Next buttons show on touch
+  (user-confirmed). All PSV loading goes through one lazy entry point (src/lib/sphere.ts, in-effect dynamic
+  imports), so nothing ships until a 360 opens. VenueTour now renders resolved scenes with real per-link yaws,
+  per-scene starting views, markers (markers-plugin, styled `.wedoura-tour-marker`) and per-scene credits; the
+  "360° view" block hides entirely when no tour resolves. Added @photo-sphere-viewer/autorotate-plugin +
+  markers-plugin (5.15.1, matching core).
+- **Sample imagery.** public/360 now holds four real CC0 equirectangular panoramas from Poly Haven, downscaled
+  to 4096×2048 (pano01 cloister courtyard · Elvis Posa; pano02 formal garden · Dimitrios Savva/Jarod Guest;
+  pano03 vestibule · Sergej Majboroda; pano04 glass passage · Greg Zaal); credits in alt.json, shown small in
+  the viewer; the stretched sample-0x fakes are deleted and public/360/README.md documents the pipeline.
+  scripts/photos.mjs now also scans public/360 (validates 2:1 and ≥4000px) into src/data/photos.ts with the
+  projection flag; seed.ts draws from flat photos only. Both photographers (aperture-marigold, saffron-frames)
+  carry one 360 photo in their portfolios; both venues carry three and a three-scene linked tour with distinct
+  names, links and markers.
+- **Verification.** Lint, typecheck, 83/83 tests (new panorama + resolveTour suites, updated venue builder),
+  build (86 pages). New `scripts/screenshots-360.mjs` against `next start`: 14/14 checks at 1440 and 390
+  (badges in both profile grids, sphere viewer opens with visible Prev/Next, arrow key steps off the 360
+  slide, tour opens with 3 spaces and scene switch), captures in docs/screenshots/360. Full
+  `scripts/audit.mjs`: 50/50 (its tour check now expects "Palace gardens").
+
+Decisions / gotchas:
+- Tour angles are stored in degrees (friendlier to edit); `degToRad` converts at the PSV boundary.
+- On touch, drag inside a 360 photo looks around; moving between photos uses the Prev/Next buttons (shown on
+  touch for 360 slides only) — per user decision; flat photos keep swipe-to-next.
+- Marking a flat-stored photo as 360 after upload can't recover resolution (stored at ≤1200px), so the toggle
+  refuses under 4000px and asks for a re-upload of the original.
+- Samples kept at 4096×2048 (~0.7–1.5 MB each) per user decision; Poly Haven originals are 8K if sharper
+  zoom is ever wanted.
+
+Next up:
+- Optional: a 360 specimen on the styleguide page; an Indian palace panorama from Wikimedia Commons if a
+  suitably licensed one is found; surfacing tour scenes in the venue's Spaces tiles.
 
 ### 2026-11-17 · Round 6: client design feedback across the public site
 

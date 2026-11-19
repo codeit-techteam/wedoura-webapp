@@ -12,6 +12,8 @@ import { InquiryForm } from "@/components/profile/InquiryForm";
 import { StickyActionBar } from "@/components/profile/StickyActionBar";
 import { StickySubnav, type SubnavSection } from "@/components/profile/StickySubnav";
 import { VenueTour } from "@/components/profile/VenueTour";
+import { cn } from "@/lib/cn";
+import { resolveTour } from "@/lib/tour";
 import { Accordion } from "@/components/ui/Accordion";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Container } from "@/components/ui/Container";
@@ -99,6 +101,9 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
   const films = vendor.films.filter((f) => f.previewSrc.length > 0 || f.fullSrc.length > 0);
   const whatsapp = vendor.contact.whatsapp;
   const whatsappHref = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
+  // Tour scenes point at portfolio photos; the portfolio is already
+  // pending-filtered, so unapproved scenes drop out here.
+  const tour = vendor.venue ? resolveTour(vendor.venue.tour, vendor.portfolio) : null;
 
   // The vendor's category-specific values (coverage, venue type, cuisine …)
   // become key facts, labelled by the category's own field definitions.
@@ -238,7 +243,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
             {vendor.venue && (
               <section id="venue" aria-label="The venue" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["The venue"]} />
-                <div className="mt-10 grid gap-10 md:grid-cols-[1fr_2fr] md:gap-14">
+                <div className={cn("mt-10 grid gap-10 md:gap-14", tour && vendor.cover && "md:grid-cols-[1fr_2fr]")}>
                   <div>
                     <Label>Capacity</Label>
                     <p className="mt-2 font-serif text-h3">
@@ -262,20 +267,14 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <Label>360° view</Label>
-                    <div className="mt-4">
-                      {vendor.venue.tour && vendor.venue.tour.length > 0 && vendor.cover ? (
-                        <VenueTour spaces={vendor.venue.tour} still={vendor.cover} venueName={vendor.name} />
-                      ) : (
-                        <div className="border border-line bg-white p-6">
-                          <p className="text-small text-mute">
-                            A walk-through of the main spaces will sit here once the venue supplies it.
-                          </p>
-                        </div>
-                      )}
+                  {tour && vendor.cover && (
+                    <div>
+                      <Label>360° view</Label>
+                      <div className="mt-4">
+                        <VenueTour tour={tour} still={vendor.cover} venueName={vendor.name} />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </section>
             )}
