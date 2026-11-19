@@ -9,9 +9,9 @@ export type SubnavSection = { id: string; label: string };
 type Props = { sections: SubnavSection[] };
 
 /**
- * Profile section links in a sticky hairline strap under the navbar.
- * Small-caps labels; scrollspy underlines the section in view with an ink
- * rule. The row scrolls sideways on phones without a visible scrollbar.
+ * Profile section links in a hairline strap under the key facts (scrolls with
+ * the page). Scrollspy underlines the section in view. One line; narrow
+ * screens scroll sideways without a visible scrollbar.
  */
 export function StickySubnav({ sections }: Props) {
   const [active, setActive] = useState(sections[0]?.id ?? "");
@@ -51,9 +51,9 @@ export function StickySubnav({ sections }: Props) {
   }, [sections]);
 
   return (
-    <nav aria-label="Profile sections" className="sticky top-nav z-30 border-b border-line bg-white">
+    <nav aria-label="Profile sections" className="relative border-b border-line bg-white">
       <Container>
-        <ul className="no-scrollbar flex gap-7 overflow-x-auto md:gap-10">
+        <ul className="no-scrollbar flex w-full flex-nowrap items-end justify-between gap-6 overflow-x-auto md:gap-8">
           {sections.map((section) => (
             <li key={section.id} className="shrink-0">
               <a

@@ -37,16 +37,20 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
 - **Tokens only.** Colours, type sizes, tracking, easing and spacing live in `src/styles/tokens.css` and are used
   as Tailwind utilities (`bg-ivory`, `text-h2`, `tracking-label`, `ease-wedoura`, `py-section`). No hex values or
   magic numbers in components. Custom utilities: `label`, `nav-link`, `wordmark`, `hairline`, `tap`,
-  `container-site` (1680px), `container-wide` (1920px, near full-bleed), `no-scrollbar`, `link-draw`
+  `container-site` (1360px content width), `container-wide` (1920px, near full-bleed), `no-scrollbar`, `link-draw`
   (underline draws in), `transition-chrome` (0.3s chrome changes).
 - **Photographs are shown whole.** Use `<Photo>` (next/image, blur placeholder, intrinsic aspect ratio). `mode="cover"`
   is only for hero and cover images. Every image needs `sizes` and alt text. Sizes come from the data, never guessed.
 - **Two card layouts.** `<CardRow ratio="4/5">` gives every card in a row one aspect ratio, chosen per row; cards
   inside inherit it. Galleries use no ratio so each photo keeps its own proportions.
-- **Design guardrails.** White and ivory backgrounds, ink text. Gold is for marks, rules and icons only, never
-  text, not even labels (3.5:1 on white). Headlines are Instrument Serif 400 (large, tracking tight); body is DM Sans 400 (500 for emphasis).
-  Square corners, hairlines, no shadows, no loud colour, no pop-ups, no auto-advancing carousels.
-  Body text at least 17px, nothing under 14px; tap targets at least 44px (`tap`). Visible focus (gold outline) stays on.
+- **Design guardrails.** White and ivory backgrounds, ink text (#1a1816, muted #5f5a52). Gold (#A8864A) is for
+  marks, rules, icons and the one italic `<em>` accent word per headline (`h1 em`/`h2 em` are gold automatically);
+  small gold labels use `gold-deep` #8A6D3B (`Label tone="gold"`) so they pass contrast; gold never colours body
+  text. Headlines are Cormorant Garamond 300 (400 for card/vendor names via `font-regular`), set large because the
+  face runs small; body is Jost 400 (300 only for lead paragraphs 20px+, 500 for nav/buttons/labels in small caps
+  with wide tracking). Square corners, hairlines, no shadows, no loud colour, no pop-ups, no auto-advancing
+  carousels. Body text at least 17px and never below 16px; labels may be 12px, nothing under 12px; tap targets at
+  least 44px (`tap`). Visible focus (gold outline) stays on.
 - **No invented numbers.** No ratings, review counts or statistics. Placeholder content carries no "sample"
   labels or slugs; the footer note is the one flag that the site is being built.
 - **Mobile first.** Design at 390px, then 768px (`md:`), then 1440px (`xl:`). Bottom nav on mobile.
@@ -125,15 +129,17 @@ src/components/profile VendorProfile (cover, key facts, content column + sticky 
                        StickyActionBar (below lg), InquiryForm (compact variant), AlbumList (large covers),
                        VenueTour (360), VendorSignupForm (one-step application), AuthForms (login+contact),
                        StudioGate (status-routed studio), DemoPanel (/demo admin stand-in)
-src/components/home    HeroV2, HeroSearch, CategoryTiles, WeddingsScroller, FilmsShowcase, CityMosaic,
-                       RailProgress
+src/components/home    HeroV2 (photo crossfade, or a muted looping film when public/films/hero.mp4+jpg exist),
+                       HeroSearch, PartnerBand (editorial brand band, hidden with no active partner),
+                       CategoryTiles, WeddingsScroller, FilmsShowcase, CityMosaic, RailProgress
 src/components/studio  the portal: StudioShell (sidebar/drawer), StatusScreens, status badge, Field/ScreenHeader,
                        autosave (DirtyProvider + useListingAutosave + SaveState), screen helpers (useListingForm,
                        TagListInput, ReorderButtons), checklist, PhotoManager, PhotoPicker. Every portal field
                        maps to VendorListing; reads/writes only through vendor-api (hooks + updateMyListing).
 src/components/motion  MotionProvider, Reveal, Parallax, PageTransition, PhotoViewer, SmoothScroll (Lenis),
                        MaskedHeading, ImageReveal
-src/data           typed sample content (types.ts, photos.ts generated, seed.ts behind WEDOURA_SEED)
+src/data           typed sample content (types.ts, photos.ts generated, partners.ts placeholder brand,
+                   seed.ts behind WEDOURA_SEED)
 src/app/api        search + by-slugs route handlers (contract: GET /search, ?slugs=)
 tests/             vitest suites (api mapping/lifecycle/paging, seed, schema, component render)
 src/lib            api.ts (public reads, published-only), vendor-api.ts (vendor/admin calls + reactive hooks),

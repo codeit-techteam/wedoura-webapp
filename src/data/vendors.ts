@@ -87,6 +87,7 @@ export const sampleListings: VendorListing[] = [
       photos.p01,
       photos.p38,
       photos.p04,
+      photos.pano01,
       photos.p33,
       photos.p14,
       photos.p12,
@@ -158,6 +159,7 @@ export const sampleListings: VendorListing[] = [
       photos.p34,
       photos.p29,
       photos.p33,
+      photos.pano04,
       photos.p43,
       photos.p28,
       photos.p20,
@@ -222,10 +224,13 @@ export const sampleListings: VendorListing[] = [
     portfolio: [
       photos.p23,
       photos.p25,
+      photos.pano01,
       photos.p24,
       photos.p22,
+      photos.pano02,
       photos.p27,
       photos.p08,
+      photos.pano04,
       photos.p30,
       photos.p09,
       photos.p45,
@@ -264,11 +269,25 @@ export const sampleListings: VendorListing[] = [
     venue: {
       capacity: { min: 80, max: 250 },
       spaces: ["Sea lawn", "Inner courtyard", "Chapel hall", "Pool deck"],
-      tour: [
-        { id: "courtyard", name: "The courtyard", panorama: "/360/sample-01.jpg", links: ["lawn", "hall"] },
-        { id: "lawn", name: "The lawn", panorama: "/360/sample-02.jpg", links: ["courtyard", "hall"] },
-        { id: "hall", name: "The hall", panorama: "/360/sample-03.jpg", links: ["courtyard", "lawn"] },
-      ],
+      tour: {
+        scenes: [
+          { id: "courtyard", photoId: photos.pano01.id, name: "Inner courtyard", startYaw: 30 },
+          { id: "lawn", photoId: photos.pano02.id, name: "Sea lawn", startYaw: 0 },
+          { id: "pavilion", photoId: photos.pano04.id, name: "Glass pavilion", startYaw: 90 },
+        ],
+        links: [
+          { from: "courtyard", to: "lawn", yaw: 140 },
+          { from: "courtyard", to: "pavilion", yaw: 260 },
+          { from: "lawn", to: "courtyard", yaw: 320 },
+          { from: "lawn", to: "pavilion", yaw: 40 },
+          { from: "pavilion", to: "courtyard", yaw: 80 },
+          { from: "pavilion", to: "lawn", yaw: 220 },
+        ],
+        markers: [
+          { scene: "courtyard", yaw: 200, pitch: -8, label: "Mandap spot" },
+          { scene: "lawn", yaw: 90, pitch: -5, label: "Dinner long tables" },
+        ],
+      },
     },
   },
   {
@@ -590,10 +609,13 @@ export const sampleListings: VendorListing[] = [
     portfolio: [
       photos.p21,
       photos.p26,
+      photos.pano01,
       photos.p29,
       photos.p20,
+      photos.pano02,
       photos.p22,
       photos.p25,
+      photos.pano03,
       photos.p19,
       photos.p43,
       photos.p28,
@@ -632,11 +654,25 @@ export const sampleListings: VendorListing[] = [
     venue: {
       capacity: { min: 120, max: 400 },
       spaces: ["Main courtyard", "Darbar hall", "Rooftop terrace"],
-      tour: [
-        { id: "courtyard", name: "The courtyard", panorama: "/360/sample-01.jpg", links: ["lawn", "hall"] },
-        { id: "lawn", name: "The lawn", panorama: "/360/sample-02.jpg", links: ["courtyard", "hall"] },
-        { id: "hall", name: "The hall", panorama: "/360/sample-03.jpg", links: ["courtyard", "lawn"] },
-      ],
+      tour: {
+        scenes: [
+          { id: "courtyard", photoId: photos.pano01.id, name: "Main courtyard", startYaw: 210 },
+          { id: "gardens", photoId: photos.pano02.id, name: "Palace gardens", startYaw: 0 },
+          { id: "hall", photoId: photos.pano03.id, name: "Darbar hall", startYaw: 150 },
+        ],
+        links: [
+          { from: "courtyard", to: "gardens", yaw: 100 },
+          { from: "courtyard", to: "hall", yaw: 300 },
+          { from: "gardens", to: "courtyard", yaw: 280 },
+          { from: "gardens", to: "hall", yaw: 20 },
+          { from: "hall", to: "courtyard", yaw: 120 },
+          { from: "hall", to: "gardens", yaw: 240 },
+        ],
+        markers: [
+          { scene: "hall", yaw: 150, pitch: -10, label: "Stage" },
+          { scene: "gardens", yaw: 180, pitch: -6, label: "Cocktail lawn" },
+        ],
+      },
     },
   },
   {

@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { HeroSearch } from "@/components/home/HeroSearch";
@@ -13,6 +13,9 @@ type Option = { slug: string; name: string };
 
 type Props = {
   photos: PhotoData[];
+  /** A muted looping background film with its poster; the photo crossfade
+   *  renders when absent. */
+  video?: { src: string; poster: string };
   cities: Option[];
   categories: Option[];
 };
@@ -20,11 +23,12 @@ type Props = {
 const SLIDE_SECONDS = 6;
 
 /**
- * Full-screen hero: three photographs crossfading slowly with a gentle zoom,
- * centred headline, search and category links over the photograph. The
- * content eases back as the page scrolls away.
+ * Full-screen hero: a muted looping film (when supplied) or three
+ * photographs crossfading slowly with a gentle zoom, centred headline,
+ * search and category links over it. The content eases back as the page
+ * scrolls away.
  */
-export function HeroV2({ photos, cities, categories }: Props) {
+export function HeroV2({ photos, video, cities, categories }: Props) {
   const reduce = useReducedMotion();
   const [slide, setSlide] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
@@ -36,10 +40,28 @@ export function HeroV2({ photos, cities, categories }: Props) {
   const contentOpacity = useTransform(fadeProgress, [0, 0.65], [1, 0.35]);
 
   useEffect(() => {
-    if (reduce || photos.length < 2) return;
+    if (reduce || video || photos.length < 2) return;
     const id = setInterval(() => setSlide((s) => (s + 1) % photos.length), SLIDE_SECONDS * 1000);
     return () => clearInterval(id);
-  }, [reduce, photos.length]);
+  }, [reduce, video, photos.length]);
+
+  // The background film plays only in view, never under reduced motion or
+  // the browser's data saver; its poster covers every other state.
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const inView = useInView(sectionRef, { amount: 0.25 });
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+    if (inView && !reduce && !saveData) {
+      el.play().catch(() => {
+        /* autoplay refused: the poster stays */
+      });
+    } else {
+      el.pause();
+    }
+  }, [inView, reduce]);
 
   const current = photos[slide] ?? photos[0];
 
@@ -54,11 +76,32 @@ export function HeroV2({ photos, cities, categories }: Props) {
       className="relative -mt-nav flex min-h-svh flex-col items-center justify-center overflow-hidden bg-ink px-gutter pb-bottombar pt-24 text-white md:pt-28"
     >
       <div className="absolute inset-0">
+        {video && (
+          <video
+            ref={videoRef}
+            src={video.src}
+            poster={video.poster}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            tabIndex={-1}
+            onPlaying={() => setPlaying(true)}
+            className={`absolute inset-0 size-full object-cover transition-opacity duration-700 ease-wedoura ${playing ? "opacity-100" : "opacity-0"}`}
+          />
+        )}
+        {/* The poster underlays the film (the native poster can flash away
+            as soon as data arrives; this holds until onPlaying). */}
+        {video && !playing && (
+          // eslint-disable-next-line @next/next/no-img-element -- plain poster behind the film; next/image adds nothing here
+          <img src={video.poster} alt="" aria-hidden="true" className="absolute inset-0 size-full object-cover" />
+        )}
         {/* The first slide is a plain element so the server-rendered hero is
             visible before hydration (it is the page's LCP element). */}
         {/* The zoom settles inward (1.06 -> 1): growing the LCP element would
             keep re-issuing larger LCP candidates for the whole slide. */}
-        {slide === 0 && photos[0] && (
+        {!video && slide === 0 && photos[0] && (
           <motion.div
             className="absolute inset-0 will-change-transform"
             initial={{ scale: reduce ? 1 : 1.06 }}
@@ -69,7 +112,7 @@ export function HeroV2({ photos, cities, categories }: Props) {
           </motion.div>
         )}
         <AnimatePresence initial={false}>
-          {slide !== 0 && (
+          {!video && slide !== 0 && (
             <motion.div
               key={current.id}
               className="absolute inset-0 will-change-transform"
@@ -87,8 +130,10 @@ export function HeroV2({ photos, cities, categories }: Props) {
         </AnimatePresence>
       </div>
 
-      {/* Legibility: a centred base gradient under the copy and search. */}
-      <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/85 via-ink/30 to-transparent" />
+      {/* Legibility: a steady dark wash plus a bottom-up gradient, so the
+          copy reads over any film frame or photograph. */}
+      <div aria-hidden="true" className="absolute inset-0 bg-ink/35" />
+      <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/80 via-ink/25 to-transparent" />
 
       <motion.div
         className="relative flex w-full max-w-(--container-hero-search) flex-col items-center text-center"

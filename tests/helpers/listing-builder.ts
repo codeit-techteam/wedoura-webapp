@@ -120,13 +120,21 @@ export function makeVenueListing(overrides: Partial<VendorListing> = {}): Vendor
     categoryValues: { venueType: "Heritage palace", roomsOnSite: 42 },
     priceUnit: "per_day",
     startingPriceINR: 400000,
+    portfolio: [photos.p13, photos.p35, photos.p07, photos.p01, photos.pano01, photos.pano02],
     venue: {
       capacity: { min: 80, max: 600 },
       spaces: ["The courtyard", "The lawn"],
-      tour: [
-        { id: "courtyard", name: "The courtyard", panorama: "/360/sample-01.jpg", links: ["lawn"] },
-        { id: "lawn", name: "The lawn", panorama: "/360/sample-02.jpg", links: ["courtyard"] },
-      ],
+      tour: {
+        scenes: [
+          { id: "courtyard", photoId: photos.pano01.id, name: "The courtyard", startYaw: 40 },
+          { id: "lawn", photoId: photos.pano02.id, name: "The lawn" },
+        ],
+        links: [
+          { from: "courtyard", to: "lawn", yaw: 120 },
+          { from: "lawn", to: "courtyard", yaw: 300 },
+        ],
+        markers: [{ scene: "courtyard", yaw: 200, pitch: -10, label: "Mandap spot" }],
+      },
     },
     ...overrides,
   });

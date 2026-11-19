@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import Link from "next/link";
 import { UnderlineTabs } from "@/components/browse/UnderlineTabs";
 import { VendorCard } from "@/components/cards/VendorCard";
@@ -27,7 +29,7 @@ import {
   listWeddings,
 } from "@/lib/api";
 import { absoluteUrl } from "@/lib/site-config";
-import { pickParams } from "@/lib/url";
+import { patchedHref, pickParams } from "@/lib/url";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -38,6 +40,15 @@ export const metadata: Metadata = {
 };
 
 const monthYear = new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" });
+const HOME_FEATURED_COUNT = 6;
+
+// A muted looping hero film plays when both files exist; otherwise the photo
+// crossfade renders. Drop real assets into public/films/.
+const heroVideo =
+  existsSync(join(process.cwd(), "public", "films", "hero.mp4")) &&
+  existsSync(join(process.cwd(), "public", "films", "hero.jpg"))
+    ? { src: "/films/hero.mp4", poster: "/films/hero.jpg" }
+    : undefined;
 
 export default async function HomePage({ searchParams }: PageProps<"/">) {
   const params = pickParams(await searchParams, ["category"]);
@@ -50,10 +61,8 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       getPhoto("p35"),
       listCategoriesWithCounts(),
       listCitiesWithCounts(),
-      // Two full rows of four from 1280px: featured by order, then newest.
-      // Fixed at eight at any vendor count; "See all vendors" sits beside it.
-      listFeatured(params.category || undefined, 8),
-      listWeddings({ page: 1, limit: 6 }),
+      listFeatured(params.category || undefined, HOME_FEATURED_COUNT),
+      listWeddings({ page: 1, limit: 3 }),
       listFilms(6),
       getPromises(),
       listArticles({ limit: 3 }),
@@ -71,25 +80,45 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {/* 1 · Hero: three crossfading photographs, search, quick links. */}
       <HeroV2
         photos={heroPhotos}
+        video={heroVideo}
         cities={cities.map((c) => ({ slug: c.slug, name: c.name }))}
         categories={categories.map((c) => ({ slug: c.slug, name: c.shortName }))}
       />
 
-      {/* 2 · Categories: one full-width row of six tall tiles. */}
-      <section aria-label="Vendor categories" className="pt-section-sm pb-section-sm">
-        <Container className="mb-6 md:mb-8">
-          <MaskedHeading as="h2" className="font-serif text-h1" lines={["Six kinds of wedding people."]} />
+      {/* 2 · Categories: six tiles in two rows of three from md. */}
+      <section aria-label="Vendor categories" className="pt-section pb-section">
+        <Container className="mb-8 md:mb-12">
+          <MaskedHeading
+            as="h2"
+            className="font-serif text-h1"
+            lines={[
+              <span key="vendor-categories-headline">
+                Six kinds of <em>wedding</em> people.
+              </span>,
+            ]}
+          />
         </Container>
         <Container width="wide">
           <CategoryTiles categories={categories} />
         </Container>
       </section>
 
-      {/* 3 · Featured vendors: tabs over a near-edge-to-edge grid. */}
-      <section aria-label="Featured vendors" className="pb-section-sm">
-        <Container className="mb-6 flex flex-wrap items-end justify-between gap-6">
-          <MaskedHeading as="h2" className="font-serif text-h1" lines={["The ones to meet first."]} />
-          <Button href="/vendors" variant="link">
+      {/* 3 · Featured vendors: tabs over two rows of three. */}
+      <section aria-label="Featured vendors" className="pb-section">
+        <Container className="mb-8 flex flex-wrap items-end justify-between gap-6">
+          <MaskedHeading
+            as="h2"
+            className="font-serif text-h1"
+            lines={[
+              <span key="featured-headline">
+                The ones to <em>meet</em> first.
+              </span>,
+            ]}
+          />
+          <Button
+            href={params.category ? patchedHref("/vendors", params, {}) : "/vendors"}
+            variant="link"
+          >
             See all vendors
           </Button>
         </Container>
@@ -101,7 +130,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             pathname="/"
             params={params}
           />
-          <ul className="mt-6 grid grid-cols-2 gap-2 gap-y-8 md:mt-8 lg:grid-cols-3 min-[80rem]:grid-cols-4">
+          <ul className="mt-8 grid grid-cols-1 gap-card-gap gap-y-14 sm:grid-cols-2 md:mt-10 lg:grid-cols-3">
             {featured.map((vendor) => (
               <li key={vendor.slug}>
                 <VendorCard vendor={vendor} />
@@ -112,9 +141,17 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 4 · Real weddings: pinned horizontal scroll (carousel on phones). */}
-      <section aria-label="Real weddings" className="pb-0 pt-section-sm">
-        <Container className="mb-6 flex flex-wrap items-end justify-between gap-6">
-          <MaskedHeading as="h2" className="font-serif text-h1" lines={["Whole weddings, as they happened."]} />
+      <section aria-label="Real weddings" className="pb-0 pt-section">
+        <Container className="mb-8 flex flex-wrap items-end justify-between gap-6">
+          <MaskedHeading
+            as="h2"
+            className="font-serif text-h1"
+            lines={[
+              <span key="weddings-headline">
+                Whole weddings, as they <em>happened</em>.
+              </span>,
+            ]}
+          />
           <Button href="/real-weddings" variant="link">
             All stories
           </Button>
@@ -127,19 +164,36 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {playableFilms.length > 0 && <FilmsShowcase films={playableFilms} />}
 
       {/* 6 · Cities: an uneven photo mosaic. */}
-      <section aria-label="Browse by city" className="pb-section-sm pt-10 md:pt-12">
+      <section aria-label="Browse by city" className="pb-section pt-section-sm">
         <Container width="wide">
-          <MaskedHeading as="h2" className="mb-6 font-serif text-h1 md:mb-8" lines={["Start with your city."]} />
+          <MaskedHeading
+            as="h2"
+            className="mb-8 font-serif text-h1 md:mb-12"
+            lines={[
+              <span key="cities-headline">
+                Start with <em>your</em> city.
+              </span>,
+            ]}
+          />
           <CityMosaic cities={cities} />
         </Container>
       </section>
 
       {/* 7 · Why couples choose Wedoura: three explained points beside one tall photograph. */}
-      <Section tone="ivory" size="small" className="pb-section-sm pt-section-sm" aria-label="Why couples choose Wedoura">
+      <Section tone="ivory" className="pb-section pt-section" aria-label="Why couples choose Wedoura">
         <Container>
           <div className="grid gap-10 md:grid-cols-2 md:gap-16 xl:gap-24">
             <div>
-              <MaskedHeading as="h2" className="font-serif text-h1" lines={["Why couples", "choose Wedoura."]} />
+              <MaskedHeading
+                as="h2"
+                className="font-serif text-h1"
+                lines={[
+                  "Why couples",
+                  <span key="why-choose">
+                    <em>choose</em> Wedoura.
+                  </span>,
+                ]}
+              />
               <ul className="mt-10 md:mt-14">
                 {promises.map((promise, i) => (
                   <Reveal as="li" key={promise.title} delay={i * 0.08} className="border-t border-ink/20 py-6 md:py-8">
@@ -162,15 +216,23 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </Section>
 
       {/* 8 · Blog: three cards with large images. */}
-      <section aria-label="From the blog" className="pb-section-sm pt-section-sm">
-        <Container className="mb-6 flex flex-wrap items-end justify-between gap-6">
-          <MaskedHeading as="h2" className="font-serif text-h1" lines={["Worth reading first."]} />
+      <section aria-label="From the blog" className="pb-section pt-section">
+        <Container className="mb-8 flex flex-wrap items-end justify-between gap-6">
+          <MaskedHeading
+            as="h2"
+            className="font-serif text-h1"
+            lines={[
+              <span key="blog-headline">
+                Worth <em>reading</em> first.
+              </span>,
+            ]}
+          />
           <Button href="/blogs" variant="link">
             All articles
           </Button>
         </Container>
-        <Container width="wide">
-          <ul className="grid gap-2 gap-y-10 md:grid-cols-3">
+        <Container>
+          <ul className="grid gap-card-gap gap-y-14 md:grid-cols-3">
             {posts.slice(0, 3).map((post, i) => (
               <li key={post.slug}>
                 <Link href={`/blogs/${post.slug}`} className="group block">
@@ -196,7 +258,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 9 · FAQ. The footer links here. */}
-      <Section tone="ivory" size="small" className="pb-section-sm pt-section-sm" id="faq" aria-label="Frequently asked questions">
+      <Section tone="ivory" className="pb-section pt-section" id="faq" aria-label="Frequently asked questions">
         <Container>
           <div className="grid gap-10 md:grid-cols-[1fr_2fr]">
             <Reveal>
@@ -212,7 +274,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       {/* 10 · List your business. */}
       <section
         aria-label="List your business"
-        className="relative flex min-h-96 items-end overflow-hidden bg-ink py-section-sm text-white md:min-h-128"
+        className="relative flex min-h-96 items-end overflow-hidden bg-ink py-section text-white md:min-h-128"
       >
         {bandPhoto && <Photo photo={bandPhoto} sizes="100vw" mode="cover" objectPosition="50% 35%" />}
         <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/80 via-ink/20 to-transparent" />

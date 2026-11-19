@@ -12,6 +12,8 @@ import { InquiryForm } from "@/components/profile/InquiryForm";
 import { StickyActionBar } from "@/components/profile/StickyActionBar";
 import { StickySubnav, type SubnavSection } from "@/components/profile/StickySubnav";
 import { VenueTour } from "@/components/profile/VenueTour";
+import { cn } from "@/lib/cn";
+import { resolveTour } from "@/lib/tour";
 import { Accordion } from "@/components/ui/Accordion";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Container } from "@/components/ui/Container";
@@ -99,6 +101,9 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
   const films = vendor.films.filter((f) => f.previewSrc.length > 0 || f.fullSrc.length > 0);
   const whatsapp = vendor.contact.whatsapp;
   const whatsappHref = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
+  // Tour scenes point at portfolio photos; the portfolio is already
+  // pending-filtered, so unapproved scenes drop out here.
+  const tour = vendor.venue ? resolveTour(vendor.venue.tour, vendor.portfolio) : null;
 
   // The vendor's category-specific values (coverage, venue type, cuisine …)
   // become key facts, labelled by the category's own field definitions.
@@ -192,14 +197,14 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
       {facts.length > 0 && (
         <section aria-label="Key facts" className="border-b border-line bg-white">
           <Container className="py-7 md:py-10">
-            <dl className="grid grid-cols-2 gap-y-7 md:grid-cols-4 md:gap-y-8">
+            <dl className="no-scrollbar -mx-gutter flex flex-nowrap items-start gap-0 overflow-x-auto px-gutter md:mx-0 md:justify-between md:gap-2 md:overflow-visible md:px-0">
               {facts.map((fact) => (
                 <div
                   key={fact.label}
-                  className="min-w-0 border-l border-line pr-4 pl-5 break-words odd:border-l-0 odd:pl-0 md:pl-8 md:odd:border-l md:odd:pl-8 md:nth-[4n+1]:border-l-0 md:nth-[4n+1]:pl-0"
+                  className="min-w-[8.75rem] max-w-[11rem] shrink-0 border-l border-line py-1 pr-4 pl-4 first:border-l-0 first:pl-0 md:min-w-0 md:max-w-none md:flex-1 md:px-5 md:first:pl-0 lg:px-6"
                 >
-                  <dt className="label text-mute">{fact.label}</dt>
-                  <dd className="mt-1.5 font-serif text-h3 leading-tight">{fact.value}</dd>
+                  <dt className="label whitespace-nowrap text-mute">{fact.label}</dt>
+                  <dd className="mt-1.5 font-serif text-lead leading-snug md:text-h3">{fact.value}</dd>
                 </div>
               ))}
             </dl>
@@ -238,7 +243,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
             {vendor.venue && (
               <section id="venue" aria-label="The venue" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
                 <MaskedHeading as="h2" className="font-serif text-h2" lines={["The venue"]} />
-                <div className="mt-10 grid gap-10 md:grid-cols-[1fr_2fr] md:gap-14">
+                <div className={cn("mt-10 grid gap-10 md:gap-14", tour && vendor.cover && "md:grid-cols-[1fr_2fr]")}>
                   <div>
                     <Label>Capacity</Label>
                     <p className="mt-2 font-serif text-h3">
@@ -262,20 +267,14 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
                       </div>
                     )}
                   </div>
-                  <div>
-                    <Label>360° view</Label>
-                    <div className="mt-4">
-                      {vendor.venue.tour && vendor.venue.tour.length > 0 && vendor.cover ? (
-                        <VenueTour spaces={vendor.venue.tour} still={vendor.cover} venueName={vendor.name} />
-                      ) : (
-                        <div className="border border-line bg-white p-6">
-                          <p className="text-small text-mute">
-                            A walk-through of the main spaces will sit here once the venue supplies it.
-                          </p>
-                        </div>
-                      )}
+                  {tour && vendor.cover && (
+                    <div>
+                      <Label>360° view</Label>
+                      <div className="mt-4">
+                        <VenueTour tour={tour} still={vendor.cover} venueName={vendor.name} />
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </section>
             )}
@@ -384,7 +383,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
           <aside
             id="inquiry"
             aria-label="Price and inquiry"
-            className={`no-scrollbar border-t border-line py-section-sm ${ANCHOR_OFFSET} lg:sticky lg:top-profile-sticky lg:z-10 lg:max-h-[calc(100svh-var(--profile-sticky-top)-1rem)] lg:self-start lg:overflow-y-auto lg:border-0 lg:py-0 lg:pt-4 lg:pb-section-sm`}
+            className={`no-scrollbar border-t border-line py-section-sm ${ANCHOR_OFFSET} lg:sticky lg:top-nav lg:z-10 lg:max-h-[calc(100svh-var(--nav-h)-1rem)] lg:self-start lg:overflow-y-auto lg:border-0 lg:py-0 lg:pt-4 lg:pb-section-sm`}
           >
             <div className="border border-line bg-white">
               <div className="p-6 md:p-8">

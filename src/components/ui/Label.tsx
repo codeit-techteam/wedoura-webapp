@@ -4,12 +4,17 @@ import { cn } from "@/lib/cn";
 type Props = {
   children: ReactNode;
   as?: "p" | "span" | "div";
-  /** Gold is never used for text; it is for marks, rules and icons. */
-  tone?: "ink" | "mute" | "white";
+  /** Gold labels use the deeper gold so they pass contrast on white. */
+  tone?: "ink" | "mute" | "white" | "gold";
   className?: string;
 };
 
-const tones = { ink: "text-ink", mute: "text-mute", white: "text-white" };
+const tones = {
+  ink: "text-ink",
+  mute: "text-mute",
+  white: "text-white",
+  gold: "text-gold-deep",
+};
 
 /** Small uppercase label with wide letter-spacing. */
 export function Label({ children, as: Tag = "p", tone = "mute", className }: Props) {

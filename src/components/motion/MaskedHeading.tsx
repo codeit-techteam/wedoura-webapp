@@ -41,7 +41,7 @@ export function MaskedHeading({ lines, as = "h2", className, delay = 0 }: Props)
         // The space keeps the text content and accessible name readable
         // ("Why couples choose", not "Why coupleschoose"); between block
         // spans it never renders visually.
-        <Fragment key={i}>
+        <Fragment key={`masked-line-${i}`}>
           {i > 0 && " "}
           {/* pb/mb give Instrument Serif descenders (g, y, p) room inside the
               clip without loosening the visual line spacing. Font descent is

@@ -1,11 +1,14 @@
 "use client";
 
 import { useRef, useState, type DragEvent } from "react";
+import { Badge360 } from "@/components/media/Badge360";
 import { Photo as PhotoImg } from "@/components/media/Photo";
+import { PhotoSphere } from "@/components/media/PhotoSphere";
 import { inputClass } from "@/components/studio/Field";
 import { Icon } from "@/components/ui/Icon";
 import type { Photo } from "@/data/types";
 import { cn } from "@/lib/cn";
+import { MIN_PANORAMA_WIDTH } from "@/lib/panorama";
 import { filesFromDataTransfer, MIN_LONG_EDGE, processPhotoFile } from "@/lib/upload";
 
 type UploadingFile = { key: string; name: string; progress: number };
@@ -30,6 +33,8 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
   const [rejected, setRejected] = useState<string[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [dragOver, setDragOver] = useState(false);
+  const [panoNote, setPanoNote] = useState<{ id: string; note: string } | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const dragIndex = useRef<number | null>(null);
   const pending = new Set(pendingIds);
 
@@ -69,6 +74,22 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
 
   function setAlt(id: string, alt: string) {
     onChange(photos.map((p) => (p.id === id ? { ...p, alt } : p)));
+  }
+
+  function toggle360(photo: Photo) {
+    const making360 = photo.projection !== "equirectangular";
+    if (making360 && photo.width < MIN_PANORAMA_WIDTH) {
+      setPanoNote({
+        id: photo.id,
+        note: `This photograph is ${photo.width}px wide; 360° photos need at least ${MIN_PANORAMA_WIDTH}px across. Upload the original export from your 360 camera instead.`,
+      });
+      return;
+    }
+    setPanoNote(null);
+    if (!making360 && previewId === photo.id) setPreviewId(null);
+    onChange(
+      photos.map((p) => (p.id === photo.id ? { ...p, projection: making360 ? ("equirectangular" as const) : ("flat" as const) } : p)),
+    );
   }
 
   function remove(ids: string[]) {
@@ -119,7 +140,8 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
           Choose files
         </button>
         <p className="text-small text-mute">
-          {hint ?? `JPEG or PNG, at least ${MIN_LONG_EDGE}px on the long edge.`}
+          {hint ??
+            `JPEG or PNG, at least ${MIN_LONG_EDGE}px on the long edge. 360° photos are spotted automatically and need ${MIN_PANORAMA_WIDTH}px across.`}
         </p>
         <input
           ref={inputRef}
@@ -231,6 +253,7 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
             >
               <div className="relative aspect-4/3 overflow-hidden bg-ivory">
                 <PhotoImg photo={photo} mode="cover" sizes="(min-width: 64rem) 20vw, 45vw" />
+                {photo.projection === "equirectangular" && <Badge360 position="top-auto bottom-1.5 left-1.5" />}
                 <label className="absolute top-1.5 left-1.5 inline-flex cursor-pointer bg-white/90 p-1.5">
                   <input
                     type="checkbox"
@@ -255,6 +278,37 @@ export function PhotoManager({ photos, onChange, pendingIds = [], hint }: Props)
                 aria-label={`Alt text for photo ${i + 1}`}
                 className={cn(inputClass, "mt-2 px-2 py-1.5 text-small")}
               />
+              <div className="mt-1.5 flex items-center justify-between gap-2">
+                <label className="tap inline-flex cursor-pointer items-center gap-2 py-1 text-small text-mute">
+                  <input
+                    type="checkbox"
+                    checked={photo.projection === "equirectangular"}
+                    onChange={() => toggle360(photo)}
+                    className="size-4 accent-ink"
+                  />
+                  360° photo
+                </label>
+                {photo.projection === "equirectangular" && (
+                  <button
+                    type="button"
+                    onClick={() => setPreviewId(previewId === photo.id ? null : photo.id)}
+                    aria-expanded={previewId === photo.id}
+                    className="label tap px-2 text-mute transition-chrome hover:text-ink"
+                  >
+                    {previewId === photo.id ? "Close preview" : "Preview"}
+                  </button>
+                )}
+              </div>
+              {panoNote?.id === photo.id && (
+                <p className="mt-1 text-small text-ink" role="alert">
+                  {panoNote.note}
+                </p>
+              )}
+              {previewId === photo.id && photo.projection === "equirectangular" && (
+                <div className="mt-2 aspect-2/1 overflow-hidden border border-line">
+                  <PhotoSphere photo={photo} autorotate={false} />
+                </div>
+              )}
               <div className="mt-1.5 flex items-center justify-between">
                 <div className="flex items-center gap-1">
                   <button

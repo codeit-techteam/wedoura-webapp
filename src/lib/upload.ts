@@ -8,15 +8,20 @@
  * for a real upload endpoint without the screens changing.
  */
 import type { Photo } from "@/data/types";
+import { looksEquirect, MIN_PANORAMA_WIDTH, xmpSaysEquirect } from "@/lib/panorama";
 
 /** Smallest acceptable long edge, in pixels. */
 export const MIN_LONG_EDGE = 800;
 /** Stored images are capped at this long edge. */
 const MAX_LONG_EDGE = 1200;
-/** Equirectangular 360° panoramas need far more pixels than a photograph;
- *  the tour editor passes this cap instead. */
+/** Equirectangular 360° panoramas keep far more pixels than a photograph. */
 export const TOUR_MAX_LONG_EDGE = 4096;
 const JPEG_QUALITY = 0.72;
+/** 360° photos are stored near 4096px, so they take a lower quality to fit
+ *  the localStorage budget. */
+const PANORAMA_JPEG_QUALITY = 0.6;
+/** How much of the file head is scanned for XMP GPano metadata. */
+const XMP_SCAN_BYTES = 128 * 1024;
 
 export type UploadResult = { ok: true; photo: Photo } | { ok: false; error: string };
 
@@ -105,17 +110,32 @@ export async function processPhotoFile(file: File, options: { maxLongEdge?: numb
         error: `"${file.name}" is ${w}×${h}px. Photographs need at least ${MIN_LONG_EDGE}px on the long edge.`,
       };
     }
-    const scale = Math.min(1, maxLongEdge / Math.max(w, h));
+    let is360 = looksEquirect(w, h);
+    if (!is360) {
+      try {
+        is360 = xmpSaysEquirect(await file.slice(0, XMP_SCAN_BYTES).text());
+      } catch {
+        // Unreadable metadata never blocks an upload.
+      }
+    }
+    if (is360 && w < MIN_PANORAMA_WIDTH) {
+      return {
+        ok: false,
+        error: `"${file.name}" looks like a 360° photo but is only ${w}px wide. 360° photos need at least ${MIN_PANORAMA_WIDTH}px across to stay sharp when visitors look around.`,
+      };
+    }
+    const cap = is360 ? TOUR_MAX_LONG_EDGE : maxLongEdge;
+    const scale = Math.min(1, cap / Math.max(w, h));
     const width = Math.round(w * scale);
     const height = Math.round(h * scale);
-    const src = draw(img, width, height, JPEG_QUALITY);
+    const src = draw(img, width, height, is360 ? PANORAMA_JPEG_QUALITY : JPEG_QUALITY);
     // Blur placeholder: 12px wide JPEG, same recipe as scripts/photos.mjs.
     const blurW = 12;
     const blurH = Math.max(1, Math.round((blurW * height) / width));
     const blurDataURL = draw(img, blurW, blurH, 0.4);
     const id = `up-${crypto.randomUUID ? crypto.randomUUID().slice(0, 8) : Math.random().toString(36).slice(2, 10)}`;
     const alt = file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() || "Uploaded photograph";
-    return { ok: true, photo: { id, src, width, height, alt, blurDataURL } };
+    return { ok: true, photo: { id, src, width, height, alt, blurDataURL, ...(is360 ? { projection: "equirectangular" as const } : {}) } };
   } catch {
     return { ok: false, error: `"${file.name}" could not be processed in this browser.` };
   } finally {

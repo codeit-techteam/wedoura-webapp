@@ -10,10 +10,11 @@
   --color-*: initial;
   --color-white: #ffffff;
   --color-ivory: #f6f2ea;
-  --color-ink: #161616;
-  --color-mute: #4a4640; /* dark enough to read on white and ivory */
+  --color-ink: #1a1816;
+  --color-mute: #5f5a52; /* darker than the mockup's #6b665d so it stays readable */
   --color-line: #ddd6c8;
-  --color-gold: #a8864a; /* marks, rules and icons only; never text (3.5:1 on white) */
+  --color-gold: #a8864a; /* marks, rules, icons and the one italic accent word per headline */
+  --color-gold-deep: #8a6d3b; /* small gold labels; passes contrast on white */
   --color-black: #000000;
   --color-transparent: transparent;
   --color-current: currentColor;
@@ -26,34 +27,37 @@
   --radius-none: 0;
   --radius-full: 9999px; /* only for round icon buttons and count badges */
 
-  /* Type: Instrument Serif for headlines, DM Sans for body and labels.
+  /* Type: Cormorant Garamond for headlines, Jost for body and labels.
      The font variables are set by next/font in src/styles/fonts.ts. */
   --font-*: initial;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
 
-  /* Type scale, mobile first. Body is never under 17px; nothing under 14px. */
+  /* Type scale, mobile first. Cormorant runs small, so headline sizes sit
+     above the reference mockup. Body is never under 16px; labels may be
+     12px; nothing under 12px. */
   --text-*: initial;
-  /* Line-heights leave room for Instrument Serif descenders (g, y, p, q).
+  /* Line-heights leave room for serif descenders (g, y, p, q).
      Sub-1.0 values clipped glyphs wherever overflow was hidden. */
-  --text-display: clamp(3.1rem, 1.6rem + 6.5vw, 7.5rem);
-  --text-display--line-height: 1.12;
-  /* Hero headline: ~42px at 390, ~78px at 1440, capped at 80px. */
-  --text-hero: clamp(2.5rem, 1.75rem + 3.5vw, 5rem);
-  --text-hero--line-height: 1.12;
+  --text-display: clamp(3.25rem, 2rem + 6.5vw, 8rem);
+  --text-display--line-height: 1.08;
+  /* Hero headline: 44px at 390 -> capped at 88px. */
+  --text-hero: clamp(2.75rem, 1.9rem + 4.5vw, 5.5rem);
+  --text-hero--line-height: 1.08;
   /* Hero supporting line: 18 -> 20px. */
   --text-sublead: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
   --text-sublead--line-height: 1.5;
   /* Quiet links over photographs (hero quick links only). */
   --text-caption: 0.8125rem;
   --text-caption--line-height: 1.4;
-  --text-h1: clamp(2.5rem, 1.6rem + 3.9vw, 4.5rem);
-  --text-h1--line-height: 1.14;
-  --text-h2: clamp(2.25rem, 1.5rem + 3.2vw, 3.75rem);
-  --text-h2--line-height: 1.15;
-  --text-h3: clamp(1.5rem, 1.25rem + 1.1vw, 2rem);
-  --text-h3--line-height: 1.2;
+  /* Section titles: 34px at 390 -> capped at 64px. */
+  --text-h1: clamp(2.125rem, 1.4rem + 3.6vw, 4rem);
+  --text-h1--line-height: 1.1;
+  --text-h2: clamp(2rem, 1.4rem + 2.8vw, 3.5rem);
+  --text-h2--line-height: 1.12;
+  --text-h3: clamp(1.625rem, 1.35rem + 1.2vw, 2.25rem);
+  --text-h3--line-height: 1.18;
   --text-menu: clamp(2.5rem, 1.6rem + 3.9vw, 4rem);
   --text-menu--line-height: 1.12;
   --text-lead: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
@@ -64,32 +68,37 @@
   --text-body-lg--line-height: 1.6;
   --text-small: 0.875rem;
   --text-small--line-height: 1.5;
-  --text-label: 0.875rem;
+  --text-label: 0.75rem; /* 12px, the floor */
   --text-label--line-height: 1.4;
-  --text-label-lg: 0.9375rem;
+  --text-label-lg: 0.8125rem;
   --text-label-lg--line-height: 1.4;
+  /* Chrome nav links — smaller than label-lg so the wordmark reads as the brand. */
+  --text-nav: 0.75rem;
+  --text-nav--line-height: 1.35;
   --text-mega: clamp(3.25rem, 12.5vw, 13rem);
   --text-mega--line-height: 1.05;
-  --text-wordmark: 1.375rem;
+  --text-wordmark: 1.5rem;
   --text-wordmark--line-height: 1.1;
-  --text-wordmark-lg: 1.625rem;
+  --text-wordmark-lg: 1.75rem;
   --text-wordmark-lg--line-height: 1.1;
   --text-search: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
   --text-search--line-height: 1.25;
 
   --tracking-*: initial;
-  --tracking-tight: -0.02em;
+  --tracking-tight: -0.01em;
   --tracking-normal: 0;
   --tracking-wordmark: 0.42em;
-  --tracking-label: 0.14em;
-  --tracking-nav: 0.12em;
+  --tracking-label: 0.28em;
+  --tracking-nav: 0.22em;
+  --tracking-wide: 0.32em; /* gold eyebrow labels */
   --tracking-caps: 0.06em;
 
   /* Rhythm. --spacing stays 0.25rem so p-4, gap-6 ... work as usual. */
-  --spacing-section: clamp(4.5rem, 10vw, 8.5rem);
-  --spacing-section-sm: clamp(3rem, 6vw, 5rem);
-  --spacing-gutter: clamp(1.5rem, 2.5vw, 2.5rem); /* 24px -> 40px */
-  --container-site: 105rem; /* 1680px, centred on wider screens */
+  --spacing-section: clamp(6rem, 12vw, 10.625rem); /* 96px -> 170px */
+  --spacing-section-sm: clamp(3.5rem, 7vw, 6rem);
+  --spacing-gutter: clamp(1.5rem, 3.5vw, 2.5rem); /* 24px -> 40px */
+  --spacing-card-gap: clamp(1.25rem, 3vw, 2.75rem); /* 20px -> 44px card grids */
+  --container-site: 85rem; /* 1360px content width, centred */
   --container-wide: 120rem; /* near full-bleed photo bands */
   --container-prose: 44rem;
   --container-article: 56rem; /* long-form reading, wider than legal prose */
@@ -110,6 +119,9 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-linear: linear;
 
+  /* Tall portrait vendor/destination cards, from the reference mockup. */
+  --aspect-card: 3 / 4.4;
+
   --animate-*: initial;
   --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
@@ -123,8 +135,8 @@
 /* next/font variables and responsive chrome sizes, mapped inline so the
    utilities resolve against the element they are used on. */
 @theme inline {
-  --font-serif: var(--font-instrument), "Instrument Serif", Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-dm), "DM Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-jost), Jost, "Helvetica Neue", Arial, sans-serif;
   --spacing-nav: var(--nav-h);
   --spacing-profile-sticky: var(--profile-sticky-top);
   --spacing-bottombar: var(--bottombar-h);

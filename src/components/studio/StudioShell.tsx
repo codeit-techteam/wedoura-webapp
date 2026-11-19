@@ -14,7 +14,7 @@ import { useFocusTrap } from "@/lib/focus-trap";
 import { EASE } from "@/lib/motion";
 import { logout } from "@/lib/vendor-api";
 
-const NAV: { group: string; items: { href: string; label: string }[] }[] = [
+const NAV: { group: string; items: { href: string; label: string; when?: (listing: VendorListing) => boolean }[] }[] = [
   {
     group: "Studio",
     items: [{ href: "/vendor-studio", label: "Overview" }],
@@ -35,6 +35,7 @@ const NAV: { group: string; items: { href: string; label: string }[] }[] = [
       { href: "/vendor-studio/covers", label: "Cover & card photos" },
       { href: "/vendor-studio/albums", label: "Albums" },
       { href: "/vendor-studio/films", label: "Films" },
+      { href: "/vendor-studio/tour", label: "360 tour", when: (l) => l.category === "venues" },
     ],
   },
   {
@@ -101,7 +102,9 @@ export function StudioShell({
         <div key={section.group}>
           <p className="label px-5 text-mute/70">{section.group}</p>
           <ul className="mt-2.5">
-            {section.items.map((item) => {
+            {section.items
+              .filter((item) => !item.when || (listing !== null && item.when(listing)))
+              .map((item) => {
               const active = pathname === item.href;
               return (
                 <li key={item.href}>

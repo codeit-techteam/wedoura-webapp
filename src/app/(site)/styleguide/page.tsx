@@ -25,10 +25,11 @@ export const metadata: Metadata = {
 const colours = [
   { name: "White", token: "white", hex: "#FFFFFF", role: "Page background" },
   { name: "Ivory", token: "ivory", hex: "#F6F2EA", role: "Alternate bands" },
-  { name: "Ink", token: "ink", hex: "#161616", role: "Text, solid buttons" },
-  { name: "Mute", token: "mute", hex: "#6B665D", role: "Secondary text, labels" },
+  { name: "Ink", token: "ink", hex: "#1A1816", role: "Text, solid buttons" },
+  { name: "Mute", token: "mute", hex: "#5F5A52", role: "Secondary text" },
   { name: "Line", token: "line", hex: "#DDD6C8", role: "Hairline rules" },
-  { name: "Gold", token: "gold", hex: "#A8864A", role: "Marks, rules and icons only. 3.5:1 on white, so never text" },
+  { name: "Gold", token: "gold", hex: "#A8864A", role: "Marks, rules, icons and one italic accent word per headline" },
+  { name: "Gold deep", token: "gold-deep", hex: "#8A6D3B", role: "Small gold labels; passes contrast on white" },
 ];
 
 const swatch: Record<string, string> = {
@@ -38,6 +39,7 @@ const swatch: Record<string, string> = {
   mute: "bg-mute",
   line: "bg-line",
   gold: "bg-gold",
+  "gold-deep": "bg-gold-deep",
 };
 
 const motionList = [
@@ -95,7 +97,9 @@ export default async function StyleguidePage() {
             <Label>01</Label>
             <Heading className="mt-3">Colour</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Mostly black and white. The photographs supply the colour. One accent, gold, for marks, rules and icons. It is never used for text, not even small labels.
+              Mostly black and white. The photographs supply the colour. One accent, gold, for marks, rules,
+              icons and the single italic accent word in a headline. Small gold labels use the deeper gold so
+              they pass contrast on white; gold never colours body text.
             </Text>
           </Reveal>
           <ul className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-6">
@@ -118,8 +122,10 @@ export default async function StyleguidePage() {
             <Label>02</Label>
             <Heading className="mt-3">Type</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Instrument Serif, regular with one italic word for emphasis, set large and tight. DM Sans for body and
-              labels: 400 everywhere, 500 for emphasis. Body text never drops below 17px; nothing is under 14px.
+              Cormorant Garamond, light and regular with one gold italic word per headline, set large because the
+              face runs small. Jost for body and UI: body 17px at 400, 300 only for lead paragraphs of 20px and up,
+              500 in small capitals with wide letter-spacing for navigation, buttons and labels. Body text never
+              drops below 16px; labels may be 12px; nothing is under 12px.
             </Text>
           </Reveal>
           <div className="mt-12">
@@ -145,12 +151,12 @@ export default async function StyleguidePage() {
             </Specimen>
             <Specimen label="Lead">
               <Text variant="lead" tone="mute" className="max-w-prose">
-                A standfirst in the serif, a touch larger than body, for the first paragraph of a story.
+                A standfirst in light Jost, 20px and up, for the first paragraph of a story.
               </Text>
             </Specimen>
             <Specimen label="Body">
               <Text className="max-w-prose">
-                Body text is DM Sans 400, 17px on phones and 18px from tablets up, with a line height of 1.6.
+                Body text is Jost 400, 17px on phones and 18px from tablets up, with a line height of 1.6.
                 Paragraphs stay under 42rem so lines remain comfortable. The footer carries the one note that
                 the site&apos;s content is placeholder while it is being built.
               </Text>
@@ -164,7 +170,7 @@ export default async function StyleguidePage() {
               <div className="flex flex-wrap gap-x-10 gap-y-3">
                 <Label tone="ink">Photography & Films</Label>
                 <Label>Udaipur · Rajasthan</Label>
-                <Label>Featured</Label>
+                <Label tone="gold">In partnership with</Label>
               </div>
             </Specimen>
           </div>
@@ -178,7 +184,8 @@ export default async function StyleguidePage() {
             <Label>03</Label>
             <Heading className="mt-3">Spacing and rules</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Sections breathe with a clamp from 80px to 152px. Hairlines separate; the ink rule heads a section.
+              Sections breathe with a clamp from 96px to 170px; content sits inside a 1360px container.
+              Hairlines separate; the ink rule heads a section.
               Square corners everywhere, no shadows.
             </Text>
           </Reveal>

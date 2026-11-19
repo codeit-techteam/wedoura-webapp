@@ -161,7 +161,7 @@ export async function VendorBrowse({ pathname, params, pinned = {}, heading, int
         </Container>
       )}
 
-      <div className="container-wide py-10 md:py-14">
+      <div className="container-site py-10 md:py-14">
         {params.q && <p className="mb-8 font-serif text-h3">Results for &ldquo;{params.q}&rdquo;</p>}
         {result.items.length === 0 ? (
           <EmptyState
@@ -170,10 +170,10 @@ export async function VendorBrowse({ pathname, params, pinned = {}, heading, int
             action={{ label: "Clear all filters", href: clearPathname ?? pathname }}
           />
         ) : (
-          <ul className="grid grid-cols-2 gap-2 gap-y-8 lg:grid-cols-3 min-[80rem]:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-card-gap gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
             {result.items.map((vendor, i) => (
               <li key={vendor.slug}>
-                <VendorCard vendor={vendor} priority={i < 4} />
+                <VendorCard vendor={vendor} priority={i < 3} />
               </li>
             ))}
           </ul>
