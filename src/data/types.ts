@@ -75,7 +75,9 @@ export type CategorySlug =
   | "djs"
   | "entertainment-music"
   | "choreographers"
-  | "wedding-transport";
+  | "wedding-transport"
+  | "hotels"
+  | "travel-agencies";
 
 /** The 11 kinds on the vendor dashboard. Categories map onto one of these. */
 export type VendorKind =
@@ -117,7 +119,9 @@ export type CategoryIcon =
   | "disc"
   | "mic"
   | "dance"
-  | "car";
+  | "car"
+  | "bed"
+  | "globe";
 
 /** A category-specific listing field, defined once per category. */
 export interface CategoryFieldDef {
@@ -719,6 +723,13 @@ export interface HotelRoom {
   size?: string;
   view?: string;
   rateFromINR?: number;
+  description?: string;
+  photoId?: string;
+}
+
+export interface HotelDining {
+  name: string;
+  description?: string;
 }
 
 export interface HotelProfile {
@@ -730,6 +741,13 @@ export interface HotelProfile {
   mealPlans?: string[];
   honeymoonTouches?: string[];
   policies?: string[];
+  dining?: HotelDining[];
+  /** Short evening / dusk band copy. */
+  eveningNote?: string;
+  gettingThere?: { label: string; value: string; detail?: string }[];
+  /** Mood tags for honeymoon search (Beach, Hills, …). */
+  moods?: string[];
+  overviewHeadline?: string;
 }
 
 export interface AgencyProfile {
@@ -741,12 +759,25 @@ export interface AgencyProfile {
 export interface TravelCollection {
   name: string;
   pricePerCoupleINR?: number;
+  note?: string;
+  /** Optional stay slug highlights for this collection. */
+  staySlugs?: string[];
 }
 
 export interface ItineraryDay {
   day: number;
   title: string;
   text: string;
+  /** Optional place line, e.g. "Ubud → Uluwatu". */
+  place?: string;
+}
+
+export interface PackageStayHighlight {
+  name: string;
+  description?: string;
+  nights?: number;
+  photoId?: string;
+  staySlug?: string;
 }
 
 export interface HoneymoonPackage {
@@ -754,15 +785,29 @@ export interface HoneymoonPackage {
   name: string;
   destination: string;
   nights: number;
+  days?: number;
   /** Vendor slug of the agency that sells it, when one is published. */
   vendorSlug?: string;
   summary: string;
+  /** Hero eyebrow, e.g. "Honeymoon package · Bali, Indonesia". */
+  heroEyebrow?: string;
+  overviewHeadline?: string;
+  overview?: string[];
+  glance?: { label: string; value: string }[];
+  routeLabel?: string;
   collections: TravelCollection[];
   inclusions: string[];
   exclusions: string[];
   itinerary: ItineraryDay[];
+  stays?: PackageStayHighlight[];
+  /** Experience slugs shown as "moments". */
+  momentSlugs?: string[];
   goodToKnow: string[];
+  faqs?: { question: string; answer: string }[];
+  gallery?: Photo[];
   cover: Photo;
+  moods?: string[];
+  featured?: boolean;
 }
 
 export interface Experience {
@@ -770,6 +815,9 @@ export interface Experience {
   name: string;
   description: string;
   priceFromINR?: number;
+  /** Optional cover for the landing cards. */
+  cover?: Photo;
+  moods?: string[];
 }
 
 export interface CoupleAccount {
@@ -791,6 +839,8 @@ export interface PlanningRequest {
   budget?: string;
   city?: string;
   weddingMonth?: string;
+  /** Honeymoon requests: the mood the couple picked (Beach, Hills, …). */
+  mood?: string;
   note?: string;
   createdAt: string;
 }
@@ -812,7 +862,7 @@ export interface SoulmatesWaitlist {
 /* ------------------------------------------------------------- partners */
 
 /** Where a partner band can appear; only the homepage for now. */
-export type PartnerPlacement = "home";
+export type PartnerPlacement = "home" | "honeymoon";
 
 /**
  * A brand partnership shown as a quiet editorial band. Managed from the

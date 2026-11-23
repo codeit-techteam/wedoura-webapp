@@ -42,6 +42,10 @@ export interface PlanningRequestInput {
   weddingDate?: string;
   city?: string;
   budget?: string;
+  /** Honeymoon planning: travel month (YYYY-MM) and mood. */
+  weddingMonth?: string;
+  mood?: string;
+  note?: string;
 }
 
 export function createPlanningRequest(input: PlanningRequestInput): PlanningRequest {
@@ -53,6 +57,9 @@ export function createPlanningRequest(input: PlanningRequestInput): PlanningRequ
     weddingDate: input.weddingDate,
     city: input.city,
     budget: input.budget,
+    weddingMonth: input.weddingMonth,
+    mood: input.mood,
+    note: input.note,
     createdAt: new Date().toISOString(),
   };
   store.planningRequests.push(record);

@@ -26,8 +26,21 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 18 | v2 session 2b: venue profile (`/venues/[slug]`) from the client reference | ✅ Done (2026-11-23) |
 | 19 | v2 session 3: real-wedding story page (`/real-weddings/[slug]`) from the client reference | ✅ Done (2026-11-23) |
 | 20 | v2 session 3b: remaining public pages restyled (listings, journal, saved, about, contact, legal, 404, Soulmates waiting list) | ✅ Done (2026-11-23) |
+| 21 | v2 session 4: honeymoon landing, packages, stays from the client references | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 4: honeymoon
+
+Done:
+- **Landing `/honeymoon`**: Where-to + Mood search, moods, five-star stays, optional film band, packages, experiences with “Add to my plan” + plan tray, how it works, India/overseas destinations, planning form (`createPlanningRequest`), PartnerBand (hidden when no honeymoon partner).
+- **Packages**: `/honeymoon/packages` listing + `/honeymoon/packages/[slug]` — overview, route, day-by-day accordion, stays, included/not, moments, collections as “from” prices, gallery, good to know, FAQ, **Request to book** → `createInquiry` (no payment / GST / TCS). Reviews hidden.
+- **Stays**: `/honeymoon/stays` listing + `/honeymoon/stays/[slug]` — Mistwood Estate (fictional Coorg stay; not WelcomHeritage Ayatana). Overview, rooms, experiences, dining, evening, gallery, films, getting there, Request to book → Inquiry.
+- **Data / api**: `hotels` + `travel-agencies` categories; hotel + agency sample listings; enriched `HoneymoonPackage` / `HotelProfile` / experiences; `listStays`, `getStay`, package/experience helpers.
+- **Verification.** Lint, typecheck, tests, production build.
+
+Next up:
+- Session 5: login, signup and couple account.
 
 ### 2026-11-23 · v2 session 3: real-wedding story page
 
@@ -43,7 +56,7 @@ Decisions / gotchas:
 - Figure captions stay in aria-labels and lightbox alts; the reference's final pass hides on-photo captions.
 
 Next up:
-- Session 4: honeymoon pages from the references.
+- Session 5: login, signup and couple account (honeymoon Session 4 done).
 
 ### 2026-11-23 · v2 session 3b: remaining public pages in the v2 language
 
@@ -59,7 +72,7 @@ Decisions / gotchas:
 - No invented numbers anywhere; the Soulmates page promises exactly one email and asks for nothing sensitive.
 
 Next up:
-- Session 4: honeymoon pages from the references.
+- Session 5: login, signup and couple account.
 
 ### 2026-11-23 · v2 session 2b: venue profile
 
