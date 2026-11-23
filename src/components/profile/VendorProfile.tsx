@@ -551,6 +551,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
         name={vendor.name}
         startingPrice={startingPrice}
         whatsapp={vendor.contact.whatsapp}
+        inquireHref="#inquire"
       />
     </main>
   );

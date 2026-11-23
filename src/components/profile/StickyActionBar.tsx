@@ -10,8 +10,8 @@ type Props = {
   startingPrice?: string;
   /** Hidden when the listing has no WhatsApp number. */
   whatsapp?: string;
-  /** Anchor for the availability CTA. Venues use #enquire. */
-  inquireHref?: string;
+  /** Anchor for the availability CTA (`#inquire` on vendors, `#enquire` on venues). */
+  inquireHref: string;
 };
 
 /**
@@ -23,7 +23,7 @@ export function StickyActionBar({
   name,
   startingPrice,
   whatsapp,
-  inquireHref = "#inquire",
+  inquireHref,
 }: Props) {
   const wa = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
   return (
