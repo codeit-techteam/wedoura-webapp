@@ -75,7 +75,9 @@ export type CategorySlug =
   | "djs"
   | "entertainment-music"
   | "choreographers"
-  | "wedding-transport";
+  | "wedding-transport"
+  | "hotels"
+  | "travel-agencies";
 
 /** The 11 kinds on the vendor dashboard. Categories map onto one of these. */
 export type VendorKind =
@@ -117,7 +119,9 @@ export type CategoryIcon =
   | "disc"
   | "mic"
   | "dance"
-  | "car";
+  | "car"
+  | "bed"
+  | "globe";
 
 /** A category-specific listing field, defined once per category. */
 export interface CategoryFieldDef {
@@ -355,6 +359,8 @@ export interface Inquiry {
   guests?: number;
   budget?: string;
   weddingMonth?: string;
+  /** When set, the couple account can list this enquiry. */
+  coupleEmail?: string;
   createdAt: string; // ISO datetime
 }
 
@@ -388,6 +394,8 @@ export interface VendorApplication {
   /** One link to their work: Instagram or website. */
   workLink: string;
   consent: true;
+  /** Optional early-access flag from the signup form. */
+  foundingPartner?: boolean;
   submittedAt: string; // ISO datetime
 }
 
@@ -540,6 +548,17 @@ export interface Paged<T> {
 
 /* ------------------------------------------------- stories and articles */
 
+/** One photograph inside a chapter, with optional caption and aspect hint. */
+export interface StoryFigure {
+  photo: Photo;
+  caption?: string;
+  /** Reference aspect classes: 3/2, 4/5, 2/3. Absent = intrinsic. */
+  aspect?: "3/2" | "4/5" | "2/3";
+}
+
+/** How figures are grouped into a gallery row. */
+export type StoryRowLayout = "single" | "pair" | "mosaic" | "petals";
+
 export interface StoryChapter {
   /** Roman numeral, as on the story page. */
   numeral?: string;
@@ -547,13 +566,28 @@ export interface StoryChapter {
   /** Short line under the numeral, before the paragraphs. */
   intro?: string;
   text: string[];
+  /** Flat list — used for "all photographs" and when figures/rows are absent. */
   photos: Photo[];
+  /** Captioned figures for the chapter gallery. Falls back to `photos`. */
+  figures?: StoryFigure[];
+  /** One layout token per row; figures are consumed in order. */
+  rows?: StoryRowLayout[];
+  /** "details" = photo + details list; "night" = video clips band. */
+  variant?: "default" | "details" | "night";
+}
+
+export interface StoryNightClip {
+  src: string;
+  alt: string;
+  aspectRatio?: string;
 }
 
 export interface VendorCredit {
   role: string;
   vendorSlug?: string;
   name: string;
+  /** When set, credit links to a venue profile instead of /vendors. */
+  venueSlug?: string;
 }
 
 export interface RealWedding {
@@ -572,10 +606,26 @@ export interface RealWedding {
   credits: VendorCredit[];
   featured?: boolean;
   editorNote?: string;
-  palette?: { name: string; hex: string }[];
+  /** Mid-story pull quote (editor's note band). */
+  pullQuote?: string;
+  palette?: { name: string; hex: string; note?: string }[];
   details?: { label: string; value: string }[];
   /** Links into filtered vendor lists ("Get the look"). */
-  getTheLook?: { label: string; href: string }[];
+  getTheLook?: { label: string; href: string; note?: string }[];
+  /** Hero eyebrow, e.g. "Real Wedding · The Courtyard House". */
+  heroEyebrow?: string;
+  /** Line under the couple names. */
+  heroSubtitle?: string;
+  /** Intro headline above the story body. */
+  storyHeadline?: string;
+  /** Opening paragraphs before chapter I. */
+  intro?: string[];
+  /** Fact chips under the hero (Venue, Photography, …). */
+  creditStrip?: { label: string; value: string }[];
+  /** Glance list beside the intro. */
+  glance?: { label: string; value: string; href?: string }[];
+  /** Short clips for "The Night" chapter. */
+  nightClips?: StoryNightClip[];
 }
 
 export interface BlogPost {
@@ -677,6 +727,13 @@ export interface HotelRoom {
   size?: string;
   view?: string;
   rateFromINR?: number;
+  description?: string;
+  photoId?: string;
+}
+
+export interface HotelDining {
+  name: string;
+  description?: string;
 }
 
 export interface HotelProfile {
@@ -688,6 +745,13 @@ export interface HotelProfile {
   mealPlans?: string[];
   honeymoonTouches?: string[];
   policies?: string[];
+  dining?: HotelDining[];
+  /** Short evening / dusk band copy. */
+  eveningNote?: string;
+  gettingThere?: { label: string; value: string; detail?: string }[];
+  /** Mood tags for honeymoon search (Beach, Hills, …). */
+  moods?: string[];
+  overviewHeadline?: string;
 }
 
 export interface AgencyProfile {
@@ -699,12 +763,25 @@ export interface AgencyProfile {
 export interface TravelCollection {
   name: string;
   pricePerCoupleINR?: number;
+  note?: string;
+  /** Optional stay slug highlights for this collection. */
+  staySlugs?: string[];
 }
 
 export interface ItineraryDay {
   day: number;
   title: string;
   text: string;
+  /** Optional place line, e.g. "Ubud → Uluwatu". */
+  place?: string;
+}
+
+export interface PackageStayHighlight {
+  name: string;
+  description?: string;
+  nights?: number;
+  photoId?: string;
+  staySlug?: string;
 }
 
 export interface HoneymoonPackage {
@@ -712,15 +789,29 @@ export interface HoneymoonPackage {
   name: string;
   destination: string;
   nights: number;
+  days?: number;
   /** Vendor slug of the agency that sells it, when one is published. */
   vendorSlug?: string;
   summary: string;
+  /** Hero eyebrow, e.g. "Honeymoon package · Bali, Indonesia". */
+  heroEyebrow?: string;
+  overviewHeadline?: string;
+  overview?: string[];
+  glance?: { label: string; value: string }[];
+  routeLabel?: string;
   collections: TravelCollection[];
   inclusions: string[];
   exclusions: string[];
   itinerary: ItineraryDay[];
+  stays?: PackageStayHighlight[];
+  /** Experience slugs shown as "moments". */
+  momentSlugs?: string[];
   goodToKnow: string[];
+  faqs?: { question: string; answer: string }[];
+  gallery?: Photo[];
   cover: Photo;
+  moods?: string[];
+  featured?: boolean;
 }
 
 export interface Experience {
@@ -728,6 +819,9 @@ export interface Experience {
   name: string;
   description: string;
   priceFromINR?: number;
+  /** Optional cover for the landing cards. */
+  cover?: Photo;
+  moods?: string[];
 }
 
 export interface CoupleAccount {
@@ -749,6 +843,8 @@ export interface PlanningRequest {
   budget?: string;
   city?: string;
   weddingMonth?: string;
+  /** Honeymoon requests: the mood the couple picked (Beach, Hills, …). */
+  mood?: string;
   note?: string;
   createdAt: string;
 }
@@ -770,7 +866,7 @@ export interface SoulmatesWaitlist {
 /* ------------------------------------------------------------- partners */
 
 /** Where a partner band can appear; only the homepage for now. */
-export type PartnerPlacement = "home";
+export type PartnerPlacement = "home" | "honeymoon";
 
 /**
  * A brand partnership shown as a quiet editorial band. Managed from the

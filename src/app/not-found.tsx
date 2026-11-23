@@ -29,7 +29,10 @@ function notFoundHero(photo: Awaited<ReturnType<typeof getPhoto>>) {
       {photo && <Photo photo={photo} sizes="100vw" mode="cover" priority objectPosition="50% 40%" />}
       <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/85 via-ink/30 to-transparent" />
       <Container className="relative pb-16 md:pb-24">
-        <h1 className="max-w-2xl font-serif text-h1 text-balance">This page has wandered off.</h1>
+        <p className="label text-white/80">Page not found</p>
+        <h1 className="mt-3.5 max-w-2xl font-serif text-h1 text-balance">
+          This page has <em>wandered off</em>.
+        </h1>
         <p className="mt-4 max-w-md text-body text-white/85">
           The link may be old, or the page is still being built. Everything that exists is a step away.
         </p>

@@ -4,6 +4,7 @@ import { ImageReveal } from "@/components/motion/ImageReveal";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
+import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
 import { getPhoto, getPromises } from "@/lib/api";
 import { absoluteUrl } from "@/lib/site-config";
@@ -20,10 +21,16 @@ export default async function AboutPage() {
   return (
     <main className="pb-section-sm">
       <Container className="pt-10 md:pt-16">
+        <Label>About Wedoura</Label>
         <MaskedHeading
           as="h1"
-          className="max-w-3xl font-serif text-h1"
-          lines={["Weddings are made by people,", "not listings."]}
+          className="mt-3.5 max-w-3xl font-serif text-h1"
+          lines={[
+            <>
+              Weddings are made by <em>people</em>,
+            </>,
+            "not listings.",
+          ]}
         />
         <div className="mt-10 grid gap-12 md:grid-cols-[1.2fr_1fr] md:gap-20">
           <div className="max-w-prose">

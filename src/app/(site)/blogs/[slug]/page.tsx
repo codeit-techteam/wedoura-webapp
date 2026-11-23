@@ -71,7 +71,7 @@ export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]"
           <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink via-ink/55 to-ink/40" />
         </div>
         <Container className="relative z-10 pb-10 pt-28 md:pb-14 md:pt-36">
-          <Breadcrumb tone="white" items={[{ label: "Blog", href: "/blogs" }, { label: post.category }]} />
+          <Breadcrumb tone="white" items={[{ label: "Journal", href: "/blogs" }, { label: post.category }]} />
           <MaskedHeading as="h1" className="mt-5 max-w-2xl font-serif text-h1 md:max-w-3xl" lines={[post.title]} />
           <p className="mt-4 text-body text-white/90">{meta}</p>
         </Container>
@@ -144,7 +144,16 @@ export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]"
       {related.length > 0 && (
         <section aria-label="Keep reading" className="mt-16 bg-ivory py-section-sm md:mt-20">
           <Container width="wide">
-            <MaskedHeading as="h2" className="font-serif text-h2" lines={["Keep reading"]} />
+            <Label>The Journal</Label>
+            <MaskedHeading
+              as="h2"
+              className="mt-3.5 font-serif text-h2"
+              lines={[
+                <>
+                  Keep <em>reading</em>
+                </>,
+              ]}
+            />
             <ul className="mt-10 grid grid-cols-1 gap-2 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">
               {related.map((p, i) => (
                 <li key={p.slug}>

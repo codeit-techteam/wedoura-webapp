@@ -139,6 +139,9 @@ export async function VendorBrowse({
     comboLabel = params.category ? "This category by city" : "This city by category";
   }
 
+  // Breadcrumb city name (pinned category-in-city pages)
+  const crumbCityName = activeCitySlug ? allCities.find((c) => c.slug === activeCitySlug)?.name : undefined;
+
   // Count line copy
   const locationTag = activeCitySlug
     ? cities.find((c) => c.slug === activeCitySlug)?.name ?? ""
@@ -166,9 +169,26 @@ export async function VendorBrowse({
                       </Link>
                     </li>
                     <li aria-hidden="true">/</li>
-                    <li aria-current="page" className="text-ink">
-                      {activeCategory?.name ?? activeCategorySlug}
-                    </li>
+                    {pinned.city && crumbCityName ? (
+                      <>
+                        <li>
+                          <Link
+                            href={`/vendors?category=${activeCategorySlug}`}
+                            className="transition-chrome hover:text-ink"
+                          >
+                            {activeCategory?.name ?? activeCategorySlug}
+                          </Link>
+                        </li>
+                        <li aria-hidden="true">/</li>
+                        <li aria-current="page" className="text-ink">
+                          {crumbCityName}
+                        </li>
+                      </>
+                    ) : (
+                      <li aria-current="page" className="text-ink">
+                        {activeCategory?.name ?? activeCategorySlug}
+                      </li>
+                    )}
                   </>
                 ) : (
                   <li aria-current="page" className="text-ink">

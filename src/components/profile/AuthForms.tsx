@@ -35,6 +35,7 @@ export function LoginForm() {
     router.push("/vendor-studio");
   }
 
+  /* Prefer /vendor/login (LoginCard). Kept for demos that still import LoginForm. */
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-8">
       <div>

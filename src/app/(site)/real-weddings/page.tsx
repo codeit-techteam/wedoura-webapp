@@ -7,6 +7,7 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Label } from "@/components/ui/Label";
 import { listCitiesWithCounts, listWeddings, listWeddingStyles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
 import { absoluteUrl } from "@/lib/site-config";
@@ -41,7 +42,19 @@ export default async function RealWeddingsPage({ searchParams }: PageProps<"/rea
   return (
     <main className="pb-section-sm">
       <Container className="pt-10 md:pt-16">
-        <MaskedHeading as="h1" className="font-serif text-h1" lines={["Real weddings, start to finish."]} />
+        <Label>Real weddings</Label>
+        <MaskedHeading
+          as="h1"
+          className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
+          lines={[
+            <>
+              Whole weddings, <em>start to finish</em>
+            </>,
+          ]}
+        />
+        <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">
+          Real celebrations across India, told the way they happened — with the people who made them.
+        </p>
       </Container>
 
       {featured && (

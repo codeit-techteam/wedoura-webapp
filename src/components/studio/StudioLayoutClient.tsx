@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useMyAccount, useMyListing, useSessionHydrated } from "@/lib/vendor-api";
 
 /**
- * The portal gate and shell. Logged-out visitors go to /login; applied,
+ * The portal gate and shell. Logged-out visitors go to /vendor/login; applied,
  * rejected and suspended accounts see their status screen; approved vendors
  * get the studio around every child screen.
  */
@@ -20,7 +20,7 @@ export function StudioLayoutClient({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (hydrated && !account) router.replace("/login");
+    if (hydrated && !account) router.replace("/vendor/login");
   }, [hydrated, account, router]);
 
   if (!hydrated || !account) {

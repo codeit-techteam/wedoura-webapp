@@ -395,9 +395,10 @@ export async function getWedding(slug: string): Promise<RealWedding | undefined>
   const publishedSlugs = new Set(published().map((l) => l.slug));
   return {
     ...wedding,
-    credits: wedding.credits.map((c) =>
-      c.vendorSlug && !publishedSlugs.has(c.vendorSlug) ? { role: c.role, name: c.name } : c,
-    ),
+    credits: wedding.credits.map((c) => {
+      const slug = c.venueSlug ?? c.vendorSlug;
+      return slug && !publishedSlugs.has(slug) ? { role: c.role, name: c.name } : c;
+    }),
   };
 }
 
@@ -491,16 +492,68 @@ export async function listSoulmatesWaitlist(): Promise<SoulmatesWaitlist[]> {
   return soulmatesWaitlist;
 }
 
-export async function listExperiences(): Promise<Experience[]> {
-  return experiences;
+export async function listExperiences(mood?: string): Promise<Experience[]> {
+  if (!mood) return experiences;
+  const m = mood.toLowerCase();
+  return experiences.filter((e) => !e.moods?.length || e.moods.some((x) => x.toLowerCase() === m));
 }
 
-export async function listHoneymoonPackages(): Promise<HoneymoonPackage[]> {
-  return honeymoonPackages;
+export async function getExperience(slug: string): Promise<Experience | undefined> {
+  return experiences.find((e) => e.slug === slug);
+}
+
+export type PackageListParams = {
+  mood?: string;
+  destination?: string;
+};
+
+export async function listHoneymoonPackages(params: PackageListParams = {}): Promise<HoneymoonPackage[]> {
+  let list = [...honeymoonPackages];
+  if (params.mood) {
+    const m = params.mood.toLowerCase();
+    list = list.filter((p) => !p.moods?.length || p.moods.some((x) => x.toLowerCase() === m));
+  }
+  if (params.destination) {
+    const d = params.destination.toLowerCase();
+    list = list.filter((p) => p.destination.toLowerCase().includes(d));
+  }
+  return list.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
 }
 
 export async function getHoneymoonPackage(slug: string): Promise<HoneymoonPackage | undefined> {
-  return honeymoonPackages.find((item) => item.slug === slug);
+  const pkg = honeymoonPackages.find((item) => item.slug === slug);
+  if (!pkg) return undefined;
+  // Drop vendorSlug when the agency is not published.
+  if (pkg.vendorSlug && !published().some((l) => l.slug === pkg.vendorSlug)) {
+    return { ...pkg, vendorSlug: undefined };
+  }
+  return pkg;
+}
+
+/** Published hotel listings for the honeymoon stays directory. */
+export async function listStays(params: { mood?: string; limit?: number } = {}): Promise<VendorSummary[]> {
+  let hotels = published().filter((l) => l.category === "hotels" && l.travel?.kind === "hotel");
+  if (params.mood) {
+    const m = params.mood.toLowerCase();
+    hotels = hotels.filter((l) => {
+      const moods = l.travel?.kind === "hotel" ? l.travel.moods : undefined;
+      return !moods?.length || moods.some((x) => x.toLowerCase() === m);
+    });
+  }
+  hotels.sort(byFeatured);
+  const limit = params.limit ?? hotels.length;
+  return hotels.slice(0, limit).map(toSummary);
+}
+
+export async function getStay(slug: string): Promise<VendorDetail | undefined> {
+  const listing = published().find(
+    (l) => l.slug === slug && l.category === "hotels" && l.travel?.kind === "hotel",
+  );
+  return listing ? toDetail(listing) : undefined;
+}
+
+export async function listHoneymoonMoods(): Promise<string[]> {
+  return ["Beach", "Hills", "Heritage", "Backwaters", "Overseas"];
 }
 
 export async function searchSuggestions(query: string): Promise<SearchSuggestions> {

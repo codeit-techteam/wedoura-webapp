@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+import { getCoupleEmail } from "@/lib/couple-auth";
 import { createInquiry } from "@/lib/vendor-api";
 
 type Props = {
@@ -83,6 +84,7 @@ export function InquiryForm({ vendorName, vendorSlug, packageLabels, compact = f
       city: values.city.trim(),
       message: messageParts.join("\n") || `Hi ${vendorName}, we would love to check availability.`,
       weddingMonth: values.date ? values.date.slice(0, 7) : undefined,
+      coupleEmail: getCoupleEmail() ?? undefined,
     });
     setBusy(false);
 

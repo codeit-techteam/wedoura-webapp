@@ -24,8 +24,68 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 16 | v2 session 1: homepage and `/vendors` from the client references | ✅ Done (2026-11-23) |
 | 17 | v2 session 2: vendor profile (`/vendors/[slug]`) from the client reference | ✅ Done (2026-11-23) |
 | 18 | v2 session 2b: venue profile (`/venues/[slug]`) from the client reference | ✅ Done (2026-11-23) |
+| 19 | v2 session 3: real-wedding story page (`/real-weddings/[slug]`) from the client reference | ✅ Done (2026-11-23) |
+| 20 | v2 session 3b: remaining public pages restyled (listings, journal, saved, about, contact, legal, 404, Soulmates waiting list) | ✅ Done (2026-11-23) |
+| 21 | v2 session 4: honeymoon landing, packages, stays from the client references | ✅ Done (2026-11-23) |
+| 22 | v2 session 5: login, signup and couple account | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 5: login, signup and couple account
+
+Done:
+- **`/login` (couples)** and **`/vendor/login`**: shared login card (email + password, Show, Keep me logged in, Forgot password → check inbox, Continue with Google mocked, “You’re in” transition). No mobile OTP or magic link. Layout matches the reference (photo + form). Demos: `couple@gmail.com` / `123456`, `vendor@gmail.com` / `123456`.
+- **Couple onboarding**: three questions (names, wedding month, city) + terms for new accounts; demo couple is pre-onboarded.
+- **`/account`**: wedding space — Overview, Shortlist (Saved store), Enquiries (Inquiry stage + quote), Compare (≤3), Details, Notifications, log out. No payments, no in-app chat. New enquiries attach `coupleEmail` when a couple session exists.
+- **`/list-your-business`**: intro screen + multi-step shell (Business → Contact → Review) with “how couples will see you” card, optional Founding Partner checkbox, success screen. Short fields only per plan §4.
+- **Verification.** Lint, typecheck, production build.
+
+Next up:
+- Session 6: vendor dashboard (`/vendor-studio`) from the client reference.
+
+### 2026-11-23 · v2 session 4: honeymoon
+
+Done:
+- **Landing `/honeymoon`**: Where-to + Mood search, moods, five-star stays, optional film band, packages, experiences with “Add to my plan” + plan tray, how it works, India/overseas destinations, planning form (`createPlanningRequest`), PartnerBand (hidden when no honeymoon partner).
+- **Packages**: `/honeymoon/packages` listing + `/honeymoon/packages/[slug]` — overview, route, day-by-day accordion, stays, included/not, moments, collections as “from” prices, gallery, good to know, FAQ, **Request to book** → `createInquiry` (no payment / GST / TCS). Reviews hidden.
+- **Stays**: `/honeymoon/stays` listing + `/honeymoon/stays/[slug]` — Mistwood Estate (fictional Coorg stay; not WelcomHeritage Ayatana). Overview, rooms, experiences, dining, evening, gallery, films, getting there, Request to book → Inquiry.
+- **Data / api**: `hotels` + `travel-agencies` categories; hotel + agency sample listings; enriched `HoneymoonPackage` / `HotelProfile` / experiences; `listStays`, `getStay`, package/experience helpers.
+- **Verification.** Lint, typecheck, tests, production build.
+
+Next up:
+- Session 5: login, signup and couple account.
+
+### 2026-11-23 · v2 session 3: real-wedding story page
+
+Done:
+- **`/real-weddings/[slug]`** rebuilt from `extracted/real-wedding` as `<RealWeddingStory>` (`src/components/stories/`, styles in `src/styles/real-wedding.css` scoped under `.story-page`): reading-progress line, ivory hero opener (eyebrow, couple names with the gold `&`, subtitle, full-screen photo), credit strip, sticky Roman-numeral chapter nav with a scroll spy, intro with drop cap + glance list, chapter galleries (single / pair / mosaic / petals rows, first row full-screen), editor's pull quote, palette drawn from the photographs, "Every detail" chapter (photo + details list), "The Night" as muted in-view video clips with sticky pause (reduced motion leaves them paused), credits cards linking `/vendors/[slug]` and `/venues/[slug]`, "Get the look" into filtered `/vendors` lists, the all-photographs strip with the shared `Lightbox`, and the submit-a-wedding band to `/contact`. Every section hides without data; minimal stories fall back to flat photo rows, credit-derived facts and a couple/city/date/style glance.
+- **Data.** `goa-beach-wedding` enriched into the rich featured coastal story ("Vows at the edge of the sea", Mira & Sahil at The Courtyard House) filling every new `RealWedding` field — hero copy, intro, credit strip, glance, pull quote, 6 chapters with captioned figures and row layouts, 6 night clips, palette with notes, details, getTheLook — using the 16 reference photographs (`/ref/real-wedding/image-01…16.webp`) and clips (`video-01…06.mp4`). Credits link published vendors (aperture-marigold, petal-and-thread, mehr-studio) and the courtyard-house venue via the new `venueSlug`.
+- **api.ts.** `getWedding` now applies the published-only link rule to `venueSlug` as well as `vendorSlug`.
+- **Verification.** Lint, typecheck, 83/83 tests, production build; checked in the browser at 1440px and 390px (hero, nav spy, galleries, pull, palette, night autoplay/pause, lightbox).
+
+Decisions / gotchas:
+- Pull quote renders after chapter I and the palette after chapter III (or the last chapter when shorter), matching the reference order.
+- Credit and "Get the look" card images are deterministic picks spread across the story's photographs (the data has no per-card photo field).
+- Figure captions stay in aria-labels and lightbox alts; the reference's final pass hides on-photo captions.
+
+Next up:
+- Session 5: login, signup and couple account (honeymoon Session 4 done).
+
+### 2026-11-23 · v2 session 3b: remaining public pages in the v2 language
+
+Done:
+- **Hero pattern everywhere.** The pages the client's files don't include now open with the v2 hero (gold `Label` eyebrow, EB Garamond headline with one gold `<em>`, lede): `/real-weddings`, `/blogs`, `/saved`, `/about`, `/contact`, `/privacy-policy`, `/terms`. Filters, tabs and `?show=` paging on the listings are unchanged (URL params intact); the real-weddings grid stays three `StoryCard`s per row on desktop.
+- **Journal naming.** `/blogs` metadata title is "Journal"; the article breadcrumb and "Keep reading" section say Journal. Routes stay at `/blogs`; article body blocks untouched (ready for Sanity).
+- **Category-in-city breadcrumb.** `VendorBrowse` now shows Home / Vendors / Category (link) / City on pinned `/vendors/[category]/[city]` pages; the bare and category views are unchanged.
+- **404.** Added the label eyebrow and gold accent word to the existing dark hero.
+- **Soulmates landing.** `/soulmates` replaced the holding page: hero, three principles (introductions not profiles, private by design, no DOB/income/ID), and a waiting-list form (name, email, optional city) in `src/app/(site)/soulmates/WaitlistForm.tsx` calling `createSoulmatesWaitlist` from `@/lib/journey-api`, with a success state. Waiting list only, per the BUILD-PLAN decision.
+- **Verification.** Lint, typecheck, 83/83 tests, production build.
+
+Decisions / gotchas:
+- No invented numbers anywhere; the Soulmates page promises exactly one email and asks for nothing sensitive.
+
+Next up:
+- Session 5: login, signup and couple account.
 
 ### 2026-11-23 · v2 session 2b: venue profile
 

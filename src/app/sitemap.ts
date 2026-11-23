@@ -3,6 +3,8 @@ import {
   listArticles,
   listCategoryCityPairs,
   listDestinations,
+  listHoneymoonPackages,
+  listStays,
   listVendors,
   listWeddings,
 } from "@/lib/api";
@@ -14,12 +16,14 @@ import { absoluteUrl } from "@/lib/site-config";
  * listing that is not published, which listVendors guarantees.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [vendors, weddings, articles, pairs, places] = await Promise.all([
+  const [vendors, weddings, articles, pairs, places, packages, stays] = await Promise.all([
     listVendors({ limit: 10000 }),
     listWeddings({ limit: 10000 }),
     listArticles({ limit: 10000 }),
     listCategoryCityPairs(),
     listDestinations(),
+    listHoneymoonPackages(),
+    listStays(),
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -29,6 +33,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/blogs",
     "/gallery",
     "/honeymoon",
+    "/honeymoon/packages",
+    "/honeymoon/stays",
     "/soulmates",
     "/about",
     "/contact",
@@ -48,5 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...weddings.items.map((w) => ({ url: absoluteUrl(`/real-weddings/${w.slug}`), lastModified: w.date })),
     ...articles.items.map((a) => ({ url: absoluteUrl(`/blogs/${a.slug}`), lastModified: a.date })),
     ...places.map((d) => ({ url: absoluteUrl(`/honeymoon/${d.slug}`) })),
+    ...packages.map((p) => ({ url: absoluteUrl(`/honeymoon/packages/${p.slug}`) })),
+    ...stays.map((s) => ({ url: absoluteUrl(`/honeymoon/stays/${s.slug}`) })),
   ];
 }

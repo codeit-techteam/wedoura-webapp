@@ -18,7 +18,8 @@ const columns = [
     title: "Vendors",
     links: [
       { href: "/list-your-business", label: "List your business" },
-      { href: "/login", label: "Vendor login" },
+      { href: "/vendor/login", label: "Vendor login" },
+      { href: "/login", label: "Couple login" },
       { href: "/vendor-studio", label: "Vendor studio" },
       { href: "/list-your-business", label: "Founding Partners" },
     ],
