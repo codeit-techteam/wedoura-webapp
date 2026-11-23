@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import { cn } from "@/lib/cn";
 import { useFocusTrap } from "@/lib/focus-trap";
 import { EASE } from "@/lib/motion";
+import { getCoupleEmail } from "@/lib/couple-auth";
 import { createInquiry } from "@/lib/vendor-api";
 import type { EnquiryTarget } from "./enquiry-context";
 
@@ -97,6 +98,7 @@ export function EnquiryDrawer({ targets, onClose }: Props) {
             message: message.trim(),
             weddingMonth: weddingMonth || undefined,
             guests: guests ? Number(guests) : undefined,
+            coupleEmail: getCoupleEmail() ?? undefined,
           }),
         ),
       );

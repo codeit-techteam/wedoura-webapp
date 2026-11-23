@@ -27,8 +27,21 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 19 | v2 session 3: real-wedding story page (`/real-weddings/[slug]`) from the client reference | ✅ Done (2026-11-23) |
 | 20 | v2 session 3b: remaining public pages restyled (listings, journal, saved, about, contact, legal, 404, Soulmates waiting list) | ✅ Done (2026-11-23) |
 | 21 | v2 session 4: honeymoon landing, packages, stays from the client references | ✅ Done (2026-11-23) |
+| 22 | v2 session 5: login, signup and couple account | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 5: login, signup and couple account
+
+Done:
+- **`/login` (couples)** and **`/vendor/login`**: shared login card (email + password, Show, Keep me logged in, Forgot password → check inbox, Continue with Google mocked, “You’re in” transition). No mobile OTP or magic link. Layout matches the reference (photo + form). Demos: `couple@gmail.com` / `123456`, `vendor@gmail.com` / `123456`.
+- **Couple onboarding**: three questions (names, wedding month, city) + terms for new accounts; demo couple is pre-onboarded.
+- **`/account`**: wedding space — Overview, Shortlist (Saved store), Enquiries (Inquiry stage + quote), Compare (≤3), Details, Notifications, log out. No payments, no in-app chat. New enquiries attach `coupleEmail` when a couple session exists.
+- **`/list-your-business`**: intro screen + multi-step shell (Business → Contact → Review) with “how couples will see you” card, optional Founding Partner checkbox, success screen. Short fields only per plan §4.
+- **Verification.** Lint, typecheck, production build.
+
+Next up:
+- Session 6: vendor dashboard (`/vendor-studio`) from the client reference.
 
 ### 2026-11-23 · v2 session 4: honeymoon
 

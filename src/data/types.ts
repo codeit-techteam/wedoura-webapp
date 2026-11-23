@@ -359,6 +359,8 @@ export interface Inquiry {
   guests?: number;
   budget?: string;
   weddingMonth?: string;
+  /** When set, the couple account can list this enquiry. */
+  coupleEmail?: string;
   createdAt: string; // ISO datetime
 }
 
@@ -392,6 +394,8 @@ export interface VendorApplication {
   /** One link to their work: Instagram or website. */
   workLink: string;
   consent: true;
+  /** Optional early-access flag from the signup form. */
+  foundingPartner?: boolean;
   submittedAt: string; // ISO datetime
 }
 

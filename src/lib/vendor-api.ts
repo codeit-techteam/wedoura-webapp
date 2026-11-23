@@ -93,6 +93,7 @@ export interface ApplicationInput {
   password: string;
   workLink: string;
   consent: true;
+  foundingPartner?: boolean;
 }
 
 /** POST /vendor/applications — creates the application and an account in
@@ -124,6 +125,7 @@ export async function submitApplication(input: ApplicationInput): Promise<Result
     email,
     workLink: input.workLink.trim(),
     consent: true,
+    foundingPartner: input.foundingPartner || undefined,
     submittedAt: new Date().toISOString(),
   };
   writeDb({ ...db, accounts: [...db.accounts, account], applications: [...db.applications, application] });
@@ -257,6 +259,7 @@ export async function createInquiry(input: {
   message: string;
   weddingMonth?: string;
   guests?: number;
+  coupleEmail?: string;
 }): Promise<Result<Inquiry>> {
   const db = readDb();
   const listing = db.listings.find((l) => l.slug === input.vendorSlug);
@@ -272,12 +275,40 @@ export async function createInquiry(input: {
     message: input.message.trim(),
     weddingMonth: input.weddingMonth,
     guests: input.guests,
+    coupleEmail: input.coupleEmail?.trim().toLowerCase() || undefined,
     status: "new",
     stage: "new",
     createdAt: new Date().toISOString(),
   };
   writeDb({ ...db, inquiries: [...db.inquiries, inquiry] });
   return { ok: true, value: inquiry };
+}
+
+export type CoupleInquiryView = Inquiry & { vendorName: string; vendorSlug?: string };
+
+/** GET inquiries for a couple email (couple account). Ensures demo rows exist. */
+export async function listCoupleInquiries(emailRaw: string): Promise<CoupleInquiryView[]> {
+  let db = readDb();
+  const email = emailRaw.trim().toLowerCase();
+  if (email === "couple@gmail.com") {
+    const missing = demoInquiries().filter(
+      (i) => i.coupleEmail === email && !db.inquiries.some((e) => e.id === i.id),
+    );
+    if (missing.length > 0) {
+      db = { ...db, inquiries: [...db.inquiries, ...missing] };
+      writeDb(db);
+    }
+  }
+  return db.inquiries
+    .filter((i) => i.coupleEmail?.toLowerCase() === email)
+    .map((i) => {
+      const listing = db.listings.find((l) => l.id === i.listingId);
+      return {
+        ...i,
+        vendorName: listing?.name ?? "Vendor",
+        vendorSlug: listing?.status === "published" ? listing.slug : listing?.slug,
+      };
+    });
 }
 
 /** PATCH /me/inquiries/{id} */

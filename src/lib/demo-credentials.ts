@@ -40,7 +40,7 @@ export function demoListing(): VendorListing {
   return { ...copy, accountId: DEMO_ACCOUNT_ID };
 }
 
-/** Sample inquiries so the portal's inquiries screen has content. */
+/** Sample inquiries so the portal and the demo couple account have content. */
 export function demoInquiries(): Inquiry[] {
   const day = 24 * 60 * 60 * 1000;
   return [
@@ -48,12 +48,16 @@ export function demoInquiries(): Inquiry[] {
       id: "inq-demo-1",
       listingId: DEMO_LISTING_ID,
       name: "Ananya",
-      partner: "Dev",
+      partner: "Kabir",
       whatsapp: "+919876543210",
       date: "2026-12-12",
-      city: "Udaipur",
+      city: "Mumbai",
       message: "We are planning two days in December, mostly outdoors. Are you free around the 12th?",
-      status: "new",
+      status: "replied",
+      stage: "quote_sent",
+      quoteINR: 185000,
+      coupleEmail: "couple@gmail.com",
+      weddingMonth: "2026-12",
       createdAt: new Date(Date.now() - 2 * day).toISOString(),
     },
     {
@@ -64,6 +68,7 @@ export function demoInquiries(): Inquiry[] {
       city: "Jaipur",
       message: "What does your one-day package cover, and do you travel to Jaipur?",
       status: "replied",
+      stage: "contacted",
       createdAt: new Date(Date.now() - 6 * day).toISOString(),
     },
     {
@@ -75,7 +80,22 @@ export function demoInquiries(): Inquiry[] {
       city: "Goa",
       message: "Looking for a small registry shoot, about twenty guests.",
       status: "closed",
+      stage: "lost",
       createdAt: new Date(Date.now() - 20 * day).toISOString(),
+    },
+    {
+      id: "inq-demo-4",
+      listingId: "lst-02",
+      name: "Ananya",
+      partner: "Kabir",
+      whatsapp: "+919876543210",
+      city: "Mumbai",
+      message: "Would love a quote for florals for a December wedding in Mumbai.",
+      status: "new",
+      stage: "new",
+      coupleEmail: "couple@gmail.com",
+      weddingMonth: "2026-12",
+      createdAt: new Date(Date.now() - 4 * day).toISOString(),
     },
   ];
 }

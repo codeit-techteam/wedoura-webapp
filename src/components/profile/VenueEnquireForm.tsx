@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { Photo } from "@/components/media/Photo";
 import type { Photo as PhotoData } from "@/data/types";
+import { getCoupleEmail } from "@/lib/couple-auth";
 import { createInquiry } from "@/lib/vendor-api";
 
 type MonthKind = "open" | "value" | "peak" | "closed";
@@ -163,6 +164,7 @@ export function VenueEnquireForm({
       message:
         messageParts.join("\n") ||
         `Hi ${vendorName}, we would love to check availability.`,
+      coupleEmail: getCoupleEmail() ?? undefined,
     });
     setBusy(false);
 
