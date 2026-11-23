@@ -1,3 +1,4 @@
+import { Announcement } from "@/components/chrome/Announcement";
 import { Navbar } from "@/components/chrome/Navbar";
 import { listCategoriesWithCounts, listCitiesWithCounts } from "@/lib/api";
 
@@ -8,9 +9,12 @@ import { listCategoriesWithCounts, listCitiesWithCounts } from "@/lib/api";
 export async function SiteHeader() {
   const [categories, cities] = await Promise.all([listCategoriesWithCounts(), listCitiesWithCounts()]);
   return (
-    <Navbar
-      categories={categories.map(({ slug, name, shortName, cover }) => ({ slug, name, shortName, cover }))}
-      cities={cities.map(({ slug, name }) => ({ slug, name }))}
-    />
+    <>
+      <Announcement />
+      <Navbar
+        categories={categories.map(({ slug, name, shortName, cover }) => ({ slug, name, shortName, cover }))}
+        cities={cities.map(({ slug, name }) => ({ slug, name }))}
+      />
+    </>
   );
 }

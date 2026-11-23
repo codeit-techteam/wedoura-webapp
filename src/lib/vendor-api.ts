@@ -247,6 +247,39 @@ export async function listMyInquiries(): Promise<Inquiry[]> {
   return listing ? db.inquiries.filter((i) => i.listingId === listing.id) : [];
 }
 
+/** POST /inquiries — a couple enquiry against one listing (by slug).
+ *  Resolves listingId from the mock store (sample rows are always seeded). */
+export async function createInquiry(input: {
+  vendorSlug: string;
+  name: string;
+  whatsapp: string;
+  city: string;
+  message: string;
+  weddingMonth?: string;
+  guests?: number;
+}): Promise<Result<Inquiry>> {
+  const db = readDb();
+  const listing = db.listings.find((l) => l.slug === input.vendorSlug);
+  const listingId = listing?.id;
+  if (!listingId) return { ok: false, error: "That vendor is not available." };
+
+  const inquiry: Inquiry = {
+    id: id(),
+    listingId,
+    name: input.name.trim(),
+    whatsapp: input.whatsapp.trim(),
+    city: input.city.trim(),
+    message: input.message.trim(),
+    weddingMonth: input.weddingMonth,
+    guests: input.guests,
+    status: "new",
+    stage: "new",
+    createdAt: new Date().toISOString(),
+  };
+  writeDb({ ...db, inquiries: [...db.inquiries, inquiry] });
+  return { ok: true, value: inquiry };
+}
+
 /** PATCH /me/inquiries/{id} */
 export async function setInquiryStatus(id: string, status: InquiryStatus): Promise<Result<Inquiry>> {
   const db = readDb();

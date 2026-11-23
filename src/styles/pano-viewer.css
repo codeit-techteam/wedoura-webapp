@@ -1,0 +1,282 @@
+/*
+  Exact 360° viewer chrome from docs/reference/client-v2/extracted/venue-profile/styles.css.
+  Scoped under .wedoura-pano. Do not restyle — only token aliases for our theme.
+*/
+.wedoura-pano {
+  --pv-serif: var(--font-serif);
+  --pv-ui: var(--font-sans);
+  --pv-gold: var(--color-gold);
+  --pv-goldtx: var(--color-gold-deep);
+  --pv-ink: var(--color-ink);
+  --pv-side: var(--gutter, 1.25rem);
+}
+
+.wedoura-pano.variant-tour {
+  background: #0e0d0c;
+  color: #faf7f2;
+}
+
+.wedoura-pano .pv {
+  position: relative;
+  margin: 0 var(--pv-side);
+  height: min(78svh, 760px);
+  background: #1a1816;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+}
+
+.wedoura-pano.variant-inline .pv {
+  margin: 0;
+  height: 100%;
+  min-height: 16rem;
+}
+
+.wedoura-pano .pv canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+.wedoura-pano .pv canvas:active {
+  cursor: grabbing;
+}
+
+.wedoura-pano .pvpost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  padding: 24px;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  border: 0;
+  width: 100%;
+  color: #fff;
+  z-index: 2;
+}
+
+.wedoura-pano .pvpost::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.15));
+}
+
+.wedoura-pano .pvpost > * {
+  position: relative;
+}
+
+.wedoura-pano .pvpost .ring {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  display: grid;
+  place-items: center;
+  background: rgba(17, 17, 17, 0.3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: transform 0.4s;
+}
+
+.wedoura-pano .pvpost:hover .ring {
+  transform: scale(1.06);
+}
+
+.wedoura-pano .pvpost .ring svg {
+  width: 40px;
+  height: 40px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.3;
+}
+
+.wedoura-pano .pvpost b {
+  font: 400 clamp(28px, 3vw, 44px) / 1.1 var(--pv-serif);
+}
+
+.wedoura-pano .pvpost small {
+  font: 400 14px var(--pv-ui);
+  color: #e9e2d4;
+}
+
+.wedoura-pano .pvload {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 500 12px var(--pv-ui);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #e9e2d4;
+  background: rgba(14, 13, 12, 0.6);
+  z-index: 4;
+}
+
+.wedoura-pano .pvload[hidden] {
+  display: none;
+}
+
+.wedoura-pano .pvui {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.wedoura-pano .pvui button {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(17, 17, 17, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font: 400 20px / 1 var(--pv-ui);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.wedoura-pano .pvui button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 1.6;
+}
+
+.wedoura-pano .pvui button[aria-pressed="true"] {
+  background: var(--pv-gold);
+  border-color: var(--pv-gold);
+}
+
+.wedoura-pano .pvui button[aria-pressed="true"] svg {
+  stroke: var(--pv-ink);
+}
+
+.wedoura-pano .pvhint {
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  z-index: 3;
+  font: 500 11px var(--pv-ui);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  background: rgba(17, 17, 17, 0.45);
+  padding: 8px 14px;
+  color: #fff;
+  transition: opacity 0.6s;
+  pointer-events: none;
+}
+
+.wedoura-pano .pvname {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 3;
+  font: 400 22px var(--pv-serif);
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.6);
+}
+
+.wedoura-pano .scenes {
+  display: flex;
+  gap: 10px;
+  margin: 16px var(--pv-side) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.wedoura-pano.variant-inline .scenes {
+  margin: 12px 0 0;
+}
+
+.wedoura-pano .scenes::-webkit-scrollbar {
+  display: none;
+}
+
+.wedoura-pano .scene {
+  flex: none;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: none;
+  border: 1px solid #3a3530;
+  padding: 8px 18px 8px 8px;
+  color: #e9e2d4;
+  font: 400 15px var(--pv-ui);
+  cursor: pointer;
+  min-height: 56px;
+}
+
+.wedoura-pano .scene img {
+  width: 64px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.wedoura-pano .scene[aria-pressed="true"] {
+  border-color: var(--pv-gold);
+  color: #fff;
+}
+
+.wedoura-pano .scene.soon {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.wedoura-pano .pvnote {
+  margin: 18px var(--pv-side) 0;
+  font: 400 13.5px var(--pv-ui);
+  color: #8c857a;
+  max-width: 60em;
+}
+
+.wedoura-pano .pv.full {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  height: 100svh;
+  z-index: 200;
+}
+
+@media (max-width: 900px) {
+  .wedoura-pano .pv {
+    margin: 0;
+    height: 72svh;
+  }
+
+  .wedoura-pano .scenes {
+    margin: 12px 16px 0;
+  }
+
+  .wedoura-pano .pvnote {
+    margin: 14px 20px 0;
+  }
+
+  .wedoura-pano .pvname {
+    top: 14px;
+    bottom: auto;
+    font-size: 19px;
+  }
+
+  .wedoura-pano .pvhint {
+    top: auto;
+    bottom: 74px;
+  }
+}

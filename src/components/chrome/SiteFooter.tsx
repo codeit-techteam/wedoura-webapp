@@ -1,109 +1,95 @@
 import Link from "next/link";
-import { Wordmark } from "@/components/chrome/Wordmark";
-import { Container } from "@/components/ui/Container";
-import { Icon, type IconName } from "@/components/ui/Icon";
-import { Label } from "@/components/ui/Label";
-import { Text } from "@/components/ui/Text";
-import { SOCIALS } from "@/lib/site-config";
+import { LetterForm } from "@/components/chrome/LetterForm";
+import { listAllCities } from "@/lib/api";
 
 const columns = [
   {
-    title: "For couples",
+    title: "Couples",
     links: [
-      { href: "/vendors", label: "Explore Vendors" },
-      { href: "/real-weddings", label: "Real Weddings" },
-      { href: "/blogs", label: "Blogs" },
-      { href: "/gallery", label: "Gallery" },
+      { href: "/vendors", label: "Find vendors" },
+      { href: "/real-weddings", label: "Real weddings" },
+      { href: "/blogs", label: "Journal" },
       { href: "/honeymoon", label: "Honeymoon" },
-      { href: "/faq", label: "FAQs" },
+      { href: "/soulmates", label: "Soulmates" },
+      { href: "/saved", label: "Saved" },
     ],
   },
   {
-    title: "For vendors",
+    title: "Vendors",
     links: [
-      { href: "/list-your-business", label: "List Your Business" },
-      { href: "/login", label: "Vendor Login" },
-      { href: "/vendor-studio", label: "Vendor Studio" },
+      { href: "/list-your-business", label: "List your business" },
+      { href: "/login", label: "Vendor login" },
+      { href: "/vendor-studio", label: "Vendor studio" },
+      { href: "/list-your-business", label: "Founding Partners" },
     ],
   },
   {
-    title: "Company",
+    title: "Wedoura",
     links: [
       { href: "/about", label: "About" },
       { href: "/contact", label: "Contact" },
-      { href: "/privacy-policy", label: "Privacy Policy" },
+      { href: "/privacy-policy", label: "Privacy" },
       { href: "/terms", label: "Terms" },
     ],
   },
 ];
 
-// One config for social links (src/lib/site-config.ts); an empty href there
-// hides the network, and a network without an icon here never renders.
-const SOCIAL_ICONS: Record<string, IconName> = {
-  instagram: "instagram",
-  pinterest: "pinterest",
-  youtube: "youtube",
-};
-const socials = SOCIALS.map((s) => ({ ...s, icon: SOCIAL_ICONS[s.label.toLowerCase()] })).filter(
-  (s): s is { label: string; href: string; icon: IconName } => s.icon !== undefined && s.href.length > 0,
-);
+const MARK = ["W", "E", "D", "O", "U", "R", "A"] as const;
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const cityList = await listAllCities();
+  const withCities = [
+    columns[0],
+    columns[1],
+    {
+      title: "Cities",
+      links: cityList.map((city) => ({ href: `/vendors?city=${city.slug}`, label: city.name })),
+    },
+    columns[2],
+  ];
   return (
-    <footer className="border-t border-line bg-white text-ink">
-      <Container className="py-section-sm">
-        <div className="grid gap-14 lg:grid-cols-[1.1fr_2fr] lg:gap-20">
-          <div>
-            <Wordmark size="footer" />
-            <Text tone="mute" className="mt-5 max-w-xs">
-              Wedding vendors across India. See their real work, shortlist the ones you love, and talk to them
-              directly.
-            </Text>
-            {socials.length > 0 && (
-            <ul className="mt-8 flex items-center gap-2" aria-label="Social">
-              {socials.map((social) => (
-                <li key={social.label}>
-                  <a
-                    href={social.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={social.label}
-                    className="-ml-2 inline-flex tap items-center justify-center transition-chrome hover:text-gold"
-                  >
-                    <Icon name={social.icon} size={22} />
-                  </a>
-                </li>
-              ))}
-            </ul>
-            )}
-          </div>
-
-          <nav aria-label="Footer" className="grid grid-cols-2 gap-x-8 gap-y-12 md:grid-cols-3">
-            {columns.map((column) => (
-              <div key={column.title}>
-                <Label tone="ink">{column.title}</Label>
-                <ul className="mt-4 flex flex-col">
-                  {column.links.map((link) => (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        className="inline-flex min-h-10 items-center text-body text-mute transition-chrome hover:text-ink"
-                      >
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
+    <footer className="border-t border-line bg-ivory pt-20 text-ink md:pt-28 xl:pt-36">
+      <div className="container-site grid gap-14 xl:grid-cols-[1fr_1.75fr] xl:gap-24">
+        <div>
+          <h2 className="font-wordmark text-[clamp(2.875rem,5.4vw,5.75rem)] leading-none font-normal tracking-normal text-ink">
+            The Wedoura <em className="mt-1 block text-gold-deep">Letter</em>
+          </h2>
+          <p className="mt-7 max-w-[26em] font-sans text-[1.1875rem] leading-relaxed text-mute">
+            One short letter a month: a real wedding, a vendor worth knowing, a venue to see.
+          </p>
+          <LetterForm />
         </div>
+        <nav aria-label="Footer" className="grid grid-cols-2 gap-x-5 gap-y-9 xl:grid-cols-4 xl:gap-8">
+          {withCities.map((column) => (
+            <div key={column.title}>
+              <h3 className="mb-5 font-sans text-[0.8125rem] font-medium tracking-[0.3em] text-ink uppercase">{column.title}</h3>
+              <ul>
+                {column.links.map((link) => (
+                  <li key={`${column.title}-${link.label}`} className="mb-3.5">
+                    <Link href={link.href} className="font-sans text-[1.0625rem] text-mute hover:text-gold-deep">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </div>
 
-        <div className="mt-16 flex flex-col gap-3 border-t border-line pt-6 md:flex-row md:items-center md:justify-between">
-          <Label>© {new Date().getFullYear()} Wedoura. All rights reserved.</Label>
-          <Label>Sample content while the site is being built.</Label>
-        </div>
-      </Container>
+      <p
+        aria-hidden="true"
+        className="mt-16 flex items-end justify-between px-2 font-wordmark text-[18.5vw] leading-[0.78] font-normal text-ink select-none xl:mt-28 xl:px-6 xl:text-[clamp(3.75rem,17.5vw,21.25rem)]"
+      >
+        {MARK.map((letter) => (
+          <span key={letter}>{letter}</span>
+        ))}
+      </p>
+
+      <div className="container-site flex flex-col gap-2 py-7 font-sans text-label font-medium tracking-[0.18em] text-mute uppercase md:flex-row md:justify-between">
+        <span>© {new Date().getFullYear()} Wedoura</span>
+        <span>Sample content while the site is being built.</span>
+      </div>
     </footer>
   );
 }

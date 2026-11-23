@@ -6,15 +6,19 @@
 */
 
 @theme {
-  /* Colour: mostly black and white, photographs supply the colour. */
+  /* Colour, from the client's v2 files (docs/v2/BUILD-PLAN.md section 2). */
   --color-*: initial;
   --color-white: #ffffff;
-  --color-ivory: #f6f2ea;
-  --color-ink: #1a1816;
-  --color-mute: #5f5a52; /* darker than the mockup's #6b665d so it stays readable */
-  --color-line: #ddd6c8;
-  --color-gold: #a8864a; /* marks, rules, icons and the one italic accent word per headline */
-  --color-gold-deep: #8a6d3b; /* small gold labels; passes contrast on white */
+  --color-ivory: #faf7f2; /* page background */
+  --color-sand: #f3eee6; /* alternate band */
+  --color-parchment: #f5f0e8; /* alternate band */
+  --color-ink: #111111;
+  --color-copy: #1d1b19; /* body text */
+  --color-mute: #4f4a42;
+  --color-line: #ddd5c6;
+  --color-gold: #c8a96a; /* rules, icons, large italic accent words */
+  --color-gold-deep: #9a7a42; /* small gold labels; passes contrast on ivory */
+  --color-mist: #e9e2d4; /* text on the ink announcement strip */
   --color-black: #000000;
   --color-transparent: transparent;
   --color-current: currentColor;
@@ -27,16 +31,16 @@
   --radius-none: 0;
   --radius-full: 9999px; /* only for round icon buttons and count badges */
 
-  /* Type: Cormorant Garamond for headlines, Jost for body and labels.
-     The font variables are set by next/font in src/styles/fonts.ts. */
+  /* Type: EB Garamond for headlines, Bodoni Moda for the wordmark,
+     Jost for body and UI. Variables are set in src/styles/fonts.ts. */
   --font-*: initial;
   --font-weight-light: 300;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
+  --font-weight-semibold: 600;
 
-  /* Type scale, mobile first. Cormorant runs small, so headline sizes sit
-     above the reference mockup. Body is never under 16px; labels may be
-     12px; nothing under 12px. */
+  /* Type scale, mobile first. Body stays 17px. Labels are 11.5px
+     and buttons 12px, as in the client's files. */
   --text-*: initial;
   /* Line-heights leave room for serif descenders (g, y, p, q).
      Sub-1.0 values clipped glyphs wherever overflow was hidden. */
@@ -68,10 +72,12 @@
   --text-body-lg--line-height: 1.6;
   --text-small: 0.875rem;
   --text-small--line-height: 1.5;
-  --text-label: 0.75rem; /* 12px, the floor */
+  --text-label: 0.71875rem; /* 11.5px eyebrows */
   --text-label--line-height: 1.4;
   --text-label-lg: 0.8125rem;
   --text-label-lg--line-height: 1.4;
+  --text-button: 0.75rem; /* 12px */
+  --text-button--line-height: 1.2;
   /* Chrome nav links — smaller than label-lg so the wordmark reads as the brand. */
   --text-nav: 0.75rem;
   --text-nav--line-height: 1.35;
@@ -88,8 +94,9 @@
   --tracking-tight: -0.01em;
   --tracking-normal: 0;
   --tracking-wordmark: 0.42em;
-  --tracking-label: 0.28em;
-  --tracking-nav: 0.22em;
+  --tracking-label: 0.3em;
+  --tracking-nav: 0.2em;
+  --tracking-button: 0.24em;
   --tracking-wide: 0.32em; /* gold eyebrow labels */
   --tracking-caps: 0.06em;
 
@@ -104,12 +111,16 @@
   --container-article: 56rem; /* long-form reading, wider than legal prose */
   --container-hero-search: 55rem; /* 880px, the hero search bar */
 
-  /* Breakpoints the brief designs for: 390 (base), 768, 1440. */
+  /* Breakpoints: 390 (base), 768 (md), 1024 (lg).
+     xl used to be 1440px, which made laptop 100%/110% zoom fall into the
+     compact layout (stacked search, 2-col grids) while 90% zoom still looked
+     “desktop”. 70rem (1120px) keeps the desktop layout at 100% and 110% on
+     typical laptop widths; 2xl stays for very wide screens. */
   --breakpoint-*: initial;
   --breakpoint-sm: 40rem;
   --breakpoint-md: 48rem;
   --breakpoint-lg: 64rem;
-  --breakpoint-xl: 90rem;
+  --breakpoint-xl: 70rem;
   --breakpoint-2xl: 100rem;
 
   /* Motion. One easing, long and quiet. */
@@ -135,7 +146,8 @@
 /* next/font variables and responsive chrome sizes, mapped inline so the
    utilities resolve against the element they are used on. */
 @theme inline {
-  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-serif: var(--font-eb-garamond), "EB Garamond", Georgia, "Times New Roman", serif;
+  --font-wordmark: var(--font-bodoni), "Bodoni Moda", Didot, "Bodoni 72", serif;
   --font-sans: var(--font-jost), Jost, "Helvetica Neue", Arial, sans-serif;
   --spacing-nav: var(--nav-h);
   --spacing-profile-sticky: var(--profile-sticky-top);
@@ -149,7 +161,9 @@
   /* Profile section subnav (Portfolio / Albums / …) under the main navbar. */
   --subnav-h: 3.5rem;
   --profile-sticky-top: calc(var(--nav-h) + var(--subnav-h));
-  --bottombar-h: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+  /* The v2 shell has no mobile tab bar. The variable stays so older
+     padding utilities collapse instead of leaving a gap. */
+  --bottombar-h: 0px;
   --motion-rise: 24px;
   --motion-duration: 0.9s;
   --motion-duration-zoom: 1.2s;
@@ -163,7 +177,6 @@
 @media (min-width: 48rem) {
   :root {
     --nav-h: 4.5rem;
-    --bottombar-h: 0px;
   }
 }
 

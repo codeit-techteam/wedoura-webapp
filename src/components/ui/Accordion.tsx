@@ -1,7 +1,6 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Icon } from "@/components/ui/Icon";
 import { Text } from "@/components/ui/Text";
 import type { Faq } from "@/data/types";
 
@@ -20,7 +19,7 @@ export function Accordion({ items, defaultOpen = 0 }: Props) {
   const uid = useId();
 
   return (
-    <ul className="border-t border-line">
+    <ul className="border-t border-ink">
       {items.map((item, i) => {
         const isOpen = open === i;
         const panelId = `${uid}-panel-${i}`;
@@ -34,16 +33,12 @@ export function Accordion({ items, defaultOpen = 0 }: Props) {
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => setOpen(isOpen ? null : i)}
-                className="tap flex w-full items-center justify-between gap-6 py-5 text-left outline-offset-4"
+                className="flex min-h-12 w-full items-center justify-between gap-6 py-5 text-left outline-offset-4"
               >
-                <span className="font-serif text-h3 leading-snug">{item.question}</span>
-                <Icon
-                  name="chevron-down"
-                  size={18}
-                  className={`shrink-0 text-gold transition-transform duration-300 ease-wedoura ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
-                />
+                <span className="font-serif text-[clamp(1.375rem,2vw,1.875rem)] leading-snug font-normal">{item.question}</span>
+                <span aria-hidden="true" className="shrink-0 font-serif text-[1.5rem] text-gold">
+                  {isOpen ? "–" : "+"}
+                </span>
               </button>
             </h3>
             <div

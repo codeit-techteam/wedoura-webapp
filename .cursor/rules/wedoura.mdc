@@ -1,0 +1,18 @@
+---
+description: Wedoura v2 project rules
+alwaysApply: true
+---
+
+# Wedoura v2 rules (apply to every request)
+
+- We are rebuilding the site to match the client's 13 HTML designs. The plan is docs/v2/BUILD-PLAN.md. Read its sections 1 to 6 before changing code, and follow its decisions table (section 4) exactly.
+- Also follow CLAUDE.md in the project root (stack, data layer, conventions).
+- NEVER open, read or attach the original files docs/reference/client-v2/*.html. They are several MB each because of embedded images and video. Read only docs/reference/client-v2/extracted/<page>/ (markup.html, styles.css, script.js, summary.md). Only scripts/extract-reference.mjs touches the originals.
+- All data goes through src/lib/api.ts and src/data/types.ts. Extend them; never hard-code content in pages or bypass them.
+- Keep the demo logins (vendor@gmail.com / 123456, and couple@gmail.com / 123456 once added).
+- No invented numbers (counts, ratings, review totals). Hide a section when it has no data.
+- Login is email and password plus "Continue with Google" only. No mobile number, no OTP.
+- The 360 viewer from the venue reference must be ported exactly, never restyled or replaced.
+- NEVER run git commit, git push or any other git command that changes history. The user commits himself.
+- Before finishing any task, run the project's lint, typecheck and build scripts and fix every error. Then update docs/PROGRESS.md.
+- If the work is too big to finish in one reply, stop at a clean point, say exactly what is done and what is left, and wait for "continue".

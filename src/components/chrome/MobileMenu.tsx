@@ -1,141 +1,83 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { useRef } from "react";
-import { PRIMARY_LINKS, type NavCategory } from "@/components/chrome/Navbar";
-import { SavedCount } from "@/components/chrome/SavedCount";
+import { NAV_LINKS, NAV_LIST } from "@/components/chrome/nav";
 import { Wordmark } from "@/components/chrome/Wordmark";
-import { Icon } from "@/components/ui/Icon";
-import { Label } from "@/components/ui/Label";
 import { useFocusTrap } from "@/lib/focus-trap";
-import { EASE } from "@/lib/motion";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSearch: () => void;
-  categories: NavCategory[];
 };
 
-const list = { show: { transition: { staggerChildren: 0.06, delayChildren: 0.08 } }, hide: {} };
-const item = {
-  hide: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-};
-
-/** Full-screen menu for phones. Large serif links that fade and rise in sequence. */
-export function MobileMenu({ open, onClose, onSearch, categories }: Props) {
+/** Full-screen menu. Serif links, then Free planning help as the button and List your business under it. */
+export function MobileMenu({ open, onClose }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   useFocusTrap(rootRef, open, closeRef);
 
-  const big = "inline-flex tap items-center font-serif text-menu text-ink";
+  if (!open) return null;
+
+  const links = NAV_LINKS.filter((item) => item.href !== NAV_LIST.href && item.href !== "/contact");
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          ref={rootRef}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-white text-ink"
+    <div
+      ref={rootRef}
+      id="site-menu"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menu"
+      className="fixed inset-0 z-50 flex flex-col bg-ivory px-6 pb-8 text-ink"
+    >
+      <div className="flex h-nav shrink-0 items-center justify-between border-b border-line">
+        <Wordmark size="menu" />
+        <button
+          ref={closeRef}
+          type="button"
+          onClick={onClose}
+          aria-label="Close menu"
+          className="flex h-11 w-11 items-center justify-center"
         >
-          <div className="container-site flex h-nav shrink-0 items-center justify-between border-b border-line">
-            <Wordmark size="menu" />
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={onClose}
-              aria-label="Close menu"
-              className="-mr-2 inline-flex tap items-center justify-center"
-            >
-              <Icon name="close" size={24} />
-            </button>
-          </div>
-
-          <motion.nav
-            aria-label="Menu"
-            variants={list}
-            initial="hide"
-            animate="show"
-            className="container-site flex flex-1 flex-col py-10 pb-section-sm"
+          <svg viewBox="0 0 24 24" className="size-5 stroke-ink" aria-hidden="true" fill="none">
+            <path d="M5 5l14 14M19 5 5 19" strokeWidth="1.5" />
+          </svg>
+        </button>
+      </div>
+      <nav aria-label="Mobile" className="mt-6 flex flex-1 flex-col overflow-auto">
+        {links.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onClose}
+            className="border-b border-line py-3.5 font-serif text-[2.25rem] leading-tight text-ink"
           >
-            <ul className="flex flex-col gap-2">
-              <motion.li variants={item}>
-                <Link href="/vendors" onClick={onClose} className={big}>
-                  Vendors
-                </Link>
-              </motion.li>
-              {PRIMARY_LINKS.map((link) => (
-                <motion.li key={link.href} variants={item}>
-                  <Link href={link.href} onClick={onClose} className={big}>
-                    {link.label}
-                  </Link>
-                </motion.li>
-              ))}
-              <motion.li variants={item}>
-                <Link href="/gallery" onClick={onClose} className={big}>
-                  Gallery
-                </Link>
-              </motion.li>
-            </ul>
-
-            <motion.div variants={item} className="mt-10 border-t border-line pt-8">
-              <Label>Vendors by category</Label>
-              <ul className="mt-3 grid grid-cols-2 gap-x-6">
-                {categories.map((category) => (
-                  <li key={category.slug}>
-                    <Link
-                      href={`/vendors?category=${category.slug}`}
-                      onClick={onClose}
-                      className="inline-flex tap items-center text-body text-ink"
-                    >
-                      {category.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-
-            <motion.ul variants={item} className="mt-8 flex flex-col gap-1 border-t border-line pt-8">
-              <li>
-                <button type="button" onClick={onSearch} className="inline-flex tap items-center gap-3 text-body text-ink">
-                  <Icon name="search" size={20} />
-                  Search
-                </button>
-              </li>
-              <li>
-                <Link href="/saved" onClick={onClose} className="inline-flex tap items-center gap-3 text-body text-ink">
-                  <Icon name="bookmark" size={20} />
-                  Saved
-                  <SavedCount />
-                </Link>
-              </li>
-              <li>
-                <Link href="/login" onClick={onClose} className="inline-flex tap items-center text-body text-ink">
-                  Vendor login
-                </Link>
-              </li>
-            </motion.ul>
-
-            <motion.div variants={item} className="mt-auto pt-10">
-              <Link
-                href="/list-your-business"
-                onClick={onClose}
-                className="nav-link inline-flex tap w-full items-center justify-center border border-ink bg-ink px-6 text-white"
-              >
-                List Your Business
-              </Link>
-            </motion.div>
-          </motion.nav>
-        </motion.div>
-      )}
-    </AnimatePresence>
+            {item.label === "Real weddings" ? (
+              <>
+                Real <em className="text-gold">weddings</em>
+              </>
+            ) : (
+              item.label
+            )}
+          </Link>
+        ))}
+      </nav>
+      <div className="flex flex-col items-start gap-5 pt-6">
+        <Link
+          href="/contact"
+          onClick={onClose}
+          className="inline-flex min-h-12 w-full items-center justify-center bg-ink px-6 font-sans text-button font-medium tracking-button text-ivory uppercase"
+        >
+          Free planning help
+        </Link>
+        <Link
+          href={NAV_LIST.href}
+          onClick={onClose}
+          className="font-sans text-button font-medium tracking-[0.26em] uppercase border-b border-gold pb-1"
+        >
+          {NAV_LIST.label}
+        </Link>
+      </div>
+    </div>
   );
 }

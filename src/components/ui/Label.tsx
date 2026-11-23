@@ -4,7 +4,7 @@ import { cn } from "@/lib/cn";
 type Props = {
   children: ReactNode;
   as?: "p" | "span" | "div";
-  /** Gold labels use the deeper gold so they pass contrast on white. */
+  /** Gold is the eyebrow default: the deeper gold, so it passes contrast. */
   tone?: "ink" | "mute" | "white" | "gold";
   className?: string;
 };
@@ -17,6 +17,6 @@ const tones = {
 };
 
 /** Small uppercase label with wide letter-spacing. */
-export function Label({ children, as: Tag = "p", tone = "mute", className }: Props) {
+export function Label({ children, as: Tag = "p", tone = "gold", className }: Props) {
   return <Tag className={cn("label", tones[tone], className)}>{children}</Tag>;
 }

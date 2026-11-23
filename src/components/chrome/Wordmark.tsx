@@ -18,10 +18,10 @@ export function Wordmark({ size = "nav", className }: Props) {
   // letter-spacing needs balancing with an equal text-indent.
   const sizeClass =
     size === "nav"
-      ? "md:text-wordmark-lg md:indent-(--tracking-wordmark)"
+      ? "text-[1.5rem] text-gold-deep indent-[0.34em] tracking-[0.34em] lg:text-[1.875rem] lg:indent-[0.36em] lg:tracking-[0.36em] xl:text-[2.375rem] xl:indent-(--tracking-wordmark) xl:tracking-wordmark"
       : size === "menu"
-        ? "text-wordmark"
-        : "text-wordmark-lg";
+        ? "text-[1.5rem] text-gold-deep indent-[0.34em] tracking-[0.34em]"
+        : "text-[2rem] text-gold-deep indent-(--tracking-wordmark)";
 
   return (
     <Link href="/" aria-label="Wedoura, home" className={cn("inline-flex tap items-center", className)}>

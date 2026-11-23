@@ -24,6 +24,7 @@ vi.mock("next/link", () => ({
 }));
 
 import { VendorProfile } from "@/components/profile/VendorProfile";
+import { VenueProfile } from "@/components/profile/VenueProfile";
 import { categories as allCategories } from "@/data/categories";
 import { listingToDetail, listingToSummary } from "@/lib/listing-view";
 import { formatPrice } from "@/lib/format";
@@ -169,15 +170,17 @@ describe("a minimal profile", () => {
 });
 
 describe("a venue profile", () => {
-  it("shows capacity, spaces, category facts and the 360 entry point", () => {
+  it("shows capacity, spaces, overview facts and the 360 entry point", () => {
     const detail = listingToDetail(makeVenueListing(), refs.categories, refs.cities);
-    const { container } = render(<VendorProfile vendor={detail} similar={[]} categoryFields={fieldsOf("venues")} />);
+    const { container } = render(<VenueProfile vendor={detail} similar={[]} />);
     const text = container.textContent ?? "";
-    expect(text).toContain("80 to 600 guests");
-    expect(text).toContain("Heritage palace"); // venueType select value
-    expect(text).toContain("42"); // roomsOnSite number
+    expect(text).toContain("80");
+    expect(text).toContain("600");
+    expect(text).toContain("guests");
+    expect(text).toContain("Heritage palace");
+    expect(text).toContain("42");
     expect(text).toContain("The courtyard");
     expect(text).toContain("The lawn");
-    expect(text).toContain("Step inside"); // the 360 tour still, viewer loads on tap
+    expect(text).toContain("Start the 360° tour");
   });
 });

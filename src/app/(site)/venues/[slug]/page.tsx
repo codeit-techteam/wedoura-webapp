@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { VendorProfile } from "@/components/profile/VendorProfile";
+import { VenueProfile } from "@/components/profile/VenueProfile";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getCategory, getVenue, listSimilar, listVendors } from "@/lib/api";
+import { getVenue, listSimilar, listVendors } from "@/lib/api";
 import { breadcrumbSchema, vendorSchema } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site-config";
 
@@ -29,7 +29,7 @@ export default async function VenuePage({ params }: PageProps<"/venues/[slug]">)
   const venue = await getVenue(slug);
   if (!venue) notFound();
 
-  const [similar, category] = await Promise.all([listSimilar(slug), getCategory("venues")]);
+  const similar = await listSimilar(slug);
   return (
     <>
       <JsonLd
@@ -42,7 +42,7 @@ export default async function VenuePage({ params }: PageProps<"/venues/[slug]">)
           ]),
         ]}
       />
-      <VendorProfile vendor={venue} similar={similar} categoryFields={category?.fields} />
+      <VenueProfile vendor={venue} similar={similar} />
     </>
   );
 }

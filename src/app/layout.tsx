@@ -4,7 +4,7 @@ import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { organizationSchema, webSiteSchema } from "@/lib/schema";
 import { SITE_URL } from "@/lib/site-config";
-import { cormorant, jost } from "@/styles/fonts";
+import { bodoni, ebGaramond, jost } from "@/styles/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 // viewportFit=cover lets the bottom bar pad for the home indicator.
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: "#FAF7F2",
   viewportFit: "cover",
   width: "device-width",
   initialScale: 1,
@@ -38,7 +38,7 @@ export const viewport: Viewport = {
  */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${jost.variable} h-full`}>
+    <html lang="en" className={`${ebGaramond.variable} ${bodoni.variable} ${jost.variable} h-full`}>
       <head>
         {/* Motion components server-render their hidden initial state (opacity,
             transforms, masks). Without JS nothing would animate in, so undo it. */}
@@ -46,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <style>{`[style]{opacity:1!important;transform:none!important;clip-path:none!important}`}</style>
         </noscript>
       </head>
-      <body className="flex min-h-full flex-col bg-white text-ink">
+      <body className="flex min-h-full flex-col bg-ivory text-copy">
         <JsonLd schema={[organizationSchema(), webSiteSchema()]} />
         <MotionProvider>
           <SmoothScroll>{children}</SmoothScroll>

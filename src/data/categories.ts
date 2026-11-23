@@ -1,36 +1,119 @@
 import { photos } from "./photos";
-import type { Category } from "./types";
+import type { Category, CategoryFieldDef, CategoryIcon, CategorySlug, VendorKind } from "./types";
 
 /**
- * The six categories, each with its own extra listing fields. Filterable
- * fields become filter controls on /vendors; keys must not collide with the
- * reserved params (q, category, city, budget, sort, show).
+ * The category list from the client's search panel (extracted/home and
+ * extracted/vendors), in that group order. The panel names 25 categories.
+ * Six slugs are the ones the sample vendors and public URLs already use.
+ * A category with no published vendor is hidden from browsing and still
+ * offered on the signup form.
  */
+
+const coverage: CategoryFieldDef = {
+  key: "coverage",
+  label: "Coverage",
+  input: "select",
+  options: ["Photography", "Film", "Photography + film"],
+  filterable: true,
+};
+
+function category(
+  slug: CategorySlug,
+  name: string,
+  shortName: string,
+  description: string,
+  group: string,
+  icon: CategoryIcon,
+  kind: VendorKind,
+  cover: Category["cover"],
+  fields: CategoryFieldDef[] = [],
+): Category {
+  return { slug, name, shortName, description, group, icon, kind, cover, fields };
+}
+
 export const categories: Category[] = [
-  {
-    slug: "photography-films",
-    name: "Photography & Films",
-    shortName: "Photography",
-    description: "Photographers and filmmakers for the whole day.",
-    cover: photos.p13,
-    fields: [
-      {
-        key: "coverage",
-        label: "Coverage",
-        input: "select",
-        options: ["Photography", "Film", "Photography + film"],
-        filterable: true,
-      },
-      { key: "secondShooter", label: "Second shooter", input: "toggle", filterable: false },
-    ],
-  },
-  {
-    slug: "venues",
-    name: "Venues",
-    shortName: "Venues",
-    description: "Palaces, lawns, beaches and halls, with a 360° look inside.",
-    cover: photos.p22,
-    fields: [
+  category(
+    "photography-films",
+    "Photographers",
+    "Photographers",
+    "Candid, traditional, fine art",
+    "Photo & film",
+    "cam",
+    "photographer",
+    photos.p13,
+    [coverage, { key: "secondShooter", label: "Second shooter", input: "toggle", filterable: false }],
+  ),
+  category(
+    "videographers",
+    "Videographers",
+    "Videographers",
+    "Wedding films and teasers",
+    "Photo & film",
+    "film",
+    "photographer",
+    photos.p16,
+    [coverage],
+  ),
+  category(
+    "pre-wedding-shoots",
+    "Pre-wedding shoots",
+    "Pre-wedding",
+    "Couple sessions, anywhere",
+    "Photo & film",
+    "heart",
+    "photographer",
+    photos.p08,
+  ),
+  category(
+    "content-creators",
+    "Content creators",
+    "Content",
+    "Same-day reels and stories",
+    "Photo & film",
+    "phone",
+    "photographer",
+    photos.p11,
+  ),
+  category(
+    "photo-booths",
+    "Photo booths",
+    "Photo booths",
+    "Prints and GIFs for guests",
+    "Photo & film",
+    "booth",
+    "photographer",
+    photos.p07,
+  ),
+  category(
+    "wedding-planners",
+    "Wedding planners",
+    "Planners",
+    "Full planning or day-of",
+    "Planning & venues",
+    "clip",
+    "planner",
+    photos.p18,
+  ),
+  category(
+    "destination-planners",
+    "Destination planners",
+    "Destination",
+    "Weddings away from home",
+    "Planning & venues",
+    "plane",
+    "planner",
+    photos.p27,
+  ),
+  category(
+    "venues",
+    "Venues",
+    "Venues",
+    "Palaces, resorts, banquet halls",
+    "Planning & venues",
+    "build",
+    "venue",
+    photos.p22,
+    [
       {
         key: "venueType",
         label: "Venue type",
@@ -40,14 +123,37 @@ export const categories: Category[] = [
       },
       { key: "roomsOnSite", label: "Rooms on site", input: "number", filterable: false },
     ],
-  },
-  {
-    slug: "makeup-beauty",
-    name: "Makeup & Beauty",
-    shortName: "Makeup",
-    description: "Bridal makeup, hair and grooming artists.",
-    cover: photos.p01,
-    fields: [
+  ),
+  category(
+    "lighting-tents",
+    "Lighting & tents",
+    "Lighting",
+    "Shamianas, canopies, lighting",
+    "Planning & venues",
+    "tent",
+    "decor",
+    photos.p28,
+  ),
+  category(
+    "wedding-officiants",
+    "Wedding officiants",
+    "Officiants",
+    "Pandits, priests, celebrants",
+    "Planning & venues",
+    "book",
+    "planner",
+    photos.p19,
+  ),
+  category(
+    "makeup-beauty",
+    "Makeup artists",
+    "Makeup",
+    "Bridal and family makeup",
+    "Beauty & style",
+    "brush",
+    "beauty",
+    photos.p01,
+    [
       {
         key: "where",
         label: "Where they work",
@@ -57,14 +163,67 @@ export const categories: Category[] = [
       },
       { key: "trialIncluded", label: "Trial included", input: "toggle", filterable: false },
     ],
-  },
-  {
-    slug: "decor-styling",
-    name: "Decor & Styling",
-    shortName: "Decor",
-    description: "Mandaps, florals, lighting and tablescapes.",
-    cover: photos.p28,
-    fields: [
+  ),
+  category(
+    "hair-stylists",
+    "Hair stylists",
+    "Hair",
+    "Braids, buns, florals",
+    "Beauty & style",
+    "sciss",
+    "beauty",
+    photos.p05,
+  ),
+  category(
+    "mehendi-artists",
+    "Mehendi artists",
+    "Mehendi",
+    "Bridal and guest henna",
+    "Beauty & style",
+    "hand",
+    "mehendi",
+    photos.p10,
+  ),
+  category(
+    "bridal-wear",
+    "Bridal wear",
+    "Bridal wear",
+    "Lehengas, sarees, gowns",
+    "Beauty & style",
+    "dress",
+    "attire",
+    photos.p02,
+  ),
+  category(
+    "groom-wear",
+    "Groom wear",
+    "Groom wear",
+    "Sherwanis, bandhgalas, suits",
+    "Beauty & style",
+    "tie",
+    "attire",
+    photos.p06,
+  ),
+  category(
+    "jewellery",
+    "Jewellery",
+    "Jewellery",
+    "Bridal and heirloom pieces",
+    "Beauty & style",
+    "gem",
+    "attire",
+    photos.p14,
+  ),
+  category(
+    "decor-styling",
+    "Décor & florals",
+    "Décor",
+    "Mandaps, stages, installations",
+    "Décor, food & fun",
+    "flower",
+    "decor",
+    photos.p28,
+    [
       {
         key: "specialty",
         label: "Specialty",
@@ -74,14 +233,17 @@ export const categories: Category[] = [
       },
       { key: "ownWorkshop", label: "Own workshop", input: "toggle", filterable: false },
     ],
-  },
-  {
-    slug: "catering-cakes",
-    name: "Catering & Cakes",
-    shortName: "Catering",
-    description: "Regional menus, live counters and cakes.",
-    cover: photos.p30,
-    fields: [
+  ),
+  category(
+    "catering-cakes",
+    "Catering",
+    "Catering",
+    "Menus for every ritual",
+    "Décor, food & fun",
+    "fork",
+    "caterer",
+    photos.p30,
+    [
       {
         key: "cuisine",
         label: "Cuisine",
@@ -91,14 +253,57 @@ export const categories: Category[] = [
       },
       { key: "minGuests", label: "Minimum guests", input: "number", filterable: false },
     ],
-  },
-  {
-    slug: "entertainment-music",
-    name: "Entertainment & Music",
-    shortName: "Entertainment",
-    description: "Bands, DJs, dhol players and performers.",
-    cover: photos.p42,
-    fields: [
+  ),
+  category(
+    "cakes-desserts",
+    "Cakes & desserts",
+    "Cakes",
+    "Cakes, mithai, dessert tables",
+    "Décor, food & fun",
+    "cake",
+    "caterer",
+    photos.p31,
+  ),
+  category(
+    "invitations",
+    "Invitations",
+    "Invitations",
+    "Printed and digital",
+    "Décor, food & fun",
+    "mail",
+    "invitations",
+    photos.p17,
+  ),
+  category(
+    "favours-gifts",
+    "Favours & gifts",
+    "Favours",
+    "Hampers and return gifts",
+    "Décor, food & fun",
+    "gift",
+    "invitations",
+    photos.p32,
+  ),
+  category(
+    "djs",
+    "DJs",
+    "DJs",
+    "Sangeet to after-party",
+    "Décor, food & fun",
+    "disc",
+    "music",
+    photos.p42,
+  ),
+  category(
+    "entertainment-music",
+    "Live bands",
+    "Live bands",
+    "Bands, singers, dhol",
+    "Décor, food & fun",
+    "mic",
+    "music",
+    photos.p42,
+    [
       {
         key: "act",
         label: "Act",
@@ -108,5 +313,25 @@ export const categories: Category[] = [
       },
       { key: "ownSound", label: "Own sound rig", input: "toggle", filterable: false },
     ],
-  },
+  ),
+  category(
+    "choreographers",
+    "Choreographers",
+    "Choreographers",
+    "Sangeet performances",
+    "Décor, food & fun",
+    "dance",
+    "music",
+    photos.p09,
+  ),
+  category(
+    "wedding-transport",
+    "Wedding transport",
+    "Transport",
+    "Vintage cars, baraat",
+    "Décor, food & fun",
+    "car",
+    "planner",
+    photos.p21,
+  ),
 ];

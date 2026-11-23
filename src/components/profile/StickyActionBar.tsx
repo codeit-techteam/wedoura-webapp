@@ -10,13 +10,21 @@ type Props = {
   startingPrice?: string;
   /** Hidden when the listing has no WhatsApp number. */
   whatsapp?: string;
+  /** Anchor for the availability CTA (`#inquire` on vendors, `#enquire` on venues). */
+  inquireHref: string;
 };
 
 /**
  * The profile's persistent actions on phones and tablets: price, save,
  * WhatsApp, inquiry. Hidden from lg where the side panel carries these actions.
  */
-export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) {
+export function StickyActionBar({
+  slug,
+  name,
+  startingPrice,
+  whatsapp,
+  inquireHref,
+}: Props) {
   const wa = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
   return (
     <div
@@ -46,10 +54,10 @@ export function StickyActionBar({ slug, name, startingPrice, whatsapp }: Props) 
             </a>
           )}
           <a
-            href="#inquiry"
+            href={inquireHref}
             className="label tap inline-flex items-center justify-center bg-ink px-5 text-white transition-chrome hover:bg-black md:px-7"
           >
-            Send inquiry
+            Check availability
           </a>
         </div>
       </div>
