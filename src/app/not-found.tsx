@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { BottomBar } from "@/components/chrome/BottomBar";
 import { SiteFooter } from "@/components/chrome/SiteFooter";
 import { SiteHeader } from "@/components/chrome/SiteHeader";
 import { Photo } from "@/components/media/Photo";
@@ -16,11 +15,10 @@ export default async function NotFound() {
   return (
     <>
       <SiteHeader />
-      <div className="flex flex-1 flex-col pb-bottombar">
+      <div className="flex flex-1 flex-col">
         <div className="flex flex-1 flex-col">{notFoundHero(photo)}</div>
         <SiteFooter />
       </div>
-      <BottomBar />
     </>
   );
 }

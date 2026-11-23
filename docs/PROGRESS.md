@@ -20,8 +20,64 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 12 | Portal ↔ profile field parity, seeded live vendor, profile + portal redesign | ✅ Done (2026-11-17, see docs/field-map.md, docs/screenshots/round-5) |
 | 13 | Round 6: client design feedback (Cormorant/Jost, colour, magazine spacing, cards, hero video, partner band) | ✅ Done (2026-11-17, see docs/screenshots/round-6) |
 | 14 | 360° photos everywhere + linked venue tours (detection, badges, sphere viewer, tour editor, real CC0 panoramas) | ✅ Done (2026-11-19, see docs/screenshots/360) |
+| 15 | v2 session 0: extract the 13 references, tokens, public shell, data model, shared components | ✅ Done (2026-11-23) |
+| 16 | v2 session 1: homepage and `/vendors` from the client references | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 1: homepage and vendors listing
+
+Done:
+- **Homepage** rebuilt from `extracted/home`: hero with search pill (Where / What, grouped categories), trust row (no review claims), eight category tiles without counts, sticky video moments, statement band, how-it-works, real weddings, popular vendors, planning-help form (writes `PlanningRequest` via `journey-api` localStorage), worlds (vendors / soulmates / honeymoon), journal, `JoinBand`, city pills. `PartnerBand` kept and hidden when inactive.
+- **`/vendors`** rebuilt from `extracted/vendors`: ivory hero + breadcrumb, SearchPill with name search, sticky filters (starting price, style, travels, Wedoura picks — no rating filter or sort), list/grid views, show more (`?show=`), enquiry drawer (`createInquiry` per vendor), shortlist tray + “Enquire with all”. All filters are URL params and server-rendered via `searchParams` / `pickParams`.
+- **Shared:** `SearchPill`, `VendorTile`, `VendorListCard`, `VendorFilters`, `EnquiryDrawer`, `ShortlistDrawer`, `PlanningHelpForm`.
+- **API:** `listVendors` gained `styles`, `travels`, `featuredOnly`; budget bands match the reference; `VendorSummary` carries tagline, styles, citiesServed, travels; `createInquiry` and `createPlanningRequest` documented.
+- **Verification.** Lint, typecheck, 83/83 tests, production build (87 pages). Spot-checked home and vendors in headless Chrome at 1440.
+
+Decisions / gotchas:
+- Trust line uses “Hand-picked vendors” instead of “Verified reviews”.
+- Category search placeholder does not say “28 categories”.
+- Planning form keeps WhatsApp as in the reference; newsletter and planning saves stay on-device until the backend exists.
+
+Next up:
+- Prompt 2: vendor profile and venue profile (including the exact 360 viewer).
+
+### 2026-11-23 · v2 session 0: extraction, design system, shell, data
+
+Done:
+- **Extraction.** `scripts/extract-reference.mjs` streams every `docs/reference/client-v2/*.html` (the script is the only reader). Embedded images and videos are saved under `public/ref/<page>/`, deduplicated by hash. `docs/reference/client-v2/extracted/<page>/` has `markup.html` (scripts and styles removed, data URIs replaced), `styles.css`, `script.js` and `summary.md`. Venue 360 panoramas that lived as raw base64 script bodies are files too.
+
+  | Page | Images | Videos |
+  |---|---:|---:|
+  | couple-account | 16 | 0 |
+  | home | 24 | 2 |
+  | honeymoon | 17 | 1 |
+  | honeymoon-package | 19 | 0 |
+  | honeymoon-stay | 19 | 8 |
+  | real-wedding | 22 | 6 |
+  | soulmates-create | 9 | 0 |
+  | vendor-dashboard | 2 | 0 |
+  | vendor-login | 1 | 0 |
+  | vendor-profile | 20 | 0 |
+  | vendor-signup | 9 | 0 |
+  | vendors | 27 | 0 |
+  | venue-profile | 17 | 0 |
+
+- **Design system.** EB Garamond (400/500/600, italic 400/500), Bodoni Moda 400 for the wordmark only, Jost 400/500. Ivory `#FAF7F2`, sand, parchment, ink `#111111`, copy `#1D1B19`, mute `#4F4A42`, gold `#C8A96A`, gold text `#9A7A42`, hairline `#DDD5C6`. Labels 11.5px / 0.3em, buttons 12px / 0.24em / 48px. Styleguide updated, including the new shared pieces.
+- **Shell on every public page.** Ink announcement strip, split header (Find vendors, Real weddings, Soulmates | wordmark | Honeymoon, Journal, Free planning help, List your business), full-screen mobile menu, footer with The Wedoura Letter (validates, success state, sends nothing). Split links from the `xl` breakpoint. Mobile bottom bar removed (`--bottombar-h: 0`). `/soulmates` is a short holding page so the nav is not a 404.
+- **Data.** 25 categories in the four search-panel groups (Photo & film, Planning & venues, Beauty & style, Décor, food & fun), mapped onto the 11 vendor kinds. The six existing slugs and their extra fields are unchanged. Venue details can carry spaces, rooms, food, rules, facilities and months; travel, honeymoon packages, experiences, testimonials, interview, availability, inquiry stage, couple account, planning request, subscriber and Soulmates waitlist are typed. Sample reads go through `src/lib/api.ts`. Contract and field-map updated. No ratings or invented counts.
+- **Shared components.** Lightbox, section header, join band, FAQ accordion, video tile (plays in view, pause button), multi-step form shell.
+- **Verification.** Lint, typecheck, 83/83 tests, production build (87 pages). Headless Chrome on `next start`: announcement, split nav and letter form present; hamburger hidden at 1440 and working at 390 (Escape closes the menu); invalid and valid newsletter states; lightbox closes on Escape; the form shell shows Continue; existing routes including a vendor, a venue tour and a 404 still render inside the shell.
+
+Decisions / gotchas:
+- The search panel names 25 categories. Do not print a category count on the site.
+- Wedding transport uses the planner kind. There is no thirteenth kind.
+- Journal is `/blogs`. Free planning help is `/contact` until the homepage plan section exists.
+- The couple login password is still for a later session. Demo vendor login is unchanged (`vendor@gmail.com` / `123456`).
+- The sample honeymoon package is a fictional Coorg stay.
+
+Next up:
+- Prompt 1: the homepage and `/vendors`, from `docs/v2/CURSOR-PROMPTS.md`.
 
 ### 2026-11-19 · 360° photo support for all vendors + linked venue tours
 

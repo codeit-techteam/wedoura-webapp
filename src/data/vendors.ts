@@ -269,6 +269,12 @@ export const sampleListings: VendorListing[] = [
     venue: {
       capacity: { min: 80, max: 250 },
       spaces: ["Sea lawn", "Inner courtyard", "Chapel hall", "Pool deck"],
+      spaceDetails: [
+        { name: "Sea lawn", setting: "outdoor", ceremony: 200, dinner: 180, standing: 250, bestFor: ["Ceremony", "Dinner"], sceneId: "lawn" },
+        { name: "Inner courtyard", setting: "covered", ceremony: 80, dinner: 70, standing: 100, bestFor: ["Pheras"], sceneId: "courtyard" },
+      ],
+      rooms: { count: 18, types: "Courtyard rooms" },
+      facilities: ["Parking", "Getting-ready rooms"],
       tour: {
         scenes: [
           { id: "courtyard", photoId: photos.pano01.id, name: "Inner courtyard", startYaw: 30 },

@@ -28,6 +28,8 @@ export interface Film {
   previewSrc: string;
   /** Full film, opened from "Watch the film". Empty until a clip exists. */
   fullSrc: string;
+  /** YouTube or Vimeo URL for the full film. Hosted uploads stay optional. */
+  youtubeUrl?: string;
   poster: Photo;
   durationSec: number;
 }
@@ -43,13 +45,79 @@ export interface Album {
 
 /* ------------------------------------------------------- categorisation */
 
+/**
+ * The search-panel list from the client's homepage, plus the slugs the
+ * sample vendors already use. `photography-films` is Photographers,
+ * `entertainment-music` is Live bands: the public URLs stay put.
+ */
 export type CategorySlug =
   | "photography-films"
+  | "videographers"
+  | "pre-wedding-shoots"
+  | "content-creators"
+  | "photo-booths"
+  | "wedding-planners"
+  | "destination-planners"
   | "venues"
+  | "lighting-tents"
+  | "wedding-officiants"
   | "makeup-beauty"
+  | "hair-stylists"
+  | "mehendi-artists"
+  | "bridal-wear"
+  | "groom-wear"
+  | "jewellery"
   | "decor-styling"
   | "catering-cakes"
-  | "entertainment-music";
+  | "cakes-desserts"
+  | "invitations"
+  | "favours-gifts"
+  | "djs"
+  | "entertainment-music"
+  | "choreographers"
+  | "wedding-transport";
+
+/** The 11 kinds on the vendor dashboard. Categories map onto one of these. */
+export type VendorKind =
+  | "photographer"
+  | "venue"
+  | "decor"
+  | "beauty"
+  | "caterer"
+  | "planner"
+  | "mehendi"
+  | "music"
+  | "invitations"
+  | "attire"
+  | "travel";
+
+/** Icon key used in the reference search panel. */
+export type CategoryIcon =
+  | "cam"
+  | "film"
+  | "heart"
+  | "phone"
+  | "booth"
+  | "clip"
+  | "plane"
+  | "build"
+  | "tent"
+  | "book"
+  | "brush"
+  | "sciss"
+  | "hand"
+  | "dress"
+  | "tie"
+  | "gem"
+  | "flower"
+  | "fork"
+  | "cake"
+  | "mail"
+  | "gift"
+  | "disc"
+  | "mic"
+  | "dance"
+  | "car";
 
 /** A category-specific listing field, defined once per category. */
 export interface CategoryFieldDef {
@@ -70,6 +138,11 @@ export interface Category {
   shortName: string;
   description: string;
   cover: Photo;
+  /** Search-panel group, in the order the panel shows them. */
+  group: string;
+  icon: CategoryIcon;
+  /** Which dashboard field set this category uses. */
+  kind: VendorKind;
   /** Extra listing fields this category asks its vendors for. */
   fields: CategoryFieldDef[];
 }
@@ -151,14 +224,71 @@ export interface VenueTourData {
   markers?: TourMarker[];
 }
 
+export interface VenueSpaceDetail {
+  name: string;
+  setting?: "indoor" | "outdoor" | "covered";
+  ceremony?: number;
+  dinner?: number;
+  standing?: number;
+  area?: string;
+  bestFor?: string[];
+  /** Tour scene id, when this space has a 360° view. */
+  sceneId?: string;
+}
+
+export interface VenueRoomOffer {
+  count: number;
+  types: string;
+  rateFromINR?: number;
+  partnerRoomsNearby?: string;
+}
+
+export interface VenueMenu {
+  name: string;
+  pricePerGuestINR?: number;
+  minimumGuests?: number;
+}
+
+export interface VenueFood {
+  cateringMode?: string;
+  menus?: VenueMenu[];
+  outsideCatererFeeINR?: number;
+  cuisines?: string[];
+}
+
+export interface VenueRules {
+  allowed?: string[];
+  withConditions?: string[];
+  notAllowed?: string[];
+  note?: string;
+}
+
 export interface VenueDetails {
   capacity: { min: number; max: number };
+  /** Short names. The portal tag list still edits this. */
   spaces: string[];
+  /** Richer space records for the venue profile. Optional until filled in. */
+  spaceDetails?: VenueSpaceDetail[];
+  rooms?: VenueRoomOffer;
+  food?: VenueFood;
+  rules?: VenueRules;
+  facilities?: string[];
+  peakMonths?: string[];
+  valueMonths?: string[];
+  closedMonths?: string[];
+  location?: {
+    address?: string;
+    mapUrl?: string;
+    distances?: { label: string; value: string }[];
+  };
   /** Linked 360° tour over equirectangular portfolio photos. */
   tour?: VenueTourData;
 }
 
 export type InquiryStatus = "new" | "replied" | "closed";
+
+/** Pipeline stage shared by the vendor dashboard and the couple account. */
+export type InquiryStage = "new" | "contacted" | "quote_sent" | "booked" | "lost";
 
 export interface Inquiry {
   id: string;
@@ -170,6 +300,13 @@ export interface Inquiry {
   city: string;
   message: string;
   status: InquiryStatus;
+  stage?: InquiryStage;
+  quoteINR?: number;
+  followUpOn?: string; // ISO date
+  notes?: string;
+  guests?: number;
+  budget?: string;
+  weddingMonth?: string;
   createdAt: string; // ISO datetime
 }
 
@@ -262,6 +399,17 @@ export interface VendorListing {
   contact: Contact;
   /** Venue listings only. */
   venue?: VenueDetails;
+  /** Hotel or travel-agency listings. */
+  travel?: HotelProfile | AgencyProfile;
+  /** Moments a couple can add to a honeymoon request. */
+  experiences?: Experience[];
+  /** Vendor-entered. Shown as "Kind words", never as verified reviews. */
+  testimonials?: Testimonial[];
+  /** Written by Wedoura. Hidden on the profile when absent. */
+  interview?: Interview;
+  /** Publication names, with no invented circulation figures. */
+  press?: string[];
+  availability?: Availability;
 }
 
 /* --------------------------------------------------------- public shapes */
@@ -270,10 +418,14 @@ export interface VendorListing {
 export interface VendorSummary {
   slug: string;
   name: string;
+  tagline: string;
   category: CategorySlug;
   categoryName: string;
   citySlug: string;
   cityName: string;
+  citiesServed: string[];
+  travels?: string;
+  styles: string[];
   startingPriceINR?: number;
   priceUnit: PriceUnit;
   cardPhotos: Photo[];
@@ -317,6 +469,12 @@ export interface VendorDetail {
   faqs: Faq[];
   contact: Omit<Contact, "phone">;
   venue?: VenueDetails;
+  travel?: HotelProfile | AgencyProfile;
+  experiences?: Experience[];
+  testimonials?: Testimonial[];
+  interview?: Interview;
+  press?: string[];
+  availability?: Availability;
   verified: boolean;
 }
 
@@ -332,7 +490,11 @@ export interface Paged<T> {
 /* ------------------------------------------------- stories and articles */
 
 export interface StoryChapter {
+  /** Roman numeral, as on the story page. */
+  numeral?: string;
   title: string;
+  /** Short line under the numeral, before the paragraphs. */
+  intro?: string;
   text: string[];
   photos: Photo[];
 }
@@ -358,6 +520,11 @@ export interface RealWedding {
   chapters: StoryChapter[];
   credits: VendorCredit[];
   featured?: boolean;
+  editorNote?: string;
+  palette?: { name: string; hex: string }[];
+  details?: { label: string; value: string }[];
+  /** Links into filtered vendor lists ("Get the look"). */
+  getTheLook?: { label: string; href: string }[];
 }
 
 export interface BlogPost {
@@ -398,6 +565,134 @@ export interface Destination {
 export interface SitePromise {
   title: string;
   text: string;
+}
+
+/* ------------------------------------------------- v2 records */
+
+export interface Testimonial {
+  quote: string;
+  couple: string;
+  /** ISO date of the wedding, when the vendor supplied one. */
+  date?: string;
+}
+
+export interface Interview {
+  title: string;
+  /** Who at Wedoura wrote it. */
+  by: string;
+  paragraphs: string[];
+}
+
+/** Reserved for later. Nothing reads this until real reviews exist. */
+export interface Review {
+  id: string;
+  listingId: string;
+  quote: string;
+  couple: string;
+  date: string;
+}
+
+export interface Availability {
+  /** ISO dates the vendor has blocked. */
+  blockedDates: string[];
+  /** Venue only: blocked dates per space name. */
+  spaces?: { space: string; blockedDates: string[] }[];
+}
+
+export interface HotelRoom {
+  name: string;
+  count?: number;
+  size?: string;
+  view?: string;
+  rateFromINR?: number;
+}
+
+export interface HotelProfile {
+  kind: "hotel";
+  propertyType: string;
+  /** Shown only when the hotel itself publishes a star rating. */
+  starRating?: number;
+  rooms: HotelRoom[];
+  mealPlans?: string[];
+  honeymoonTouches?: string[];
+  policies?: string[];
+}
+
+export interface AgencyProfile {
+  kind: "agency";
+  destinations: string[];
+  registrations?: string[];
+}
+
+export interface TravelCollection {
+  name: string;
+  pricePerCoupleINR?: number;
+}
+
+export interface ItineraryDay {
+  day: number;
+  title: string;
+  text: string;
+}
+
+export interface HoneymoonPackage {
+  slug: string;
+  name: string;
+  destination: string;
+  nights: number;
+  /** Vendor slug of the agency that sells it, when one is published. */
+  vendorSlug?: string;
+  summary: string;
+  collections: TravelCollection[];
+  inclusions: string[];
+  exclusions: string[];
+  itinerary: ItineraryDay[];
+  goodToKnow: string[];
+  cover: Photo;
+}
+
+export interface Experience {
+  slug: string;
+  name: string;
+  description: string;
+  priceFromINR?: number;
+}
+
+export interface CoupleAccount {
+  id: string;
+  names: string;
+  email: string;
+  /** YYYY-MM */
+  weddingMonth?: string;
+  city?: string;
+  shortlist: string[];
+}
+
+export interface PlanningRequest {
+  id: string;
+  name: string;
+  email?: string;
+  whatsapp?: string;
+  weddingDate?: string;
+  budget?: string;
+  city?: string;
+  weddingMonth?: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface Subscriber {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+export interface SoulmatesWaitlist {
+  id: string;
+  name: string;
+  email: string;
+  city?: string;
+  createdAt: string;
 }
 
 /* ------------------------------------------------------------- partners */

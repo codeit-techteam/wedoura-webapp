@@ -15,16 +15,19 @@ const sampleWeddings: RealWedding[] = [
     cover: photos.p24,
     chapters: [
       {
+        numeral: "I",
         title: "The terrace",
         text: ["The mehendi took over the rooftop, with the city going gold behind it and the band warming up two floors down."],
         photos: [photos.p35, photos.p36],
       },
       {
+        numeral: "II",
         title: "Sunrise pheras",
         text: ["The ceremony began at six, before the heat, with the lake flat as glass and the pandit speaking just above a whisper."],
         photos: [photos.p19, photos.p33],
       },
       {
+        numeral: "III",
         title: "Dinner",
         text: ["Long tables in the courtyard, a brass band, and no speeches. The last guests left when the birds started."],
         photos: [photos.p09, photos.p42],
@@ -33,6 +36,22 @@ const sampleWeddings: RealWedding[] = [
     credits: [
       { role: "Photography", vendorSlug: "aperture-marigold", name: "Aperture & Marigold" },
       { role: "Decor", vendorSlug: "petal-and-thread", name: "Petal & Thread" },
+    ],
+    editorNote: "We kept the order the day actually happened in, and left the speeches out.",
+    palette: [
+      { name: "Ivory", hex: "#FAF7F2" },
+      { name: "Marigold", hex: "#C8A96A" },
+      { name: "Lake", hex: "#4F4A42" },
+      { name: "Ink", hex: "#111111" },
+    ],
+    details: [
+      { label: "City", value: "Udaipur" },
+      { label: "Days", value: "Three" },
+      { label: "Setting", value: "Palace" },
+    ],
+    getTheLook: [
+      { label: "Photographers", href: "/vendors?category=photography-films" },
+      { label: "Décor & florals", href: "/vendors?category=decor-styling" },
     ],
     featured: true,
   },

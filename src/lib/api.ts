@@ -12,6 +12,14 @@ import { categories } from "@/data/categories";
 import { cities } from "@/data/cities";
 import { promises, siteFaq } from "@/data/faq";
 import { destinations } from "@/data/honeymoon";
+import {
+  coupleAccount,
+  experiences,
+  honeymoonPackages,
+  planningRequests,
+  soulmatesWaitlist,
+  subscribers,
+} from "@/data/journey";
 import { partners } from "@/data/partners";
 import { photoList } from "@/data/photos";
 import { realWeddings } from "@/data/real-weddings";
@@ -24,11 +32,17 @@ import type {
   Faq,
   Film,
   Paged,
+  CoupleAccount,
+  Experience,
+  HoneymoonPackage,
   Partner,
   PartnerPlacement,
   Photo,
+  PlanningRequest,
   RealWedding,
   SitePromise,
+  SoulmatesWaitlist,
+  Subscriber,
   VendorDetail,
   VendorListing,
   VendorSummary,
@@ -73,26 +87,40 @@ const byFeatured = (a: VendorListing, b: VendorListing) =>
 
 export type VendorSort = "featured" | "price-asc" | "price-desc" | "name";
 export const VENDOR_SORTS: { value: VendorSort; label: string }[] = [
-  { value: "featured", label: "Featured first" },
-  { value: "price-asc", label: "Price, low to high" },
-  { value: "price-desc", label: "Price, high to low" },
+  { value: "featured", label: "Recommended" },
+  { value: "price-asc", label: "Price: low to high" },
+  { value: "price-desc", label: "Price: high to low" },
   { value: "name", label: "Name, A to Z" },
 ];
 
-/** Budget bands with clear boundaries, mapped onto min/max price. */
-export type BudgetBand = "b1" | "b2" | "b3";
+/** Starting-price bands from the vendors reference (plus legacy b1–b3). */
+export type BudgetBand = "under-1l" | "1-3l" | "3-8l" | "8-plus" | "b1" | "b2" | "b3";
 export const BUDGET_BANDS: { value: BudgetBand; label: string }[] = [
-  { value: "b1", label: "Under ₹1 lakh" },
-  { value: "b2", label: "₹1 to under ₹5 lakh" },
-  { value: "b3", label: "₹5 lakh and above" },
+  { value: "under-1l", label: "Under ₹1L" },
+  { value: "1-3l", label: "₹1L – ₹3L" },
+  { value: "3-8l", label: "₹3L – ₹8L" },
+  { value: "8-plus", label: "₹8L +" },
 ];
 
 export function budgetToRange(band: string | undefined): { minPrice?: number; maxPrice?: number } {
-  if (band === "b1") return { maxPrice: 99999 };
+  if (band === "under-1l" || band === "b1") return { maxPrice: 99999 };
+  if (band === "1-3l") return { minPrice: 100000, maxPrice: 300000 };
+  if (band === "3-8l") return { minPrice: 300001, maxPrice: 800000 };
+  if (band === "8-plus") return { minPrice: 800001 };
   if (band === "b2") return { minPrice: 100000, maxPrice: 499999 };
   if (band === "b3") return { minPrice: 500000 };
   return {};
 }
+
+export const STYLE_FILTERS = [
+  "Candid",
+  "Fine art",
+  "Cinematic",
+  "Traditional",
+  "Destination",
+  "Outdoor",
+  "Bridal",
+] as const;
 
 export interface VendorListParams {
   q?: string;
@@ -103,6 +131,12 @@ export interface VendorListParams {
    *  are left out whenever a price bound is set. */
   minPrice?: number;
   maxPrice?: number;
+  /** Match any of these style labels (case-insensitive). */
+  styles?: string[];
+  /** Vendor travels for destination weddings (citiesServed beyond base, or travels text). */
+  travels?: boolean;
+  /** Wedoura picks only. */
+  featuredOnly?: boolean;
   sort?: VendorSort | string;
   page?: number;
   limit?: number;
@@ -114,9 +148,20 @@ export async function listVendors(params: VendorListParams = {}): Promise<Paged<
   const q = params.q?.trim().toLowerCase();
   const priced = params.minPrice !== undefined || params.maxPrice !== undefined;
 
+  const styleNeed = (params.styles ?? []).map((s) => s.trim().toLowerCase()).filter(Boolean);
+
   let result = published().filter((l) => {
     if (params.category && l.category !== params.category) return false;
     if (params.city && l.baseCity !== params.city && !l.citiesServed.includes(params.city)) return false;
+    if (params.featuredOnly && !l.featured) return false;
+    if (params.travels) {
+      const travelsAway = l.citiesServed.some((c) => c !== l.baseCity) || Boolean(l.travels?.trim());
+      if (!travelsAway) return false;
+    }
+    if (styleNeed.length) {
+      const own = l.styles.map((s) => s.toLowerCase());
+      if (!styleNeed.some((need) => own.some((s) => s.includes(need) || need.includes(s)))) return false;
+    }
     if (priced) {
       // Per-plate and on-request prices are not comparable to event budgets.
       if (l.priceUnit === "per_plate" || l.priceUnit === "on_request" || l.startingPriceINR === undefined) return false;
@@ -239,6 +284,17 @@ export async function getCategory(slug: string): Promise<Category | undefined> {
  *  no published vendor yet. Public browsing uses the counted function. */
 export async function listAllCategories(): Promise<Category[]> {
   return categories;
+}
+
+/** Categories in the search-panel groups, including ones with no vendor yet. */
+export async function listCategoryGroups(): Promise<{ group: string; categories: Category[] }[]> {
+  const groups: { group: string; categories: Category[] }[] = [];
+  for (const category of categories) {
+    const existing = groups.find((group) => group.group === category.group);
+    if (existing) existing.categories.push(category);
+    else groups.push({ group: category.group, categories: [category] });
+  }
+  return groups;
 }
 
 /** Every city, for forms (signup). */
@@ -416,6 +472,36 @@ export interface SearchSuggestions {
 }
 
 const SUGGESTION_CAPS = { vendors: 5, cities: 3, categories: 3 };
+
+/* --------------------------------------------------------------- v2 */
+
+export async function getCoupleAccount(): Promise<CoupleAccount> {
+  return coupleAccount;
+}
+
+export async function listPlanningRequests(): Promise<PlanningRequest[]> {
+  return planningRequests;
+}
+
+export async function listSubscribers(): Promise<Subscriber[]> {
+  return subscribers;
+}
+
+export async function listSoulmatesWaitlist(): Promise<SoulmatesWaitlist[]> {
+  return soulmatesWaitlist;
+}
+
+export async function listExperiences(): Promise<Experience[]> {
+  return experiences;
+}
+
+export async function listHoneymoonPackages(): Promise<HoneymoonPackage[]> {
+  return honeymoonPackages;
+}
+
+export async function getHoneymoonPackage(slug: string): Promise<HoneymoonPackage | undefined> {
+  return honeymoonPackages.find((item) => item.slug === slug);
+}
 
 export async function searchSuggestions(query: string): Promise<SearchSuggestions> {
   const q = query.trim().toLowerCase();

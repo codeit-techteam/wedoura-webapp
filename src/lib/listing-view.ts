@@ -32,10 +32,14 @@ export function listingToSummary(
   return {
     slug: listing.slug,
     name: listing.name,
+    tagline: listing.tagline,
     category: listing.category,
     categoryName: nameOf(categories, listing.category),
     citySlug: listing.baseCity,
     cityName: nameOf(cities, listing.baseCity),
+    citiesServed: listing.citiesServed,
+    travels: listing.travels,
+    styles: listing.styles,
     startingPriceINR: listing.startingPriceINR,
     priceUnit: listing.priceUnit,
     cardPhotos: visiblePhotos(listing.cardPhotos, pending),
@@ -86,6 +90,12 @@ export function listingToDetail(
     faqs: listing.faqs,
     contact: { whatsapp, email, instagram, website },
     venue: listing.venue,
+    travel: listing.travel,
+    experiences: listing.experiences,
+    testimonials: listing.testimonials,
+    interview: listing.interview,
+    press: listing.press,
+    availability: listing.availability,
     verified: listing.verified,
   };
 }

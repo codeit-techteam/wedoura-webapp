@@ -54,7 +54,9 @@ export default async function CategoryCityPage({ params, searchParams }: PagePro
 
   const sp = await searchParams;
   const fieldKeys = category.fields.filter((f) => f.filterable && f.options?.length).map((f) => f.key);
-  const query = pickParams(sp, ["q", "budget", "sort", "show", ...fieldKeys]);
+  const query = pickParams(sp, [
+    "q", "budget", "style", "travel", "picks", "sort", "view", "show", ...fieldKeys,
+  ]);
 
   return (
     <>
@@ -68,8 +70,6 @@ export default async function CategoryCityPage({ params, searchParams }: PagePro
         pathname={`/vendors/${category.slug}/${city.slug}`}
         params={query}
         pinned={{ category: category.slug, city: city.slug }}
-        heading={[`${category.name}`, `in ${city.name}.`]}
-        intro={`${category.description} Based in or serving ${city.name}, ${city.state}.`}
         clearPathname={`/vendors/${category.slug}/${city.slug}`}
       />
     </>

@@ -17,16 +17,16 @@ type AsLink = Common & { href: string; onClick?: never; type?: never; disabled?:
 type AsButton = Common & { href?: undefined } & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const base =
-  "label inline-flex items-center justify-center gap-3 tap transition-colors duration-300 ease-wedoura select-none disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-3 font-sans text-button font-medium tracking-button uppercase transition-colors duration-300 ease-wedoura select-none disabled:cursor-not-allowed disabled:opacity-50";
 
 const styles: Record<Variant, Record<Tone, string>> = {
   solid: {
-    ink: "bg-ink text-white border border-ink px-8 py-4 hover:bg-white hover:text-ink",
-    white: "bg-white text-ink border border-white px-8 py-4 hover:bg-transparent hover:text-white",
+    ink: "min-h-12 bg-ink text-ivory border border-ink px-8 hover:bg-gold-deep hover:border-gold-deep hover:text-white",
+    white: "min-h-12 bg-white text-ink border border-white px-8 hover:bg-transparent hover:text-white",
   },
   outline: {
-    ink: "border border-ink text-ink px-8 py-4 hover:bg-ink hover:text-white",
-    white: "border border-white text-white px-8 py-4 hover:bg-white hover:text-ink",
+    ink: "min-h-12 border border-ink text-ink px-8 hover:bg-ink hover:text-ivory",
+    white: "min-h-12 border border-white text-white px-8 hover:bg-white hover:text-ink",
   },
   link: {
     ink: "link-draw min-w-0 pb-1 text-ink",

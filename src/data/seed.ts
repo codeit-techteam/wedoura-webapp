@@ -7,12 +7,13 @@ const flatPhotos = photoList.filter((p) => p.projection !== "equirectangular");
 import type {
   Album,
   BlogPost,
-  CategorySlug,
+  Category,
   Faq,
   Package,
   Photo,
   PriceUnit,
   RealWedding,
+  VendorKind,
   VendorListing,
 } from "./types";
 
@@ -64,27 +65,39 @@ const FIRST = [
   "Amaltas", "Verandah", "Patio", "Heirloom", "Velvet", "Noor", "Riwaaz", "Sitara",
 ] as const;
 
-const SUFFIX: Record<CategorySlug, readonly string[]> = {
-  "photography-films": ["Frames", "Films", "Stories", "Stills", "Studio"],
-  venues: ["House", "Palace", "Gardens", "Court", "Retreat"],
-  "makeup-beauty": ["Studio", "Artistry", "Beauty", "Looks"],
-  "decor-styling": ["Decor", "Styling", "Settings", "Blooms"],
-  "catering-cakes": ["Kitchen", "Table", "Catering", "Rasoi"],
-  "entertainment-music": ["Collective", "Ensemble", "Beats", "Baraat"],
+const SUFFIX: Record<VendorKind, readonly string[]> = {
+  photographer: ["Frames", "Films", "Stories", "Stills", "Studio"],
+  venue: ["House", "Palace", "Gardens", "Court", "Retreat"],
+  beauty: ["Studio", "Artistry", "Beauty", "Looks"],
+  decor: ["Decor", "Styling", "Settings", "Blooms"],
+  caterer: ["Kitchen", "Table", "Catering", "Rasoi"],
+  music: ["Collective", "Ensemble", "Beats", "Baraat"],
+  planner: ["Planning", "Studio", "Atelier", "Co"],
+  mehendi: ["Henna", "Studio", "Art", "Line"],
+  invitations: ["Press", "Paper", "Studio", "Atelier"],
+  attire: ["Atelier", "House", "Studio", "Room"],
+  travel: ["Journeys", "Retreats", "Routes", "House"],
 };
 
-const TAGLINES: Record<CategorySlug, readonly string[]> = {
-  "photography-films": [
+const TAGLINES: Record<VendorKind, readonly string[]> = {
+  photographer: [
     "Honest photographs of real days",
     "Films cut to the sound of the day",
     "Quiet coverage, whole weddings",
   ],
-  venues: ["Courtyards, lawns and long evenings", "Room for every ritual", "One address for the whole week"],
-  "makeup-beauty": ["Skin that looks like skin", "Looks that last the longest day", "Makeup for every ritual"],
-  "decor-styling": ["Mandaps, florals and light", "Settings that fit the place", "Flowers first, plastic never"],
-  "catering-cakes": ["Menus from home, cooked for a crowd", "Live counters and long tables", "Food people talk about after"],
-  "entertainment-music": ["Music that moves a baraat", "From pheras to the last dance", "Sound for every function"],
+  venue: ["Courtyards, lawns and long evenings", "Room for every ritual", "One address for the whole week"],
+  beauty: ["Skin that looks like skin", "Looks that last the longest day", "Makeup for every ritual"],
+  decor: ["Mandaps, florals and light", "Settings that fit the place", "Flowers first, plastic never"],
+  caterer: ["Menus from home, cooked for a crowd", "Live counters and long tables", "Food people talk about after"],
+  music: ["Music that moves a baraat", "From pheras to the last dance", "Sound for every function"],
+  planner: ["A calm plan for a long day", "The week, held together", "Planning that stays out of the photographs"],
+  mehendi: ["Bridal mehendi, drawn by hand", "Patterns that belong to the couple", "Henna for the wedding party"],
+  invitations: ["Paper for the wedding, and the gifts that follow", "Printed suites and small favours", "An invitation people keep"],
+  attire: ["Clothes for the wedding, fitted properly", "Lehengas, sherwanis and the pieces between", "Made for the rituals, not a shoot"],
+  travel: ["The days after the wedding", "A stay, planned properly", "Honeymoons with the dates written down"],
 };
+
+const words = (table: Record<VendorKind, readonly string[]>, category: Category) => table[category.kind];
 
 const ABOUT_A = [
   "We have spent years doing weddings and nothing else, and it shows in how calmly the day runs.",
@@ -100,22 +113,32 @@ const ABOUT_B = [
   "Ask us for a full wedding's work, not a highlight reel, and judge from that.",
 ] as const;
 
-const SERVICES: Record<CategorySlug, readonly string[]> = {
-  "photography-films": ["Wedding photography", "Wedding films", "Pre-wedding shoots", "Albums"],
-  venues: ["Wedding venue", "Rooms on site", "In-house catering", "Event lawns"],
-  "makeup-beauty": ["Bridal makeup", "Hair", "Grooming", "Family makeup"],
-  "decor-styling": ["Mandap design", "Florals", "Lighting", "Tablescapes"],
-  "catering-cakes": ["Wedding catering", "Live counters", "Cakes", "Tasting sessions"],
-  "entertainment-music": ["Baraat band", "Sangeet set", "DJ", "Live performers"],
+const SERVICES: Record<VendorKind, readonly string[]> = {
+  photographer: ["Wedding photography", "Wedding films", "Pre-wedding shoots", "Albums"],
+  venue: ["Wedding venue", "Rooms on site", "In-house catering", "Event lawns"],
+  beauty: ["Bridal makeup", "Hair", "Grooming", "Family makeup"],
+  decor: ["Mandap design", "Florals", "Lighting", "Tablescapes"],
+  caterer: ["Wedding catering", "Live counters", "Cakes", "Tasting sessions"],
+  music: ["Baraat band", "Sangeet set", "DJ", "Live performers"],
+  planner: ["Full planning", "Day-of coordination", "Guest handling", "Vendor shortlist"],
+  mehendi: ["Bridal mehendi", "Guest mehendi", "Trial session"],
+  invitations: ["Invitation suite", "Digital cards", "Favours"],
+  attire: ["Bridal wear", "Groom wear", "Fittings", "Jewellery"],
+  travel: ["Hotel stay", "Honeymoon package", "Transfers"],
 };
 
-const STYLES: Record<CategorySlug, readonly string[]> = {
-  "photography-films": ["Editorial", "Candid", "Documentary", "Classic"],
-  venues: ["Heritage", "Garden", "Waterfront", "Modern"],
-  "makeup-beauty": ["Natural", "Classic", "Glam", "Minimal"],
-  "decor-styling": ["Fresh florals", "Minimal", "Traditional", "Contemporary"],
-  "catering-cakes": ["Traditional", "Modern plating", "Regional", "Fusion"],
-  "entertainment-music": ["High energy", "Classical", "Contemporary", "Folk"],
+const STYLES: Record<VendorKind, readonly string[]> = {
+  photographer: ["Editorial", "Candid", "Documentary", "Classic"],
+  venue: ["Heritage", "Garden", "Waterfront", "Modern"],
+  beauty: ["Natural", "Classic", "Glam", "Minimal"],
+  decor: ["Fresh florals", "Minimal", "Traditional", "Contemporary"],
+  caterer: ["Traditional", "Modern plating", "Regional", "Fusion"],
+  music: ["High energy", "Classical", "Contemporary", "Folk"],
+  planner: ["Intimate", "Multi-day", "Destination", "Family"],
+  mehendi: ["Fine line", "Traditional", "Arabic", "Portrait"],
+  invitations: ["Letterpress", "Foil", "Handmade", "Digital"],
+  attire: ["Bridal", "Classic", "Contemporary", "Heirloom"],
+  travel: ["Beach", "Hill", "City", "Slow"],
 };
 
 const VENUE_SPACES = ["The courtyard", "The lawn", "The hall", "The terrace", "The poolside", "The pavilion"] as const;
@@ -156,7 +179,7 @@ export function generateSeedListings(): VendorListing[] {
     const city = cities[(i + Math.floor(i / categories.length)) % cities.length];
     const n = String(i + 1).padStart(3, "0");
 
-    const name = `${FIRST[i % FIRST.length]} ${pick(random, SUFFIX[category.slug])}`;
+    const name = `${FIRST[i % FIRST.length]} ${pick(random, words(SUFFIX, category))}`;
     let slug = slugify(name);
     if (usedSlugs.has(slug)) slug = `${slug}-${city.slug}`;
     if (usedSlugs.has(slug)) slug = `${slug}-${n}`;
@@ -178,10 +201,10 @@ export function generateSeedListings(): VendorListing[] {
     if (chance(random, 0.12)) {
       priceUnit = "on_request";
       startingPriceINR = undefined;
-    } else if (category.slug === "catering-cakes") {
+    } else if (category.kind === "caterer") {
       priceUnit = "per_plate";
       startingPriceINR = int(random, 9, 35) * 100;
-    } else if (category.slug === "venues") {
+    } else if (category.kind === "venue") {
       priceUnit = "per_day";
       startingPriceINR = int(random, 20, 150) * 10000;
     } else {
@@ -212,13 +235,13 @@ export function generateSeedListings(): VendorListing[] {
       ? []
       : [
           {
-            label: category.slug === "catering-cakes" ? "Classic menu" : "One event",
+            label: category.kind === "caterer" ? "Classic menu" : "One event",
             priceINR: startingPriceINR,
             unit: priceUnit,
             note: "The starting point; most couples build from here.",
           },
           {
-            label: category.slug === "catering-cakes" ? "Extended menu" : "The full wedding",
+            label: category.kind === "caterer" ? "Extended menu" : "The full wedding",
             priceINR: startingPriceINR !== undefined ? Math.round(startingPriceINR * 2.2) : undefined,
             unit: priceUnit,
           },
@@ -237,14 +260,14 @@ export function generateSeedListings(): VendorListing[] {
       ...(status === "published" ? { publishedAt: isoDate(30 + ((i * 5) % 1000)) } : {}),
       name,
       slug,
-      tagline: pick(random, TAGLINES[category.slug]),
+      tagline: pick(random, words(TAGLINES, category)),
       about: minimal ? [pick(random, ABOUT_A)] : [pick(random, ABOUT_A), pick(random, ABOUT_B)],
       ...(minimal ? {} : { aboutPhoto: flatPhotos[(photoStart + 20) % flatPhotos.length] }),
       ...(minimal ? {} : { team: pick(random, ["A team of two", "A small studio", "Family run"] as const) }),
       ...(minimal ? {} : { yearsActive: int(random, 2, 18) }),
       category: category.slug,
-      services: [...SERVICES[category.slug]].slice(0, minimal ? 2 : int(random, 3, 4)),
-      styles: [...STYLES[category.slug]].slice(0, minimal ? 1 : int(random, 2, 3)),
+      services: [...words(SERVICES, category)].slice(0, minimal ? 2 : int(random, 3, 4)),
+      styles: [...words(STYLES, category)].slice(0, minimal ? 1 : int(random, 2, 3)),
       categoryValues,
       baseCity: city.slug,
       citiesServed: [...served],
@@ -263,7 +286,7 @@ export function generateSeedListings(): VendorListing[] {
         ...(chance(random, 0.6) ? { email: "hello@example.com" } : {}),
         ...(chance(random, 0.4) ? { website: `https://example.com/${slug}` } : {}),
       },
-      ...(category.slug === "venues"
+      ...(category.kind === "venue"
         ? {
             venue: {
               capacity: { min: int(random, 40, 120), max: int(random, 200, 900) },
@@ -291,8 +314,10 @@ export function generateSeedWeddings(): RealWedding[] {
   return Array.from({ length: WEDDING_COUNT }, (_, i) => {
     const city = cities[i % cities.length];
     const photoStart = (i * 11) % flatPhotos.length;
-    const photographer = published.filter((l) => l.category === "photography-films")[i % 20];
-    const decorator = published.filter((l) => l.category === "decor-styling")[i % 20];
+    const photographers = published.filter((l) => l.category === "photography-films");
+    const decorators = published.filter((l) => l.category === "decor-styling");
+    const photographer = photographers[i % photographers.length];
+    const decorator = decorators[i % decorators.length];
     // A few credits point at non-published seeds on purpose: the public
     // story must show the name without a link.
     const offVendor = offstage[i % offstage.length];

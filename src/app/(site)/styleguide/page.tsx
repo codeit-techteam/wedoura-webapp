@@ -13,7 +13,10 @@ import { Heading } from "@/components/ui/Heading";
 import { Label } from "@/components/ui/Label";
 import { Section } from "@/components/ui/Section";
 import { Text } from "@/components/ui/Text";
+import { JoinBand } from "@/components/ui/JoinBand";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { listFilms, listGalleryPhotos } from "@/lib/api";
+import { FoundationsDemo } from "./FoundationsDemo";
 import { ViewerDemo } from "./ViewerDemo";
 
 export const metadata: Metadata = {
@@ -23,19 +26,25 @@ export const metadata: Metadata = {
 };
 
 const colours = [
-  { name: "White", token: "white", hex: "#FFFFFF", role: "Page background" },
-  { name: "Ivory", token: "ivory", hex: "#F6F2EA", role: "Alternate bands" },
-  { name: "Ink", token: "ink", hex: "#1A1816", role: "Text, solid buttons" },
-  { name: "Mute", token: "mute", hex: "#5F5A52", role: "Secondary text" },
-  { name: "Line", token: "line", hex: "#DDD6C8", role: "Hairline rules" },
-  { name: "Gold", token: "gold", hex: "#A8864A", role: "Marks, rules, icons and one italic accent word per headline" },
-  { name: "Gold deep", token: "gold-deep", hex: "#8A6D3B", role: "Small gold labels; passes contrast on white" },
+  { name: "Ivory", token: "ivory", hex: "#FAF7F2", role: "Page background" },
+  { name: "Sand", token: "sand", hex: "#F3EEE6", role: "Alternate band" },
+  { name: "Parchment", token: "parchment", hex: "#F5F0E8", role: "Alternate band" },
+  { name: "White", token: "white", hex: "#FFFFFF", role: "Cards and fields" },
+  { name: "Ink", token: "ink", hex: "#111111", role: "Headlines, solid buttons" },
+  { name: "Copy", token: "copy", hex: "#1D1B19", role: "Body text" },
+  { name: "Mute", token: "mute", hex: "#4F4A42", role: "Secondary text" },
+  { name: "Line", token: "line", hex: "#DDD5C6", role: "Hairline rules" },
+  { name: "Gold", token: "gold", hex: "#C8A96A", role: "Rules, icons, large italic words" },
+  { name: "Gold deep", token: "gold-deep", hex: "#9A7A42", role: "Small gold labels" },
 ];
 
 const swatch: Record<string, string> = {
   white: "bg-white",
   ivory: "bg-ivory",
+  sand: "bg-sand",
+  parchment: "bg-parchment",
   ink: "bg-ink",
+  copy: "bg-copy",
   mute: "bg-mute",
   line: "bg-line",
   gold: "bg-gold",
@@ -81,7 +90,7 @@ export default async function StyleguidePage() {
             on the site is built from what is on this page.
           </Text>
           <nav aria-label="Sections" className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
-            {["colour", "type", "spacing", "buttons", "photos", "motion"].map((id) => (
+            {["colour", "type", "spacing", "buttons", "photos", "motion", "shared"].map((id) => (
               <Link key={id} href={`#${id}`} className="label tap inline-flex items-center border-b border-line text-ink hover:border-gold">
                 {id}
               </Link>
@@ -97,12 +106,11 @@ export default async function StyleguidePage() {
             <Label>01</Label>
             <Heading className="mt-3">Colour</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Mostly black and white. The photographs supply the colour. One accent, gold, for marks, rules,
-              icons and the single italic accent word in a headline. Small gold labels use the deeper gold so
-              they pass contrast on white; gold never colours body text.
+              Ivory pages, ink headlines, a warmer copy colour for body text. Gold is for rules, icons and the
+              italic word in a large headline. Small labels use the deeper gold. Gold never colours body text.
             </Text>
           </Reveal>
-          <ul className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-6">
+          <ul className="mt-12 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-5">
             {colours.map((c, i) => (
               <Reveal as="li" key={c.token} delay={i * 0.06}>
                 <div className={`aspect-4/5 border border-line ${swatch[c.token]}`} />
@@ -122,10 +130,9 @@ export default async function StyleguidePage() {
             <Label>02</Label>
             <Heading className="mt-3">Type</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Cormorant Garamond, light and regular with one gold italic word per headline, set large because the
-              face runs small. Jost for body and UI: body 17px at 400, 300 only for lead paragraphs of 20px and up,
-              500 in small capitals with wide letter-spacing for navigation, buttons and labels. Body text never
-              drops below 16px; labels may be 12px; nothing is under 12px.
+              EB Garamond for headlines, at 400, 500 and 600, with italic 400 and 500 for the one gold accent
+              word. Bodoni Moda is the wordmark only. Jost 400 for body at 17px, Jost 500 for labels (11.5px,
+              wide tracking, gold), navigation and buttons (12px, 48px tall).
             </Text>
           </Reveal>
           <div className="mt-12">
@@ -149,9 +156,12 @@ export default async function StyleguidePage() {
                 The Courtyard House, Goa
               </Heading>
             </Specimen>
+            <Specimen label="Wordmark">
+              <p className="wordmark text-[2.375rem] text-gold-deep indent-[0.42em] tracking-wordmark">Wedoura</p>
+            </Specimen>
             <Specimen label="Lead">
               <Text variant="lead" tone="mute" className="max-w-prose">
-                A standfirst in light Jost, 20px and up, for the first paragraph of a story.
+                A standfirst in Jost, 20px and up, for the first paragraph of a story.
               </Text>
             </Specimen>
             <Specimen label="Body">
@@ -196,7 +206,7 @@ export default async function StyleguidePage() {
             </div>
             <div>
               <Hairline />
-              <Label className="mt-4">Hairline, 1px #DDD6C8</Label>
+              <Label className="mt-4">Hairline, 1px #DDD5C6</Label>
             </div>
             <div>
               <div className="h-24 bg-ivory" />
@@ -227,7 +237,7 @@ export default async function StyleguidePage() {
             <Label>04</Label>
             <Heading className="mt-3">Buttons</Heading>
             <Text tone="mute" className="mt-4 max-w-prose">
-              Three kinds. Every one is at least 44px tall, uses the label style and changes colour over 0.3s.
+              Jost 500, 12px, wide tracking, at least 48px tall. Solid buttons warm to the deeper gold.
             </Text>
           </Reveal>
           <div className="mt-12 grid gap-10 md:grid-cols-2">
@@ -377,6 +387,36 @@ export default async function StyleguidePage() {
             Go to the homepage and back
           </Button>
         </Container>
+      </Section>
+
+      <Section id="shared">
+        <Container>
+          <Reveal>
+            <Label>07</Label>
+            <Heading className="mt-3">Shared pieces</Heading>
+            <Text tone="mute" className="mt-4 max-w-prose">
+              The section head, the photo lightbox, a video tile that plays as it enters and pauses on the button,
+              and the multi-step form shell. The join band sits under them.
+            </Text>
+          </Reveal>
+          <div className="mt-12">
+            <SectionHeader
+              label="Real weddings"
+              title={
+                <>
+                  Days worth <em>keeping</em>
+                </>
+              }
+              lede="A label, a headline and a link, used wherever a section begins."
+              href="/real-weddings"
+              linkLabel="See all"
+            />
+          </div>
+          {cover ? <FoundationsDemo poster={cover.src} alt={cover.alt} /> : null}
+        </Container>
+        <div className="mt-section">
+          <JoinBand />
+        </div>
       </Section>
 
       <footer className="border-t border-line">
