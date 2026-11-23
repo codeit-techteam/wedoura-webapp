@@ -1,0 +1,311 @@
+/* Vendor dashboard shell — scoped under .studio-app */
+
+.studio-app {
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  min-height: 100dvh;
+  background: var(--color-ivory);
+  color: var(--color-copy);
+}
+
+.studio-app .studio-side {
+  border-right: 1px solid var(--color-line);
+  padding: 2rem 1.5rem;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #fff;
+}
+
+.studio-app .studio-who {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.studio-app .studio-who .mono {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--color-line);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  flex: none;
+}
+
+.studio-app .studio-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.studio-app .studio-nav a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-line);
+  text-decoration: none;
+  font: 400 1.0625rem var(--font-sans);
+  color: var(--color-mute);
+  min-height: 2.75rem;
+}
+
+.studio-app .studio-nav a.on,
+.studio-app .studio-nav a:hover {
+  color: var(--color-ink);
+  border-color: var(--color-gold);
+}
+
+.studio-app .studio-bd {
+  background: var(--color-ink);
+  color: #fff;
+  font: 400 0.8125rem var(--font-sans);
+  min-width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  padding: 0 0.4rem;
+}
+
+.studio-app .studio-pc {
+  font: 400 0.9375rem var(--font-sans);
+  color: var(--color-mute);
+  margin-top: auto;
+}
+
+.studio-app .studio-pc b {
+  color: var(--color-ink);
+  font-weight: 400;
+}
+
+.studio-app .studio-pc .bar {
+  height: 4px;
+  background: var(--color-line);
+  margin-top: 0.5rem;
+}
+
+.studio-app .studio-pc .bar i {
+  display: block;
+  height: 100%;
+  background: var(--color-gold);
+  transition: width 0.4s;
+}
+
+.studio-app .studio-main {
+  padding: clamp(1.75rem, 5vw, 4rem) clamp(1.25rem, 4.5vw, 4rem) 7rem;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.studio-app .studio-bar {
+  display: none;
+}
+
+.studio-app .studio-board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(11rem, 1fr));
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.studio-app .studio-col {
+  border: 1px solid var(--color-line);
+  background: #fff;
+  min-height: 16rem;
+}
+
+.studio-app .studio-col h3 {
+  font: 500 0.6875rem var(--font-sans);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-mute);
+}
+
+.studio-app .studio-col .drop {
+  min-height: 12rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.studio-app .studio-col .drop.on {
+  background: var(--color-sand);
+}
+
+.studio-app .lead-card {
+  border: 1px solid var(--color-line);
+  padding: 0.75rem;
+  background: var(--color-ivory);
+  cursor: grab;
+  text-align: left;
+  width: 100%;
+}
+
+.studio-app .lead-card:active {
+  cursor: grabbing;
+}
+
+.studio-app .cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--color-line);
+  border: 1px solid var(--color-line);
+}
+
+.studio-app .cal .hd {
+  background: #fff;
+  padding: 0.5rem;
+  font: 500 0.6875rem var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-mute);
+}
+
+.studio-app .cal .cell {
+  background: #fff;
+  min-height: 4.5rem;
+  padding: 0.35rem;
+  text-align: left;
+  font: 400 0.875rem var(--font-sans);
+  position: relative;
+}
+
+.studio-app .cal .cell.muted {
+  color: var(--color-mute);
+  background: var(--color-ivory);
+}
+
+.studio-app .cal .cell.blocked {
+  background: #f0e8e0;
+}
+
+.studio-app .cal .dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.2rem;
+}
+
+.studio-app .cal .dot.booked {
+  background: var(--color-gold-deep);
+}
+
+.studio-app .cal .dot.open {
+  background: var(--color-ink);
+}
+
+.studio-app .jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-ivory);
+  padding: 0.75rem 0;
+  margin-bottom: 0.5rem;
+}
+
+.studio-app .jump a {
+  border: 1px solid var(--color-line);
+  padding: 0.45rem 0.75rem;
+  font: 500 0.6875rem var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--color-mute);
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.studio-app .jump a:hover {
+  border-color: var(--color-gold);
+  color: var(--color-ink);
+}
+
+.studio-app .drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(17, 17, 17, 0.35);
+}
+
+.studio-app .drawer-panel {
+  width: min(26rem, 100%);
+  height: 100%;
+  background: #fff;
+  border-left: 1px solid var(--color-line);
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 860px) {
+  .studio-app {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-app .studio-side {
+    display: none;
+  }
+
+  .studio-app .studio-main {
+    padding-bottom: 6rem;
+  }
+
+  .studio-app .studio-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    gap: 0.25rem;
+    padding: 0.4rem 0.25rem calc(0.4rem + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.97);
+    border-top: 1px solid var(--color-line);
+    z-index: 40;
+  }
+
+  .studio-app .studio-bar a {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    font: 500 0.625rem var(--font-sans);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-mute);
+    min-height: 2.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+  }
+
+  .studio-app .studio-bar a.on {
+    color: var(--color-ink);
+  }
+
+  .studio-app .studio-board {
+    grid-template-columns: repeat(5, minmax(12rem, 1fr));
+  }
+}

@@ -2,6 +2,7 @@
 @import "../styles/tokens.css";
 @import "../styles/auth.css";
 @import "../styles/account.css";
+@import "../styles/studio.css";
 
 /* Site-wide density: 100% browser zoom matches the approved 90% look.
    Pair with the lowered xl breakpoint in tokens.css so laptop widths keep

@@ -468,6 +468,23 @@ export interface VendorListing {
   /** Founder intro: a short video or poster + caption. */
   founder?: FounderProfile;
   availability?: Availability;
+  /** Vendor-submitted real weddings awaiting Wedoura editorial review. Not public. */
+  weddingSubmissions?: WeddingSubmission[];
+}
+
+/** A real wedding a vendor asks Wedoura to feature. */
+export interface WeddingSubmission {
+  id: string;
+  coupleNames: string;
+  /** YYYY-MM */
+  weddingMonth: string;
+  venue: string;
+  city: string;
+  /** Couple gave permission to publish. */
+  permission: true;
+  note?: string;
+  status: "pending" | "featured" | "declined";
+  submittedAt: string;
 }
 
 /* --------------------------------------------------------- public shapes */

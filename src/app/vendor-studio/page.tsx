@@ -1,33 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { ScreenHeader, StudioCard } from "@/components/studio/Field";
 import { checklistProgress, computeChecklist } from "@/components/studio/checklist";
 import { ScreenSkeleton } from "@/components/studio/screen";
 import { STATUS_EXPLANATION, StatusBadge } from "@/components/studio/status";
+import type { InquiryStage } from "@/data/types";
 import { cn } from "@/lib/cn";
+import { formatINR } from "@/lib/format";
 import { useMyInquiries, useMyListing } from "@/lib/vendor-api";
 
-const timeAgo = (iso: string) => {
-  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  return days <= 0 ? "Today" : days === 1 ? "Yesterday" : `${days} days ago`;
-};
+const STAGE: InquiryStage[] = ["new", "contacted", "quote_sent", "booked", "lost"];
 
-/** A small done/open mark for checklist rows. */
 function DoneMark({ done }: { done: boolean }) {
   return (
     <span
       aria-hidden="true"
       className={cn(
-        "flex size-5 shrink-0 items-center justify-center border transition-chrome",
-        done ? "border-ink bg-ink text-white" : "border-line bg-white",
+        "flex size-5 shrink-0 items-center justify-center rounded-full border",
+        done ? "border-ink bg-ink text-white" : "border-ink bg-white",
       )}
     >
-      {done && (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3">
-          <path d="m5 13 4.5 4.5L19 7" />
-        </svg>
-      )}
+      {done ? "✓" : ""}
     </span>
   );
 }
@@ -39,122 +32,129 @@ export default function OverviewPage() {
 
   const items = computeChecklist(listing);
   const { done, total, complete } = checklistProgress(items);
-  const pendingCount = listing.pendingMediaIds?.length ?? 0;
-  const recent = inquiries.slice(0, 3);
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+
+  const byStage = (s: InquiryStage) => inquiries.filter((i) => (i.stage ?? "new") === s);
+  const open = inquiries.filter((i) => (i.stage ?? "new") !== "lost" && (i.stage ?? "new") !== "booked");
+  const due = open
+    .filter((i) => i.followUpOn && i.followUpOn <= new Date().toISOString().slice(0, 10))
+    .sort((a, b) => (a.followUpOn ?? "").localeCompare(b.followUpOn ?? ""));
+  const quoteSum = inquiries
+    .filter((i) => (i.stage ?? "new") === "quote_sent" || (i.stage ?? "new") === "booked")
+    .reduce((a, i) => a + (i.quoteINR ?? 0), 0);
+
+  const stats = [
+    { label: "New enquiries", value: String(byStage("new").length) },
+    { label: "Open pipeline", value: String(open.length) },
+    { label: "Booked", value: String(byStage("booked").length) },
+    { label: "Quotes sent", value: quoteSum > 0 ? formatINR(quoteSum) : String(byStage("quote_sent").length) },
+  ];
 
   return (
-    <div className="max-w-3xl">
-      <ScreenHeader
-        title="Overview"
-        text="Where your profile stands, what is left to do and who has written."
-        right={<StatusBadge status={listing.status} />}
-      />
+    <div>
+      <header className="mb-10">
+        <p className="label text-gold-deep">Overview</p>
+        <h1 className="mt-3 font-serif text-h1 text-ink">
+          Welcome back, <em>{listing.name.split(" ")[0]}</em>
+        </h1>
+        <p className="mt-4 max-w-prose italic text-mute">
+          Your enquiries, calendar and profile — in one place.
+        </p>
+        <div className="mt-4">
+          <StatusBadge status={listing.status} />
+          <p className="mt-3 max-w-prose text-small text-mute">{STATUS_EXPLANATION[listing.status]}</p>
+        </div>
+      </header>
 
-      <div className="mt-8 grid gap-6">
-        {/* Status */}
-        <StudioCard title="Status" right={<StatusBadge status={listing.status} />}>
-          <p className="max-w-prose text-body text-mute">{STATUS_EXPLANATION[listing.status]}</p>
-
-          {listing.status === "changes_requested" && listing.reviewNote && (
-            <div className="mt-5 border border-gold bg-ivory/60 p-4" role="status">
-              <p className="label text-mute">Note from the review</p>
-              <p className="mt-2 text-body">{listing.reviewNote}</p>
-              <Link href="/vendor-studio/submit" className="link-draw mt-3 inline-block text-small text-ink">
-                Make the changes, then submit again
-              </Link>
-            </div>
-          )}
-
-          {pendingCount > 0 && (
-            <p className="mt-5 flex items-start gap-2.5 border-t border-line pt-4 text-small text-mute">
-              <span aria-hidden="true" className="mt-1.5 size-1.5 shrink-0 rounded-full bg-gold" />
-              <span>
-                {pendingCount} new photo{pendingCount === 1 ? "" : "s"} or film{pendingCount === 1 ? " is" : "s are"}{" "}
-                waiting for review and hidden from couples until approved.{" "}
-                <Link href="/vendor-studio/photos" className="link-draw text-ink">
-                  See photos
-                </Link>
-              </span>
-            </p>
-          )}
-        </StudioCard>
-
-        {/* Checklist */}
-        <StudioCard
-          title="A complete profile"
-          right={
-            <p className="label text-mute">
-              {done} of {total}
-            </p>
-          }
-        >
-          <div aria-label={`${done} of ${total} checklist items done`} className="h-1 w-full bg-line" role="img">
-            <div
-              className="h-full bg-ink transition-all duration-700 ease-wedoura"
-              style={{ width: `${(done / total) * 100}%` }}
-            />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="border border-line bg-white p-5">
+            <b className="block font-serif text-[clamp(2rem,4vw,3rem)] font-normal leading-tight">{s.value}</b>
+            <span className="mt-2 block text-small text-mute">{s.label}</span>
           </div>
-          <ul className="mt-5 divide-y divide-line border-t border-line" aria-label="Profile checklist">
-            {items.map((item) => (
-              <li key={item.key}>
-                <Link
-                  href={item.href}
-                  className="tap group flex items-center gap-3.5 py-3 transition-chrome hover:bg-ivory/60"
-                >
-                  <DoneMark done={item.done} />
-                  <span className={cn("min-w-0 flex-1 text-body", item.done ? "text-mute" : "text-ink")}>
-                    {item.label}
-                  </span>
-                  <span className={cn("label shrink-0", item.done ? "text-mute" : "text-ink")}>
-                    {item.done ? "Edit" : "Add"}
-                  </span>
+        ))}
+      </div>
+
+      {due.length > 0 ? (
+        <section className="mt-8 border border-line bg-sand/60 p-6" aria-label="Needs attention">
+          <h2 className="font-serif text-h3">Needs attention</h2>
+          <ul className="mt-4 divide-y divide-line">
+            {due.map((i) => (
+              <li key={i.id} className="flex flex-wrap items-baseline justify-between gap-2 py-3">
+                <span>
+                  {i.name}
+                  {i.partner ? ` & ${i.partner}` : ""} · follow up {i.followUpOn}
+                </span>
+                <Link href="/vendor-studio/leads" className="border-b border-gold pb-0.5 text-small">
+                  Open lead
                 </Link>
               </li>
             ))}
           </ul>
-          {complete && (listing.status === "draft" || listing.status === "changes_requested") && (
+        </section>
+      ) : null}
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <section className="border border-line bg-sand/40 p-6">
+          <div className="mb-4 flex items-center gap-5">
+            <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="32" r="28" fill="none" stroke="var(--color-line)" strokeWidth="4" />
+              <circle
+                cx="32"
+                cy="32"
+                r="28"
+                fill="none"
+                stroke="var(--color-gold)"
+                strokeWidth="4"
+                strokeDasharray={`${(pct / 100) * 176} 176`}
+                strokeLinecap="round"
+                transform="rotate(-90 32 32)"
+              />
+            </svg>
+            <div>
+              <b className="font-serif text-[2.5rem] font-normal">{pct}%</b>
+              <p className="text-small text-mute">Profile complete</p>
+            </div>
+          </div>
+          <ul className="divide-y divide-line" aria-label="Profile checklist">
+            {items.map((item) => (
+              <li key={item.key} className="flex items-center gap-3 py-3">
+                <DoneMark done={item.done} />
+                <span className={cn("flex-1", item.done && "text-mute line-through")}>{item.label}</span>
+                {!item.done ? (
+                  <Link href={item.href} className="border-b border-gold pb-0.5 text-small">
+                    Do this
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {complete && (listing.status === "draft" || listing.status === "changes_requested") ? (
             <Link
-              href="/vendor-studio/submit"
-              className="label tap mt-6 inline-flex items-center justify-center bg-ink px-6 py-3 text-white transition-chrome hover:bg-black"
+              href="/vendor-studio/profile#submit"
+              className="mt-6 inline-flex min-h-12 items-center bg-ink px-6 font-sans text-button font-medium tracking-button text-ivory uppercase"
             >
               Submit for review
             </Link>
-          )}
-        </StudioCard>
+          ) : null}
+        </section>
 
-        {/* Recent inquiries */}
-        <StudioCard
-          title="Recent inquiries"
-          right={
-            <Link href="/vendor-studio/inquiries" className="link-draw label text-ink">
-              All inquiries
+        <section className="border border-line bg-white p-6">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="font-serif text-h3">Pipeline</h2>
+            <Link href="/vendor-studio/leads" className="border-b border-gold pb-0.5 text-small">
+              All leads
             </Link>
-          }
-        >
-          {recent.length === 0 ? (
-            <p className="text-small text-mute">Nothing yet. Inquiries from couples land here.</p>
-          ) : (
-            <ul className="divide-y divide-line">
-              {recent.map((inquiry) => (
-                <li key={inquiry.id}>
-                  <Link
-                    href="/vendor-studio/inquiries"
-                    className="block py-3 transition-chrome hover:bg-ivory/60"
-                  >
-                    <span className="flex items-baseline justify-between gap-4">
-                      <span className="min-w-0 truncate text-body font-medium">
-                        {inquiry.name}
-                        {inquiry.partner ? ` & ${inquiry.partner}` : ""} · {inquiry.city}
-                      </span>
-                      <span className="label shrink-0 text-mute">{timeAgo(inquiry.createdAt)}</span>
-                    </span>
-                    <span className="mt-1 block truncate text-small text-mute">{inquiry.message}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </StudioCard>
+          </div>
+          <ul className="mt-4 divide-y divide-line">
+            {STAGE.map((s) => (
+              <li key={s} className="flex justify-between py-3 text-small">
+                <span className="capitalize text-mute">{s.replace("_", " ")}</span>
+                <span>{byStage(s).length}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </div>
   );

@@ -311,7 +311,7 @@ export async function listCoupleInquiries(emailRaw: string): Promise<CoupleInqui
     });
 }
 
-/** PATCH /me/inquiries/{id} */
+/** PATCH /me/inquiries/{id} — legacy status toggle (maps onto stage when useful). */
 export async function setInquiryStatus(id: string, status: InquiryStatus): Promise<Result<Inquiry>> {
   const db = readDb();
   const listing = myListing(db);
@@ -319,9 +319,66 @@ export async function setInquiryStatus(id: string, status: InquiryStatus): Promi
   if (!listing || !inquiry || inquiry.listingId !== listing.id) {
     return { ok: false, error: "No such inquiry on this account." };
   }
-  const next = { ...inquiry, status };
+  const stage =
+    status === "new" ? "new" : status === "replied" ? (inquiry.stage === "new" ? "contacted" : inquiry.stage) : inquiry.stage === "booked" ? "booked" : "lost";
+  const next = { ...inquiry, status, stage: stage as Inquiry["stage"] };
   writeDb({ ...db, inquiries: db.inquiries.map((i) => (i.id === id ? next : i)) });
   return { ok: true, value: next };
+}
+
+/** PATCH /me/inquiries/{id} — pipeline fields (stage, quote, follow-up, notes). */
+export async function updateInquiry(
+  inquiryId: string,
+  patch: Partial<Pick<Inquiry, "stage" | "quoteINR" | "followUpOn" | "notes" | "status" | "name" | "partner" | "city" | "whatsapp" | "message" | "date" | "weddingMonth" | "guests">>,
+): Promise<Result<Inquiry>> {
+  const db = readDb();
+  const listing = myListing(db);
+  const inquiry = db.inquiries.find((i) => i.id === inquiryId);
+  if (!listing || !inquiry || inquiry.listingId !== listing.id) {
+    return { ok: false, error: "No such inquiry on this account." };
+  }
+  let status = patch.status ?? inquiry.status;
+  const stage = patch.stage ?? inquiry.stage ?? "new";
+  if (patch.stage) {
+    if (patch.stage === "new") status = "new";
+    else if (patch.stage === "lost") status = "closed";
+    else if (patch.stage === "booked") status = "replied";
+    else status = "replied";
+  }
+  const next: Inquiry = { ...inquiry, ...patch, stage, status };
+  writeDb({ ...db, inquiries: db.inquiries.map((i) => (i.id === inquiryId ? next : i)) });
+  return { ok: true, value: next };
+}
+
+/** POST /me/inquiries — vendor-added lead. */
+export async function createMyLead(input: {
+  name: string;
+  partner?: string;
+  whatsapp: string;
+  city: string;
+  message?: string;
+  weddingMonth?: string;
+  date?: string;
+}): Promise<Result<Inquiry>> {
+  const db = readDb();
+  const listing = myListing(db);
+  if (!listing) return { ok: false, error: "No listing on this account yet." };
+  const inquiry: Inquiry = {
+    id: id(),
+    listingId: listing.id,
+    name: input.name.trim(),
+    partner: input.partner?.trim() || undefined,
+    whatsapp: input.whatsapp.trim(),
+    city: input.city.trim(),
+    message: input.message?.trim() || "Added by the vendor.",
+    weddingMonth: input.weddingMonth,
+    date: input.date,
+    status: "new",
+    stage: "new",
+    createdAt: new Date().toISOString(),
+  };
+  writeDb({ ...db, inquiries: [...db.inquiries, inquiry] });
+  return { ok: true, value: inquiry };
 }
 
 /* ------------------------------------------- demo admin (/demo only) */

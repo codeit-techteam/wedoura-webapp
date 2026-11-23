@@ -28,8 +28,24 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 20 | v2 session 3b: remaining public pages restyled (listings, journal, saved, about, contact, legal, 404, Soulmates waiting list) | ✅ Done (2026-11-23) |
 | 21 | v2 session 4: honeymoon landing, packages, stays from the client references | ✅ Done (2026-11-23) |
 | 22 | v2 session 5: login, signup and couple account | ✅ Done (2026-11-23) |
+| 23 | v2 session 6: vendor dashboard (`/vendor-studio`) | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 6: vendor dashboard
+
+Done:
+- **Shell**: sidebar (desktop) + bottom tab bar (mobile), View my profile, completeness meter, log out. Six screens: Overview, Leads, Calendar, Photos and videos, Profile, Real weddings.
+- **Overview**: welcome hero, four Inquiry-derived stat cards, needs-attention follow-ups, completeness checklist (shared + category fields). No analytics chart.
+- **Leads**: board/list, drag between stages (New → Lost), lead drawer (stage, quote, follow-up, notes, WhatsApp), Add a lead via `updateInquiry` / `createMyLead`.
+- **Calendar**: month view, booked/open dots from Inquiry, tap to block dates on `availability` (per-space for venues).
+- **Media**: PhotoManager + highlights/cover + 360 detection, films as YouTube/Vimeo links.
+- **Profile**: long sectioned form with jump chips; category fields from definitions; venue spaces when relevant; kind words / FAQs / pricing / submit. Field map updated to the new screens.
+- **Real weddings**: submit with permission checkbox; `weddingSubmissions` status on the listing.
+- Legacy studio routes redirect into the new screens. Lint, typecheck, 83 tests (field-map), production build.
+
+Next up:
+- Session 7: Soulmates (only if confirmed) and full audit.
 
 ### 2026-11-23 · v2 session 5: login, signup and couple account
 

@@ -69,6 +69,7 @@ export function demoInquiries(): Inquiry[] {
       message: "What does your one-day package cover, and do you travel to Jaipur?",
       status: "replied",
       stage: "contacted",
+      followUpOn: new Date(Date.now() + 2 * day).toISOString().slice(0, 10),
       createdAt: new Date(Date.now() - 6 * day).toISOString(),
     },
     {
@@ -82,6 +83,20 @@ export function demoInquiries(): Inquiry[] {
       status: "closed",
       stage: "lost",
       createdAt: new Date(Date.now() - 20 * day).toISOString(),
+    },
+    {
+      id: "inq-demo-5",
+      listingId: DEMO_LISTING_ID,
+      name: "Meera",
+      partner: "Arjun",
+      whatsapp: "+919811122233",
+      date: "2026-11-28",
+      city: "Udaipur",
+      message: "Booked us for the Mehendi and the wedding day.",
+      status: "replied",
+      stage: "booked",
+      quoteINR: 240000,
+      createdAt: new Date(Date.now() - 14 * day).toISOString(),
     },
     {
       id: "inq-demo-4",
