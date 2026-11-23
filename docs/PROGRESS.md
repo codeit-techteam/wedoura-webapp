@@ -29,8 +29,21 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 21 | v2 session 4: honeymoon landing, packages, stays from the client references | ✅ Done (2026-11-23) |
 | 22 | v2 session 5: login, signup and couple account | ✅ Done (2026-11-23) |
 | 23 | v2 session 6: vendor dashboard (`/vendor-studio`) | ✅ Done (2026-11-23) |
+| 24 | v2 session 7: full audit (Soulmates create skipped) | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 7: full audit
+
+Done:
+- **Soulmates create** skipped per BUILD-PLAN §4 (waiting list only).
+- **SEO**: `pageMeta` in `src/lib/seo.ts` (title, description, canonical, OG/Twitter image); applied across public listings, detail pages, legal, honeymoon lists, and noindex auth/account/saved routes. Sitemap already covers all public routes; robots excludes private ones. Footer FAQs + Gallery confirmed.
+- **A11y / content**: home tile alts; vendor count string for screen readers; decorative signup images `aria-hidden`. No invented category/review counts; Kind words only; dashboard stats from Inquiry.
+- **Browser**: home, vendors (+ filters), vendor + venue profiles, honeymoon, vendor login → studio overview. Filters, forms and section nav working.
+- **Verification**: lint, typecheck, 83 tests, production build. Write-up in `docs/AUDIT.md` (incl. backend leftovers).
+
+Next up:
+- Backend integration; optional Soulmates create if the client confirms; licensed photography pass.
 
 ### 2026-11-23 · v2 session 6: vendor dashboard
 

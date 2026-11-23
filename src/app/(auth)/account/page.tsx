@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { AccountSpace } from "@/components/account/AccountSpace";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Your wedding space",
   description: "Shortlist, enquiries and wedding details on Wedoura.",
-  robots: { index: false, follow: false },
-};
+  path: "/account",
+  noIndex: true,
+});
 
 export default function AccountPage() {
   return <AccountSpace />;

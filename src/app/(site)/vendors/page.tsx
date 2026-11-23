@@ -1,15 +1,14 @@
-import type { Metadata } from "next";
 import { VendorBrowse } from "@/components/browse/VendorBrowse";
 import { listCategoriesWithCounts } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import { pickParams } from "@/lib/url";
 
-export const metadata: Metadata = {
+export const metadata = pageMeta({
   title: "Vendors",
   description:
     "Photographers, venues, makeup artists, decorators, caterers and musicians across India — with real work and open pricing.",
-  alternates: { canonical: absoluteUrl("/vendors") },
-};
+  path: "/vendors",
+});
 
 const BASE_KEYS = [
   "q", "category", "city", "budget", "style", "travel", "picks", "sort", "view", "show",

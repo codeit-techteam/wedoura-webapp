@@ -5,7 +5,7 @@ import { VendorProfile } from "@/components/profile/VendorProfile";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getCategory, getVendor, isKnownVendorSlug, listAllCategories, listAllCities, listSimilar, listVendors } from "@/lib/api";
 import { breadcrumbSchema, vendorSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 export async function generateStaticParams() {
   // Published, non-venue listings only; unpublished profiles 404.
@@ -16,13 +16,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/vendors/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const vendor = await getVendor(slug);
-  if (!vendor) return { title: "Vendor" };
-  return {
+  if (!vendor) return { title: "Vendor", robots: { index: false, follow: false } };
+  const image = vendor.cover?.src ?? vendor.cardPhotos[0]?.src;
+  return pageMeta({
     title: `${vendor.name} · ${vendor.categoryName} in ${vendor.cityName}`,
-    description: vendor.tagline,
-    alternates: { canonical: absoluteUrl(`/vendors/${vendor.slug}`) },
-    openGraph: vendor.cover ? { images: [{ url: absoluteUrl(vendor.cover.src) }] } : undefined,
-  };
+    description: vendor.tagline || `${vendor.name} — ${vendor.categoryName} in ${vendor.cityName}.`,
+    path: `/vendors/${vendor.slug}`,
+    image,
+  });
 }
 
 export default async function VendorPage({ params }: PageProps<"/vendors/[slug]">) {

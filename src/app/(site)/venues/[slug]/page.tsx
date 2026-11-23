@@ -4,7 +4,7 @@ import { VenueProfile } from "@/components/profile/VenueProfile";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getVenue, listSimilar, listVendors } from "@/lib/api";
 import { breadcrumbSchema, vendorSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 export async function generateStaticParams() {
   // Published venues only; unpublished profiles 404.
@@ -15,13 +15,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/venues/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const venue = await getVenue(slug);
-  if (!venue) return { title: "Venue" };
-  return {
+  if (!venue) return { title: "Venue", robots: { index: false, follow: false } };
+  return pageMeta({
     title: `${venue.name} · Wedding venue in ${venue.cityName}`,
-    description: venue.tagline,
-    alternates: { canonical: absoluteUrl(`/venues/${venue.slug}`) },
-    openGraph: venue.cover ? { images: [{ url: absoluteUrl(venue.cover.src) }] } : undefined,
-  };
+    description: venue.tagline || `${venue.name} — wedding venue in ${venue.cityName}.`,
+    path: `/venues/${venue.slug}`,
+    image: venue.cover?.src ?? venue.cardPhotos[0]?.src,
+  });
 }
 
 export default async function VenuePage({ params }: PageProps<"/venues/[slug]">) {

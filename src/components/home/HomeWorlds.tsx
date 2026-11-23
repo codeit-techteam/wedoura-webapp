@@ -45,7 +45,7 @@ export function HomeWorlds() {
               <div className="relative aspect-3/4.2 overflow-hidden bg-sand">
                 <Image
                   src={`/ref/home/${world.img}`}
-                  alt=""
+                  alt={world.title}
                   fill
                   className="object-cover transition-transform duration-1200 ease-wedoura group-hover:scale-104"
                   style={"position" in world ? { objectPosition: world.position } : undefined}

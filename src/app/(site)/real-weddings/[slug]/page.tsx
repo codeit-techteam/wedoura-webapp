@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { RealWeddingStory } from "@/components/stories/RealWeddingStory";
 import { getWedding, listAllCities, listWeddings } from "@/lib/api";
 import { weddingSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const { items } = await listWeddings({ limit: 10000 });
@@ -15,12 +15,12 @@ export async function generateMetadata({ params }: PageProps<"/real-weddings/[sl
   const { slug } = await params;
   const wedding = await getWedding(slug);
   if (!wedding) return { title: "Real wedding" };
-  return {
+  return pageMeta({
     title: wedding.title,
     description: wedding.excerpt,
-    alternates: { canonical: absoluteUrl(`/real-weddings/${wedding.slug}`) },
-    openGraph: { images: [{ url: absoluteUrl(wedding.cover.src) }] },
-  };
+    path: `/real-weddings/${wedding.slug}`,
+    image: wedding.cover.src,
+  });
 }
 
 export default async function RealWeddingPage({ params }: PageProps<"/real-weddings/[slug]">) {

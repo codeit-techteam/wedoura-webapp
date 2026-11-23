@@ -4,13 +4,13 @@ import { Accordion } from "@/components/ui/Accordion";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { getSiteFaq } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "FAQs",
   description: "Questions couples ask us about finding, saving and contacting wedding vendors on Wedoura.",
-  alternates: { canonical: absoluteUrl("/faq") },
-};
+  path: "/faq",
+});
 
 export default async function FaqPage() {
   const faq = await getSiteFaq();

@@ -3,15 +3,15 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import { WaitlistForm } from "./WaitlistForm";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Soulmates",
   description:
     "A quieter way to meet someone serious about marriage. Soulmates is opening soon — join the waiting list with just a name and an email.",
-  alternates: { canonical: absoluteUrl("/soulmates") },
-};
+  path: "/soulmates",
+});
 
 const PRINCIPLES = [
   {

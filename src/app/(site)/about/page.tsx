@@ -7,13 +7,13 @@ import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
 import { getPhoto, getPromises } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "About",
   description: "Why Wedoura exists: real work, direct contact and no made-up numbers.",
-  alternates: { canonical: absoluteUrl("/about") },
-};
+  path: "/about",
+});
 
 export default async function AboutPage() {
   const [photo, promises] = await Promise.all([getPhoto("p33"), getPromises()]);

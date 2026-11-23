@@ -13,7 +13,7 @@ import type { Photo as PhotoType } from "@/data/types";
 import { getStay, listStays } from "@/lib/api";
 import { formatINR, formatPrice } from "@/lib/format";
 import { vendorSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const stays = await listStays();
@@ -23,12 +23,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/honeymoon/stays/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const stay = await getStay(slug);
-  if (!stay) return {};
-  return {
+  if (!stay) return { title: "Honeymoon stay", robots: { index: false, follow: false } };
+  return pageMeta({
     title: `${stay.name} — honeymoon stay`,
-    description: stay.tagline,
-    alternates: { canonical: absoluteUrl(`/honeymoon/stays/${stay.slug}`) },
-  };
+    description: stay.tagline || `${stay.name} — honeymoon stay.`,
+    path: `/honeymoon/stays/${stay.slug}`,
+    image: stay.cover?.src ?? stay.cardPhotos[0]?.src,
+  });
 }
 
 export default async function HoneymoonStayPage({ params }: PageProps<"/honeymoon/stays/[slug]">) {

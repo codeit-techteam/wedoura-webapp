@@ -137,7 +137,7 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
       <div className="aspect-4/5 overflow-hidden bg-sand">
         {previewImage ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={previewImage} alt="" className="h-full w-full object-cover" />
+          <img src={previewImage} alt="" aria-hidden="true" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-end p-4 text-small text-mute">Your cover photo appears here after approval.</div>
         )}

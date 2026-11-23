@@ -22,15 +22,15 @@ import {
   listStays,
 } from "@/lib/api";
 import { formatINR } from "@/lib/format";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import { patchedHref, pickParams } from "@/lib/url";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Honeymoon",
   description:
     "Honeymoons planned around the two of you: five-star stays, slow itineraries and small moments, in India and overseas.",
-  alternates: { canonical: absoluteUrl("/honeymoon") },
-};
+  path: "/honeymoon",
+});
 
 /** Which destination photo illustrates each mood card. */
 const MOOD_COVERS: Record<string, string> = {

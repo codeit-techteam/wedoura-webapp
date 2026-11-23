@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { CoupleLoginClient } from "@/components/auth/CoupleLoginClient";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Couple login",
   description: "Sign in to your Wedoura wedding space.",
-  robots: { index: false, follow: false },
-};
+  path: "/login",
+  noIndex: true,
+});
 
 export default function CoupleLoginPage() {
   return <CoupleLoginClient />;

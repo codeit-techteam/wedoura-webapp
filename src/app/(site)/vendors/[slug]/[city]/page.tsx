@@ -4,7 +4,7 @@ import { VendorBrowse } from "@/components/browse/VendorBrowse";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { getCategory, listAllCities, listCategoryCityPairs } from "@/lib/api";
 import { breadcrumbSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import { pickParams } from "@/lib/url";
 
 /**
@@ -38,12 +38,12 @@ export async function generateMetadata({ params }: PageProps<"/vendors/[slug]/[c
   const { category, city } = pair;
   const path = `/vendors/${category.slug}/${city.slug}`;
   const description = `${category.description} Browse ${category.name.toLowerCase()} for weddings in ${city.name}, ${city.state}.`;
-  return {
+  return pageMeta({
     title: `${category.name} in ${city.name}`,
     description,
-    alternates: { canonical: absoluteUrl(path) },
-    openGraph: { images: [{ url: absoluteUrl(category.cover.src) }] },
-  };
+    path,
+    image: category.cover.src,
+  });
 }
 
 export default async function CategoryCityPage({ params, searchParams }: PageProps<"/vendors/[slug]/[city]">) {

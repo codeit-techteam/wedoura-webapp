@@ -12,8 +12,9 @@ import { absoluteUrl } from "@/lib/site-config";
 
 /**
  * Everything public and indexable. Deliberately absent: /demo, /login,
- * /saved, /styleguide, /vendor-studio, /api (see robots.ts) — and every
- * listing that is not published, which listVendors guarantees.
+ * /vendor/login, /account, /saved, /styleguide, /vendor-studio, /api
+ * (see robots.ts) — and every listing that is not published, which
+ * listVendors guarantees.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [vendors, weddings, articles, pairs, places, packages, stays] = await Promise.all([

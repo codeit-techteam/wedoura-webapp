@@ -3,13 +3,14 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
-import { SITE_EMAIL, absoluteUrl } from "@/lib/site-config";
+import { SITE_EMAIL } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Privacy Policy",
   description: "What Wedoura collects, what stays on your device, and what we never do with your data.",
-  alternates: { canonical: absoluteUrl("/privacy-policy") },
-};
+  path: "/privacy-policy",
+});
 
 const LAST_UPDATED = "16 November 2026";
 

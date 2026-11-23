@@ -12,13 +12,13 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Label } from "@/components/ui/Label";
 import { listArticleCategories, listArticles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Journal",
   description: "Planning guides, venue notes and ideas worth saving, from people who work weddings every week.",
-  alternates: { canonical: absoluteUrl("/blogs") },
-};
+  path: "/blogs",
+});
 
 const PAGE = 9;
 const PATHNAME = "/blogs";

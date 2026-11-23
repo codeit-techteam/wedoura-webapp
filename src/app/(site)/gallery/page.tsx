@@ -7,13 +7,13 @@ import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listCategoriesWithCounts, listGalleryPhotos } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Gallery",
   description: "Photographs from weddings across India, each linked to the people who made it.",
-  alternates: { canonical: absoluteUrl("/gallery") },
-};
+  path: "/gallery",
+});
 
 const PAGE = 60;
 const PATHNAME = "/gallery";

@@ -10,13 +10,13 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Label } from "@/components/ui/Label";
 import { listCitiesWithCounts, listWeddings, listWeddingStyles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Real Weddings",
   description: "Whole weddings across India, told the way they happened, with the people who made them.",
-  alternates: { canonical: absoluteUrl("/real-weddings") },
-};
+  path: "/real-weddings",
+});
 
 const PAGE = 6;
 const PATHNAME = "/real-weddings";

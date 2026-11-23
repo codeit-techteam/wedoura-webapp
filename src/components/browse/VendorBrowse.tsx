@@ -282,7 +282,9 @@ export async function VendorBrowse({
           {/* Count line */}
           {result.total > 0 && (
             <p className="mb-8 text-body text-mute" aria-live="polite">
-              <span className="font-medium text-ink">{result.total} vendor{result.total !== 1 ? "s" : ""}</span>
+              <span className="font-medium text-ink">
+                {`${result.total} vendor${result.total === 1 ? "" : "s"}`}
+              </span>
               {locationTag ? (
                 <> in <em className="not-italic font-medium text-ink">{locationTag}</em></>
               ) : (

@@ -6,11 +6,14 @@ import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { listAllCities } from "@/lib/api";
 
-export const metadata: Metadata = {
+import { pageMeta } from "@/lib/seo";
+
+export const metadata: Metadata = pageMeta({
   title: "Saved",
   description: "Your shortlist of vendors and stories, kept on this device.",
-  robots: { index: false, follow: false },
-};
+  path: "/saved",
+  noIndex: true,
+});
 
 export default async function SavedPage() {
   // The shortlist lives in the browser; SavedList fetches exactly the saved
