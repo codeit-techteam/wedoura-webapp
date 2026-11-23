@@ -540,6 +540,17 @@ export interface Paged<T> {
 
 /* ------------------------------------------------- stories and articles */
 
+/** One photograph inside a chapter, with optional caption and aspect hint. */
+export interface StoryFigure {
+  photo: Photo;
+  caption?: string;
+  /** Reference aspect classes: 3/2, 4/5, 2/3. Absent = intrinsic. */
+  aspect?: "3/2" | "4/5" | "2/3";
+}
+
+/** How figures are grouped into a gallery row. */
+export type StoryRowLayout = "single" | "pair" | "mosaic" | "petals";
+
 export interface StoryChapter {
   /** Roman numeral, as on the story page. */
   numeral?: string;
@@ -547,13 +558,28 @@ export interface StoryChapter {
   /** Short line under the numeral, before the paragraphs. */
   intro?: string;
   text: string[];
+  /** Flat list — used for "all photographs" and when figures/rows are absent. */
   photos: Photo[];
+  /** Captioned figures for the chapter gallery. Falls back to `photos`. */
+  figures?: StoryFigure[];
+  /** One layout token per row; figures are consumed in order. */
+  rows?: StoryRowLayout[];
+  /** "details" = photo + details list; "night" = video clips band. */
+  variant?: "default" | "details" | "night";
+}
+
+export interface StoryNightClip {
+  src: string;
+  alt: string;
+  aspectRatio?: string;
 }
 
 export interface VendorCredit {
   role: string;
   vendorSlug?: string;
   name: string;
+  /** When set, credit links to a venue profile instead of /vendors. */
+  venueSlug?: string;
 }
 
 export interface RealWedding {
@@ -572,10 +598,26 @@ export interface RealWedding {
   credits: VendorCredit[];
   featured?: boolean;
   editorNote?: string;
-  palette?: { name: string; hex: string }[];
+  /** Mid-story pull quote (editor's note band). */
+  pullQuote?: string;
+  palette?: { name: string; hex: string; note?: string }[];
   details?: { label: string; value: string }[];
   /** Links into filtered vendor lists ("Get the look"). */
-  getTheLook?: { label: string; href: string }[];
+  getTheLook?: { label: string; href: string; note?: string }[];
+  /** Hero eyebrow, e.g. "Real Wedding · The Courtyard House". */
+  heroEyebrow?: string;
+  /** Line under the couple names. */
+  heroSubtitle?: string;
+  /** Intro headline above the story body. */
+  storyHeadline?: string;
+  /** Opening paragraphs before chapter I. */
+  intro?: string[];
+  /** Fact chips under the hero (Venue, Photography, …). */
+  creditStrip?: { label: string; value: string }[];
+  /** Glance list beside the intro. */
+  glance?: { label: string; value: string; href?: string }[];
+  /** Short clips for "The Night" chapter. */
+  nightClips?: StoryNightClip[];
 }
 
 export interface BlogPost {

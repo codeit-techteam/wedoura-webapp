@@ -17,7 +17,16 @@ export default function ContactPage() {
       <Container className="pt-10 md:pt-16">
         <div className="grid gap-12 md:grid-cols-[1fr_1.2fr] md:gap-20">
           <div>
-            <MaskedHeading as="h1" className="font-serif text-h1" lines={["Say hello."]} />
+            <Label>Contact</Label>
+            <MaskedHeading
+              as="h1"
+              className="mt-3.5 font-serif text-h1"
+              lines={[
+                <>
+                  Say <em>hello</em>.
+                </>,
+              ]}
+            />
             <p className="mt-5 max-w-sm text-mute">
               Questions, corrections, a vendor we should meet, or anything the FAQ did not answer. We reply
               within two working days.

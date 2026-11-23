@@ -15,7 +15,7 @@ import { patchedHref, pickParams } from "@/lib/url";
 import { absoluteUrl } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Journal",
   description: "Planning guides, venue notes and ideas worth saving, from people who work weddings every week.",
   alternates: { canonical: absoluteUrl("/blogs") },
 };
@@ -39,8 +39,20 @@ export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
   return (
     <main className="pb-section-sm">
       <Container className="pt-10 md:pt-16">
-        <MaskedHeading as="h1" className="font-serif text-h1" lines={["Worth reading before you book."]} />
-        <p className="mt-4 max-w-prose text-mute">Guides on vendors, venues and the days around the ceremony—not listicles, just what we would tell friends.</p>
+        <Label>The Journal</Label>
+        <MaskedHeading
+          as="h1"
+          className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
+          lines={[
+            <>
+              Worth reading before you <em>book</em>
+            </>,
+          ]}
+        />
+        <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">
+          Guides on vendors, venues and the days around the ceremony — not listicles, just what we would tell
+          friends.
+        </p>
       </Container>
 
       {featured && (

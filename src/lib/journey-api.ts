@@ -1,21 +1,26 @@
 "use client";
 
-import type { PlanningRequest } from "@/data/types";
+import type { PlanningRequest, SoulmatesWaitlist } from "@/data/types";
 
 const KEY = "wedoura:journey";
 
 interface JourneyStore {
   planningRequests: PlanningRequest[];
+  soulmatesWaitlist: SoulmatesWaitlist[];
 }
 
 function readStore(): JourneyStore {
-  if (typeof window === "undefined") return { planningRequests: [] };
+  if (typeof window === "undefined") return { planningRequests: [], soulmatesWaitlist: [] };
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { planningRequests: [] };
-    return JSON.parse(raw) as JourneyStore;
+    if (!raw) return { planningRequests: [], soulmatesWaitlist: [] };
+    const parsed = JSON.parse(raw) as Partial<JourneyStore>;
+    return {
+      planningRequests: parsed.planningRequests ?? [],
+      soulmatesWaitlist: parsed.soulmatesWaitlist ?? [],
+    };
   } catch {
-    return { planningRequests: [] };
+    return { planningRequests: [], soulmatesWaitlist: [] };
   }
 }
 
@@ -55,7 +60,32 @@ export function createPlanningRequest(input: PlanningRequestInput): PlanningRequ
   return record;
 }
 
+export interface SoulmatesWaitlistInput {
+  name: string;
+  email: string;
+  city?: string;
+}
+
+/** Waiting-list signup for Soulmates. No matrimony fields. */
+export function createSoulmatesWaitlist(input: SoulmatesWaitlistInput): SoulmatesWaitlist {
+  const store = readStore();
+  const record: SoulmatesWaitlist = {
+    id: randomId(),
+    name: input.name.trim(),
+    email: input.email.trim().toLowerCase(),
+    city: input.city?.trim() || undefined,
+    createdAt: new Date().toISOString(),
+  };
+  store.soulmatesWaitlist.push(record);
+  writeStore(store);
+  return record;
+}
+
 /** Debug helper. */
 export function listLocalPlanningRequests(): PlanningRequest[] {
   return readStore().planningRequests;
+}
+
+export function listLocalSoulmatesWaitlist(): SoulmatesWaitlist[] {
+  return readStore().soulmatesWaitlist;
 }

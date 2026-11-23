@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
+import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
 import { SITE_EMAIL, absoluteUrl } from "@/lib/site-config";
 
@@ -70,7 +71,16 @@ export default function PrivacyPolicyPage() {
     <main className="pb-section-sm">
       <Container className="pt-10 md:pt-16">
         <div className="mx-auto max-w-prose">
-          <MaskedHeading as="h1" className="font-serif text-h1" lines={["Privacy, plainly."]} />
+          <Label>Privacy</Label>
+          <MaskedHeading
+            as="h1"
+            className="mt-3.5 font-serif text-h1"
+            lines={[
+              <>
+                Privacy, <em>plainly</em>.
+              </>,
+            ]}
+          />
           <Text tone="mute" className="mt-4">
             Last updated {LAST_UPDATED}.
           </Text>

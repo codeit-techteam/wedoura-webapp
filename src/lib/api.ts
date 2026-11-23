@@ -395,9 +395,10 @@ export async function getWedding(slug: string): Promise<RealWedding | undefined>
   const publishedSlugs = new Set(published().map((l) => l.slug));
   return {
     ...wedding,
-    credits: wedding.credits.map((c) =>
-      c.vendorSlug && !publishedSlugs.has(c.vendorSlug) ? { role: c.role, name: c.name } : c,
-    ),
+    credits: wedding.credits.map((c) => {
+      const slug = c.venueSlug ?? c.vendorSlug;
+      return slug && !publishedSlugs.has(slug) ? { role: c.role, name: c.name } : c;
+    }),
   };
 }
 
