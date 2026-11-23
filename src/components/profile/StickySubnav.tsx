@@ -62,7 +62,7 @@ export function StickySubnav({ sections }: Props) {
                 className={cn(
                   "label tap inline-flex items-center justify-center whitespace-nowrap border-b-2 pt-4 pb-3.5 transition-chrome",
                   active === section.id
-                    ? "border-ink text-ink"
+                    ? "border-gold text-ink"
                     : "border-transparent text-mute hover:border-line hover:text-ink",
                 )}
               >

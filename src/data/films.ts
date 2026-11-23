@@ -11,8 +11,10 @@ export const films: Film[] = [
     title: "A lake-palace morning",
     previewSrc: "",
     fullSrc: "",
+    // Public sample: "Big Buck Bunny" trailer — replace with a real wedding film before launch.
+    youtubeUrl: "https://www.youtube.com/watch?v=ScMzIvxBSi4",
     poster: photos.p24,
-    durationSec: 0,
+    durationSec: 240,
   },
   {
     id: "film-goa",
@@ -27,7 +29,9 @@ export const films: Film[] = [
     title: "Pheras at dusk",
     previewSrc: "",
     fullSrc: "",
+    // Public sample trailer — replace with a real wedding film before launch.
+    youtubeUrl: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     poster: photos.p28,
-    durationSec: 0,
+    durationSec: 180,
   },
 ];

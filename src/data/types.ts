@@ -172,6 +172,8 @@ export interface Package {
   note?: string;
   /** "What's included" bullets, shown as a check list on the profile. */
   inclusions?: string[];
+  /** Highlights this package as the most popular choice ("Most booked"). */
+  featured?: boolean;
 }
 
 /* ---------------------------------------------------------------- misc */
@@ -226,16 +228,34 @@ export interface VenueTourData {
 
 export interface VenueSpaceDetail {
   name: string;
+  /** Short kind line, e.g. "Outdoor · lawn". */
+  kind?: string;
+  description?: string;
   setting?: "indoor" | "outdoor" | "covered";
+  /** Ceremony layout (rows of chairs). */
   ceremony?: number;
+  /** Dinner layout (round tables). */
   dinner?: number;
+  /** Standing / party layout. */
   standing?: number;
   area?: string;
+  areaSqFt?: number;
   bestFor?: string[];
+  /** Portfolio photo id for the space card. */
+  photoId?: string;
   /** Tour scene id, when this space has a 360° view. */
   sceneId?: string;
 }
 
+/** One stay tier on the venue profile (suites, garden rooms, partner hotels). */
+export interface VenueRoomTier {
+  name: string;
+  countLabel: string;
+  description?: string;
+  rateFromINR?: number;
+}
+
+/** Kept for the portal's simple rooms summary; prefer `roomTiers` on the profile. */
 export interface VenueRoomOffer {
   count: number;
   types: string;
@@ -245,6 +265,7 @@ export interface VenueRoomOffer {
 
 export interface VenueMenu {
   name: string;
+  note?: string;
   pricePerGuestINR?: number;
   minimumGuests?: number;
 }
@@ -256,11 +277,32 @@ export interface VenueFood {
   cuisines?: string[];
 }
 
+export type VenueRuleStatus = "allowed" | "conditions" | "forbidden";
+
+export interface VenueRuleItem {
+  status: VenueRuleStatus;
+  title: string;
+  detail: string;
+}
+
 export interface VenueRules {
+  /** Rich rule rows for the venue profile. */
+  items?: VenueRuleItem[];
   allowed?: string[];
   withConditions?: string[];
   notAllowed?: string[];
   note?: string;
+}
+
+/** Inputs for the rough estimate calculator on the venue profile. */
+export interface VenueEstimate {
+  /** Hire cost charged once per selected event. */
+  venueHireINR: number;
+  /** Event chips (Mehendi, Wedding, …). */
+  events: string[];
+  /** Optional package for blocking all rooms (e.g. 24 rooms × 2 nights). */
+  roomsPackageINR?: number;
+  roomsPackageLabel?: string;
 }
 
 export interface VenueDetails {
@@ -270,16 +312,22 @@ export interface VenueDetails {
   /** Richer space records for the venue profile. Optional until filled in. */
   spaceDetails?: VenueSpaceDetail[];
   rooms?: VenueRoomOffer;
+  roomTiers?: VenueRoomTier[];
   food?: VenueFood;
   rules?: VenueRules;
   facilities?: string[];
   peakMonths?: string[];
   valueMonths?: string[];
   closedMonths?: string[];
+  /** Optional pull-quote under the capacity planner. */
+  capacityNote?: string;
+  /** Overview fact strip (Type, Guests, …). Hidden when empty. */
+  overviewFacts?: { label: string; value: string; note?: string }[];
+  estimate?: VenueEstimate;
   location?: {
     address?: string;
     mapUrl?: string;
-    distances?: { label: string; value: string }[];
+    distances?: { label: string; value: string; detail?: string }[];
   };
   /** Linked 360° tour over equirectangular portfolio photos. */
   tour?: VenueTourData;
@@ -409,6 +457,8 @@ export interface VendorListing {
   interview?: Interview;
   /** Publication names, with no invented circulation figures. */
   press?: string[];
+  /** Founder intro: a short video or poster + caption. */
+  founder?: FounderProfile;
   availability?: Availability;
 }
 
@@ -474,6 +524,7 @@ export interface VendorDetail {
   testimonials?: Testimonial[];
   interview?: Interview;
   press?: string[];
+  founder?: FounderProfile;
   availability?: Availability;
   verified: boolean;
 }
@@ -572,6 +623,8 @@ export interface SitePromise {
 export interface Testimonial {
   quote: string;
   couple: string;
+  /** City or location, e.g. "Bengaluru" or "Destination wedding, Goa". */
+  location?: string;
   /** ISO date of the wedding, when the vendor supplied one. */
   date?: string;
 }
@@ -580,7 +633,26 @@ export interface Interview {
   title: string;
   /** Who at Wedoura wrote it. */
   by: string;
-  paragraphs: string[];
+  /** One-line teaser shown above the Q&A. */
+  lede?: string;
+  /** Introductory paragraphs before Q&A, if any. */
+  paragraphs?: string[];
+  /** Q&A pairs; shown as an expandable list. */
+  questions?: { question: string; answer: string }[];
+  /** YouTube embed URL for a video version of the interview. */
+  youtubeUrl?: string;
+  /** Human-readable duration label, e.g. "4 min". */
+  durationLabel?: string;
+  /** Poster image for the video button. */
+  poster?: Photo;
+}
+
+/** Vendor founder / about-the-person video strip. */
+export interface FounderProfile {
+  caption: string;
+  poster: Photo;
+  youtubeUrl?: string;
+  previewSrc?: string;
 }
 
 /** Reserved for later. Nothing reads this until real reviews exist. */

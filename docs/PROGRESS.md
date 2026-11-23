@@ -22,8 +22,42 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 14 | 360° photos everywhere + linked venue tours (detection, badges, sphere viewer, tour editor, real CC0 panoramas) | ✅ Done (2026-11-19, see docs/screenshots/360) |
 | 15 | v2 session 0: extract the 13 references, tokens, public shell, data model, shared components | ✅ Done (2026-11-23) |
 | 16 | v2 session 1: homepage and `/vendors` from the client references | ✅ Done (2026-11-23) |
+| 17 | v2 session 2: vendor profile (`/vendors/[slug]`) from the client reference | ✅ Done (2026-11-23) |
+| 18 | v2 session 2b: venue profile (`/venues/[slug]`) from the client reference | ✅ Done (2026-11-23) |
 
 ## Session log
+
+### 2026-11-23 · v2 session 2b: venue profile
+
+Done:
+- **360 viewer.** Ported the venue reference WebGL viewer exactly into `PanoViewer` (same shaders, pitch limit 0.14, drag / keyboard / wheel / zoom buttons, auto-rotate, full screen, pause off-screen, tap-to-load poster, scene chips). Scenes are image URLs from data. `VenueTour` and `PhotoSphere` (portfolio lightbox + studio preview) both use it; 2:1 equirectangular detection unchanged.
+- **`/venues/[slug]`** renders `<VenueProfile>`: cover hero, key facts, sticky chips, overview, spaces (360 jump), tour, “Will we fit?” planner, stay, food & rules, packages + rough estimate, gallery, Kind words, getting there, month enquire (`createInquiry`), sticky bar.
+- **Data / field-map.** Richer `VenueDetails` (`spaceDetails`, `roomTiers`, `rules.items`, `estimate`, `overviewFacts`, `location`). Field-map rows updated; sample data on Courtyard House and Bagh-e-Noor.
+- **Verification.** Lint, typecheck, 83/83 tests (field-map included), production build.
+
+Decisions / gotchas:
+- Kind words — never “Reviews”; no star ratings.
+- Month chips: open / value / peak / closed from listing data only; closed disabled; no invented “fully booked”.
+- Estimate ± band matches the reference `est()`.
+
+Next up:
+- Session 3: real weddings, journal and remaining public pages.
+
+### 2026-11-23 · v2 session 2: vendor profile
+
+Done:
+- **`/vendors/[slug]`** rebuilt from `extracted/vendor-profile`: cover mast with share, at-a-glance facts strip (no ratings), sticky section nav, “Inside the stories” album carousel, portfolio (`PhotoGrid` + viewer), wedding stories with lightbox, Kind words (testimonials + press names), about, optional Voices interview, founder band, pricing collections (featured gold border), films with click-to-load YouTube embeds, FAQ, check-availability form (`createInquiry`), sticky bottom bar (price, save, WhatsApp, Check availability). Empty sections hide. “Replace photos” and the review-writing form are gone.
+- **Data.** `FounderProfile`, `Testimonial.location`, interview Q&A / lede / duration, `Package.featured`, `Film.youtubeUrl` mapped through `listing-view`. Field-map row for founder. Sample data on Aperture & Marigold (testimonials, press, interview, founder) and YouTube URLs on sample films.
+- **Shared profile pieces.** `ShareProfileButton`, `InsideStories`, `KindWords`, `InterviewBlock`, `FounderBand`, `FilmYouTube`; `InquiryForm` writes via `createInquiry`.
+- **Verification.** Lint, typecheck, 83/83 tests (including field-map), production build.
+
+Decisions / gotchas:
+- Kind words are vendor-entered quotes, never labelled as verified reviews.
+- At-a-glance uses listing facts only; no rating or review count until reviews exist.
+- Venue profiles moved to `<VenueProfile>` in session 2b (exact 360 viewer).
+
+Next up:
+- Session 3: real weddings, journal and remaining public pages (`docs/v2/CURSOR-PROMPTS.md`).
 
 ### 2026-11-23 · v2 session 1: homepage and vendors listing
 

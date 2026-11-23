@@ -95,6 +95,7 @@ export function listingToDetail(
     testimonials: listing.testimonials,
     interview: listing.interview,
     press: listing.press,
+    founder: listing.founder,
     availability: listing.availability,
     verified: listing.verified,
   };

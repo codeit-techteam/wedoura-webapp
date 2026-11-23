@@ -12,6 +12,15 @@ export function formatINR(amount: number): string {
   return `₹${new Intl.NumberFormat("en-IN").format(amount)}`;
 }
 
+/** "4:32" or "1:04:08" from a duration in seconds. */
+export function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 /**
  * The one way a price is written: "From ₹1,50,000 per event",
  * "₹2,200 per plate", or "On request".

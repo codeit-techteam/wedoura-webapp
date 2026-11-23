@@ -8,20 +8,25 @@ import { ImageReveal } from "@/components/motion/ImageReveal";
 import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { AlbumList } from "@/components/profile/AlbumList";
+import { FounderBand } from "@/components/profile/FounderBand";
 import { InquiryForm } from "@/components/profile/InquiryForm";
+import { InsideStories } from "@/components/profile/InsideStories";
+import { InterviewBlock } from "@/components/profile/InterviewBlock";
+import { KindWords } from "@/components/profile/KindWords";
+import { ShareProfileButton } from "@/components/profile/ShareProfileButton";
 import { StickyActionBar } from "@/components/profile/StickyActionBar";
 import { StickySubnav, type SubnavSection } from "@/components/profile/StickySubnav";
+import { FilmYouTube } from "@/components/profile/FilmYouTube";
 import { VenueTour } from "@/components/profile/VenueTour";
 import { cn } from "@/lib/cn";
 import { resolveTour } from "@/lib/tour";
 import { Accordion } from "@/components/ui/Accordion";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Container } from "@/components/ui/Container";
-import { Icon } from "@/components/ui/Icon";
 import { Label } from "@/components/ui/Label";
 import { SaveButton } from "@/components/ui/SaveButton";
 import { Text } from "@/components/ui/Text";
-import type { CategoryFieldDef, VendorDetail, VendorSummary } from "@/data/types";
+import type { CategoryFieldDef, Film, VendorDetail, VendorSummary } from "@/data/types";
 import { formatPrice } from "@/lib/format";
 
 type Props = {
@@ -33,10 +38,7 @@ type Props = {
 
 const PORTFOLIO_INITIAL = 12;
 
-/** Room for the sticky navbar + subnav when jumping to a section anchor. */
-const ANCHOR_OFFSET = "scroll-profile-anchor";
-
-/** "mumbai-suburbs" -> "Mumbai Suburbs"; cities served arrive as slugs. */
+/** "mumbai-suburbs" -> "Mumbai Suburbs" */
 function cityLabel(slug: string): string {
   return slug
     .split("-")
@@ -44,7 +46,7 @@ function cityLabel(slug: string): string {
     .join(" ");
 }
 
-/** The gold verification mark: a rosette with a check. A mark, never text. */
+/** The gold verification mark. */
 function VerifiedMark({ size = 18 }: { size?: number }) {
   return (
     <svg
@@ -85,28 +87,28 @@ function InclusionMark() {
   );
 }
 
+/** Returns true when a film has something to show or play. */
+function filmPlayable(f: Film): boolean {
+  return Boolean(f.youtubeUrl || f.previewSrc || f.fullSrc);
+}
+
 /**
- * The vendor profile: the most important page on the site, set like a
- * magazine feature. A full-bleed cover with the essentials over a quiet
- * gradient, a strip of inline key facts separated by hairlines, a sticky
- * section subnav, then the work in a wide column with a grouped
- * price-and-inquiry panel beside it from lg (the same panel sits after the
- * content on phones, where the bottom action bar takes over). Every section
- * renders only when the listing has content for it; films only with a real
- * clip. Venues get the capacity/spaces/360 section via `vendor.venue`.
+ * The vendor profile: rebuilt to match the reference design. A full-bleed
+ * cover with a mast bar, a trust/at-a-glance strip, sticky chip-nav, then
+ * sections in order: inside the stories → portfolio → venue → albums →
+ * kind words → about → voices → founder → pricing → films → faq → inquire.
+ * Every section hides when empty. Desktop and mobile share one set of markup;
+ * the sticky bottom bar carries the mobile actions.
  */
 export function VendorProfile({ vendor, similar, categoryFields }: Props) {
   const startingPrice = formatPrice(vendor.startingPriceINR, vendor.priceUnit);
-  // A poster alone is not a film; only real clips count.
-  const films = vendor.films.filter((f) => f.previewSrc.length > 0 || f.fullSrc.length > 0);
+  const films = vendor.films.filter(filmPlayable);
   const whatsapp = vendor.contact.whatsapp;
   const whatsappHref = whatsapp ? `https://wa.me/${whatsapp.replace(/[^0-9]/g, "")}` : undefined;
-  // Tour scenes point at portfolio photos; the portfolio is already
-  // pending-filtered, so unapproved scenes drop out here.
+
   const tour = vendor.venue ? resolveTour(vendor.venue.tour, vendor.portfolio) : null;
 
-  // The vendor's category-specific values (coverage, venue type, cuisine …)
-  // become key facts, labelled by the category's own field definitions.
+  // Category-specific key facts
   const fieldFacts = (categoryFields ?? []).map((def) => {
     const value = vendor.categoryValues[def.key];
     if (value === undefined || value === "" || value === false) return undefined;
@@ -114,7 +116,6 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
     return { label: def.label, value: display };
   });
 
-  // The key-facts strip, from structured listing fields; only facts that exist.
   const facts = [
     ...(vendor.venue
       ? [
@@ -132,68 +133,120 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
     ...fieldFacts,
   ].filter((f): f is { label: string; value: string } => f !== undefined);
 
-  // Other cities the vendor covers, shown as a quiet line under the facts.
   const alsoServes = vendor.citiesServed.filter((slug) => slug !== vendor.baseCity).map(cityLabel);
-
-  // The round mark on the hero; the first card photo stands in when unset.
   const avatar = vendor.avatar ?? vendor.cardPhotos[0];
-
-  // Services and styles as quiet chips in the about section, deduplicated.
   const chips = [...new Set([...vendor.services, ...vendor.styles])];
+  const packageLabels = vendor.packages.map((p) => p.label);
 
+  // Build subnav: only sections that have content
   const sections: SubnavSection[] = [
+    ...(vendor.albums.length ? [{ id: "inside", label: "Stories" }] : []),
     ...(vendor.portfolio.length ? [{ id: "portfolio", label: "Portfolio" }] : []),
     ...(vendor.venue ? [{ id: "venue", label: "The venue" }] : []),
     ...(vendor.albums.length ? [{ id: "albums", label: "Albums" }] : []),
-    ...(films.length ? [{ id: "films", label: "Films" }] : []),
+    ...((vendor.testimonials?.length || vendor.press?.length)
+      ? [{ id: "kind-words", label: "Kind words" }]
+      : []),
     ...(vendor.about.length ? [{ id: "about", label: "About" }] : []),
+    ...(vendor.interview ? [{ id: "voices", label: "Voices" }] : []),
+    ...(vendor.founder ? [{ id: "founder", label: "Founder" }] : []),
     ...(vendor.packages.length ? [{ id: "pricing", label: "Pricing" }] : []),
+    ...(films.length ? [{ id: "films", label: "Films" }] : []),
     ...(vendor.faqs.length ? [{ id: "faq", label: "FAQ" }] : []),
-    { id: "inquiry", label: "Inquire" },
+    { id: "inquire", label: "Inquire" },
   ];
 
   return (
     <main className="pb-24 lg:pb-0">
-      {/* Opener: fixed-height cover; the identity block sits in the scrimmed
-          lower band, so it never fights the subject of the photograph. */}
-      <section data-nav-dark className="relative -mt-nav flex h-[60svh] flex-col justify-end bg-ink text-white md:h-[72svh]">
-        {vendor.cover && (
-          <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={75} objectPosition="50% 45%" />
-        )}
-        <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/95 via-ink/45 to-ink/10" />
-        <Container className="relative pb-10 md:pb-14">
-          <Breadcrumb
-            tone="white"
-            items={[
-              { label: "Vendors", href: "/vendors" },
-              { label: vendor.categoryName, href: `/vendors?category=${vendor.category}` },
-              { label: vendor.name },
-            ]}
-          />
-          {avatar && (
-            <span className="relative mt-6 block size-18 overflow-hidden rounded-full border border-white/80 md:mt-8">
-              <Photo photo={avatar} mode="cover" sizes="72px" objectPosition="50% 30%" />
-            </span>
+      {/* ── Cover ──────────────────────────────────────────────────────── */}
+      <section
+        data-nav-dark
+        className="relative -mt-nav bg-ink text-white"
+      >
+        {/* Mast bar: meta left / name center / inquire right */}
+        <div className="relative z-10 border-b border-white/10">
+          <Container className="flex items-center justify-between gap-4 py-4 md:py-5">
+            {/* Left: breadcrumb / meta */}
+            <div className="min-w-0 flex-1">
+              <Breadcrumb
+                tone="white"
+                items={[
+                  { label: "Vendors", href: "/vendors" },
+                  { label: vendor.categoryName, href: `/vendors?category=${vendor.category}` },
+                  { label: vendor.name },
+                ]}
+              />
+            </div>
+            {/* Right: share */}
+            <ShareProfileButton
+              title={vendor.name}
+              className="tap shrink-0 inline-flex items-center gap-1.5 border border-white/30 px-4 py-2 text-white transition-chrome hover:border-white"
+            />
+          </Container>
+        </div>
+
+        {/* Hero image */}
+        <div className="relative flex h-[62svh] flex-col justify-end md:h-[75svh]">
+          {vendor.cover && (
+            <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={75} objectPosition="50% 45%" />
           )}
-          <MaskedHeading as="h1" className="mt-4 max-w-4xl font-serif text-hero" lines={[vendor.name]} />
-          {vendor.tagline && <p className="mt-3 max-w-xl text-lead text-white/85">{vendor.tagline}</p>}
-          <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-body-lg text-white/90">
-            <span>{vendor.categoryName}</span>
-            {vendor.verified && (
-              <span className="inline-flex items-center gap-1.5 border border-gold/70 px-2.5 py-1">
-                <VerifiedMark size={14} />
-                <span className="label text-white">Verified</span>
+          <div aria-hidden="true" className="absolute inset-0 bg-linear-to-t from-ink/95 via-ink/40 to-ink/10" />
+
+          <Container className="relative pb-10 md:pb-14">
+            {avatar && (
+              <span className="relative block size-18 overflow-hidden rounded-full border border-white/80 mb-5 md:mb-6">
+                <Photo photo={avatar} mode="cover" sizes="72px" objectPosition="50% 30%" />
               </span>
             )}
-            <span aria-hidden="true" className="size-1 rounded-full bg-white/60" />
-            <span>{vendor.cityName}</span>
-            <span aria-hidden="true" className="size-1 rounded-full bg-white/60" />
-            <span>{startingPrice}</span>
-          </p>
-        </Container>
+            <MaskedHeading as="h1" className="max-w-4xl font-serif text-hero" lines={[vendor.name]} />
+            {vendor.tagline && (
+              <p className="mt-3 max-w-xl text-lead text-white/85">{vendor.tagline}</p>
+            )}
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-body-lg text-white/90">
+              <span>{vendor.categoryName}</span>
+              {vendor.verified && (
+                <span className="inline-flex items-center gap-1.5 border border-gold/70 px-2.5 py-1">
+                  <VerifiedMark size={14} />
+                  <span className="label text-white">Verified</span>
+                </span>
+              )}
+              <span aria-hidden="true" className="size-1 rounded-full bg-white/60" />
+              <span>{vendor.cityName}</span>
+              {startingPrice && (
+                <>
+                  <span aria-hidden="true" className="size-1 rounded-full bg-white/60" />
+                  <span>{startingPrice}</span>
+                </>
+              )}
+            </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <a
+                href="#inquire"
+                className="label tap inline-flex items-center gap-2 bg-white px-5 py-3 text-ink transition-chrome hover:bg-ivory"
+              >
+                Inquire ⟶
+              </a>
+              {whatsappHref && (
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`WhatsApp ${vendor.name}`}
+                  className="tap inline-flex items-center gap-2 border border-white/40 px-4 py-2.5 text-white transition-chrome hover:border-white"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 20l1.3-3.9A8 8 0 1112 20a8 8 0 01-4-1.1z" />
+                    <path d="M9 9.5c.3 1.6 1.9 3.6 3.9 4.4l1.2-1.1 1.9.9c-.2 1-.9 1.6-1.9 1.6-3.1 0-6.6-3.4-6.6-6.5 0-1 .7-1.7 1.6-1.9l.9 1.9z" />
+                  </svg>
+                  <span className="label">WhatsApp</span>
+                </a>
+              )}
+            </div>
+          </Container>
+        </div>
       </section>
 
-      {/* Key facts: inline stats, serif values under label captions, hairlines between. */}
+      {/* ── Trust / at-a-glance strip ───────────────────────────────────── */}
       {facts.length > 0 && (
         <section aria-label="Key facts" className="border-b border-line bg-white">
           <Container className="py-7 md:py-10">
@@ -215,219 +268,269 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
         </section>
       )}
 
+      {/* ── Chip subnav ────────────────────────────────────────────────── */}
       <StickySubnav sections={sections} />
 
+      {/* ── #inside: album cover carousel ──────────────────────────────── */}
+      {vendor.albums.length > 0 && (
+        <Container className="py-section-sm">
+          <InsideStories albums={vendor.albums} />
+        </Container>
+      )}
+
+      {/* ── Main content column ────────────────────────────────────────── */}
       <Container>
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)] lg:items-start lg:gap-14 xl:gap-20">
-          {/* The work, in a wide column. */}
-          <div className="min-w-0">
-            {vendor.portfolio.length > 0 && (
-              <section id="portfolio" aria-label="Portfolio" className={`py-section-sm ${ANCHOR_OFFSET}`}>
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Portfolio"]} />
-                <p className="mt-3 max-w-prose text-mute">
-                  Recent work in natural light—the same frames you will see on your day.
-                </p>
-                <div className="mt-10">
-                  <Reveal>
-                    <PhotoGrid
-                      photos={vendor.portfolio}
-                      columns={3}
-                      initialCount={PORTFOLIO_INITIAL}
-                      sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 33vw, 50vw"
-                    />
-                  </Reveal>
-                </div>
-              </section>
-            )}
-
-            {vendor.venue && (
-              <section id="venue" aria-label="The venue" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={["The venue"]} />
-                <div className={cn("mt-10 grid gap-10 md:gap-14", tour && vendor.cover && "md:grid-cols-[1fr_2fr]")}>
-                  <div>
-                    <Label>Capacity</Label>
-                    <p className="mt-2 font-serif text-h3">
-                      {vendor.venue.capacity.min} to {vendor.venue.capacity.max} guests
-                    </p>
-                    {vendor.portfolio.length > 0 && (
-                      <div className="mt-8">
-                        <Label>Spaces</Label>
-                        <ul className="mt-4 grid grid-cols-2 gap-2">
-                          {vendor.venue.spaces.map((space, i) => (
-                            <li key={space} className="relative aspect-4/3">
-                              <PhotoTile
-                                photo={vendor.portfolio[i % vendor.portfolio.length]}
-                                title={space}
-                                sizes="(min-width: 48rem) 15vw, 50vw"
-                                titleClassName="text-lead p-4"
-                              />
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  {tour && vendor.cover && (
-                    <div>
-                      <Label>360° view</Label>
-                      <div className="mt-4">
-                        <VenueTour tour={tour} still={vendor.cover} venueName={vendor.name} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {vendor.albums.length > 0 && (
-              <section id="albums" aria-label="Albums" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Albums"]} />
-                <p className="mt-3 max-w-prose text-mute">Whole weddings, each one its own sequence.</p>
-                <div className="mt-10">
-                  <AlbumList albums={vendor.albums} />
-                </div>
-              </section>
-            )}
-
-            {films.length > 0 && (
-              <section id="films" aria-label="Films" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Films"]} />
-                <div className="mt-10 grid gap-2 md:grid-cols-2">
-                  {films.map((film) => (
-                    <FilmPreview key={film.id} film={film} sizes="(min-width: 64rem) 33vw, (min-width: 48rem) 50vw, 100vw" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {vendor.about.length > 0 && (
-              <section id="about" aria-label="About" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
-                <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)] md:gap-14">
-                  <div>
-                    <MaskedHeading as="h2" className="font-serif text-h2" lines={[`About ${vendor.name}`]} />
-                    <div className="mt-6 flex max-w-prose flex-col gap-4">
-                      {vendor.about.map((paragraph) => (
-                        <Text key={paragraph.slice(0, 24)} tone="mute">
-                          {paragraph}
-                        </Text>
-                      ))}
-                    </div>
-                    {chips.length > 0 && (
-                      <ul aria-label="Services and styles" className="mt-8 flex flex-wrap gap-2">
-                        {chips.map((chip) => (
-                          <li key={chip} className="border border-line px-3.5 py-2 text-small text-ink">
-                            {chip}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                  {vendor.aboutPhoto && (
-                    <ImageReveal delay={0.1}>
-                      <div className="relative overflow-hidden bg-ivory">
-                        <Photo photo={vendor.aboutPhoto} sizes="(min-width: 48rem) 18rem, 100vw" />
-                      </div>
-                    </ImageReveal>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {vendor.packages.length > 0 && (
-              <section id="pricing" aria-label="Pricing" className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}>
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Pricing"]} />
-                <p className="mt-3 max-w-prose text-mute">Starting points. Exact quotes come from {vendor.name}.</p>
-                <ul className="mt-10 grid gap-2 md:grid-cols-3">
-                  {vendor.packages.map((pkg, i) => (
-                    <Reveal as="li" key={pkg.label} delay={i * 0.08} className="flex flex-col border border-line bg-white">
-                      <div className="p-6 md:p-7">
-                        <p className="font-serif text-h3">{pkg.label}</p>
-                        <p className="mt-3 text-body-lg font-medium">{formatPrice(pkg.priceINR, pkg.unit)}</p>
-                      </div>
-                      {pkg.inclusions && pkg.inclusions.length > 0 && (
-                        <ul aria-label={`What ${pkg.label} includes`} className="flex flex-col gap-3 border-t border-line p-6 md:p-7">
-                          {pkg.inclusions.map((item) => (
-                            <li key={item} className="flex items-start gap-3 text-small text-ink">
-                              <InclusionMark />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {pkg.note && (
-                        <p className="mt-auto border-t border-line px-6 py-5 text-small text-mute md:px-7">{pkg.note}</p>
-                      )}
-                    </Reveal>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {vendor.faqs.length > 0 && (
-              <section
-                id="faq"
-                aria-label="Frequently asked questions"
-                className={`border-t border-line py-section-sm ${ANCHOR_OFFSET}`}
-              >
-                <MaskedHeading as="h2" className="font-serif text-h2" lines={["Good to know"]} />
-                <div className="mt-10">
-                  <Accordion items={vendor.faqs} />
-                </div>
-              </section>
-            )}
-          </div>
-
-          {/* Price, save, WhatsApp and a compact inquiry form beside the work
-              from lg (sticky under the chrome); after it on phones, where the
-              bottom action bar carries the same actions (one set of markup). */}
-          <aside
-            id="inquiry"
-            aria-label="Price and inquiry"
-            className={`no-scrollbar border-t border-line py-section-sm ${ANCHOR_OFFSET} lg:sticky lg:top-nav lg:z-10 lg:max-h-[calc(100svh-var(--nav-h)-1rem)] lg:self-start lg:overflow-y-auto lg:border-0 lg:py-0 lg:pt-4 lg:pb-section-sm`}
-          >
-            <div className="border border-line bg-white">
-              <div className="p-6 md:p-8">
-                <Label>Starting from</Label>
-                <p className="mt-2 font-serif text-h2">{startingPrice}</p>
-                <p className="mt-2 text-small text-mute">
-                  {vendor.categoryName} · {vendor.cityName}
-                </p>
-              </div>
-              <div className="border-t border-line p-6 md:p-8">
-                <div className={`grid gap-2 ${whatsappHref ? "grid-cols-2" : "grid-cols-1"}`}>
-                  <SaveButton
-                    slug={vendor.slug}
-                    name={vendor.name}
-                    tone="ink"
-                    withLabel
-                    className="border border-line px-4 py-3 hover:border-ink"
-                  />
-                  {whatsappHref && (
-                    <a
-                      href={whatsappHref}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`WhatsApp ${vendor.name}`}
-                      className="tap inline-flex items-center justify-center gap-2 border border-line px-4 py-3 text-ink transition-chrome hover:border-ink"
-                    >
-                      <Icon name="whatsapp" size={20} />
-                      <span className="label">WhatsApp</span>
-                    </a>
-                  )}
-                </div>
-              </div>
-              <div className="border-t border-line p-6 md:p-8">
-                <h2 className="font-serif text-h3">Write to {vendor.name}</h2>
-                <p className="mt-2 text-small text-mute">Straight to the vendor. No middlemen, no call centre.</p>
-                <div className="mt-6">
-                  <InquiryForm vendorName={vendor.name} compact />
-                </div>
-              </div>
+        {/* ── #portfolio ───────────────────────────────────────────────── */}
+        {vendor.portfolio.length > 0 && (
+          <section id="portfolio" aria-label="Portfolio" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <Label className="mb-4">Portfolio</Label>
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["Frames we still think about"]} />
+            <p className="mt-3 max-w-prose text-mute">
+              Recent work in natural light — the same frames you will see on your day.
+            </p>
+            <div className="mt-10">
+              <Reveal>
+                <PhotoGrid
+                  photos={vendor.portfolio}
+                  columns={3}
+                  initialCount={PORTFOLIO_INITIAL}
+                  sizes="(min-width: 64rem) 22vw, (min-width: 48rem) 33vw, 50vw"
+                />
+              </Reveal>
             </div>
-          </aside>
-        </div>
+          </section>
+        )}
+
+        {/* ── #venue ───────────────────────────────────────────────────── */}
+        {vendor.venue && (
+          <section id="venue" aria-label="The venue" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["The venue"]} />
+            <div className={cn("mt-10 grid gap-10 md:gap-14", tour && vendor.cover && "md:grid-cols-[1fr_2fr]")}>
+              <div>
+                <Label>Capacity</Label>
+                <p className="mt-2 font-serif text-h3">
+                  {vendor.venue.capacity.min} to {vendor.venue.capacity.max} guests
+                </p>
+                {vendor.portfolio.length > 0 && (
+                  <div className="mt-8">
+                    <Label>Spaces</Label>
+                    <ul className="mt-4 grid grid-cols-2 gap-2">
+                      {vendor.venue.spaces.map((space, i) => (
+                        <li key={space} className="relative aspect-4/3">
+                          <PhotoTile
+                            photo={vendor.portfolio[i % vendor.portfolio.length]}
+                            title={space}
+                            sizes="(min-width: 48rem) 15vw, 50vw"
+                            titleClassName="text-lead p-4"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              {tour && vendor.cover && (
+                <div>
+                  <Label>360° view</Label>
+                  <div className="mt-4">
+                    <VenueTour tour={tour} still={vendor.cover} venueName={vendor.name} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── #albums: Wedding stories ──────────────────────────────────── */}
+        {vendor.albums.length > 0 && (
+          <section id="albums" aria-label="Wedding stories" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <Label className="mb-4">Stories</Label>
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["Wedding stories"]} />
+            <p className="mt-3 max-w-prose text-mute">Open a story to read it frame by frame.</p>
+            <div className="mt-10">
+              <AlbumList albums={vendor.albums} />
+            </div>
+          </section>
+        )}
+
+        {/* ── #kind-words ──────────────────────────────────────────────── */}
+        {((vendor.testimonials?.length ?? 0) > 0 || (vendor.press?.length ?? 0) > 0) && (
+          <KindWords
+            testimonials={vendor.testimonials ?? []}
+            press={vendor.press}
+          />
+        )}
+
+        {/* ── #about ───────────────────────────────────────────────────── */}
+        {vendor.about.length > 0 && (
+          <section id="about" aria-label="About" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)] md:gap-14">
+              <div>
+                <Label className="mb-4">About the studio</Label>
+                <MaskedHeading as="h2" className="font-serif text-h2" lines={[`About ${vendor.name}`]} />
+                <div className="mt-6 flex max-w-prose flex-col gap-4">
+                  {vendor.about.map((paragraph) => (
+                    <Text key={paragraph.slice(0, 24)} tone="mute">
+                      {paragraph}
+                    </Text>
+                  ))}
+                </div>
+                {chips.length > 0 && (
+                  <ul aria-label="Services and styles" className="mt-8 flex flex-wrap gap-2">
+                    {chips.map((chip) => (
+                      <li key={chip} className="border border-line px-3.5 py-2 text-small text-ink">
+                        {chip}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              {vendor.aboutPhoto && (
+                <ImageReveal delay={0.1}>
+                  <div className="relative overflow-hidden bg-ivory">
+                    <Photo photo={vendor.aboutPhoto} sizes="(min-width: 48rem) 18rem, 100vw" />
+                  </div>
+                </ImageReveal>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── #voices: Interview ───────────────────────────────────────── */}
+        {vendor.interview && <InterviewBlock interview={vendor.interview} />}
       </Container>
 
+      {/* ── #founder: full-bleed strip ───────────────────────────────────── */}
+      {vendor.founder && <FounderBand founder={vendor.founder} vendorName={vendor.name} />}
+
+      <Container>
+        {/* ── #pricing ─────────────────────────────────────────────────── */}
+        {vendor.packages.length > 0 && (
+          <section id="pricing" aria-label="Pricing" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <Label className="mb-4">Pricing</Label>
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["Collections, priced openly"]} />
+            <p className="mt-3 max-w-prose text-mute">
+              Starting prices, shown openly. Every collection includes a pre-wedding call and a private gallery.
+            </p>
+            <ul className="mt-10 grid gap-2 md:grid-cols-3">
+              {vendor.packages.map((pkg, i) => (
+                <Reveal
+                  as="li"
+                  key={pkg.label}
+                  delay={i * 0.08}
+                  className={cn(
+                    "flex flex-col border bg-white",
+                    pkg.featured ? "border-gold" : "border-line",
+                  )}
+                >
+                  {pkg.featured && (
+                    <div className="border-b border-gold bg-gold/10 px-6 py-2 md:px-7">
+                      <span className="label italic text-gold-deep">Most booked</span>
+                    </div>
+                  )}
+                  <div className="p-6 md:p-7">
+                    <p className="font-serif text-h3">{pkg.label}</p>
+                    <p className="mt-3 text-body-lg font-medium">{formatPrice(pkg.priceINR, pkg.unit)}</p>
+                    {pkg.note && <p className="mt-2 text-small text-mute">{pkg.note}</p>}
+                  </div>
+                  {pkg.inclusions && pkg.inclusions.length > 0 && (
+                    <ul aria-label={`What ${pkg.label} includes`} className="flex flex-col gap-3 border-t border-line p-6 md:p-7">
+                      {pkg.inclusions.map((item) => (
+                        <li key={item} className="flex items-start gap-3 text-small text-ink">
+                          <InclusionMark />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </Reveal>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* ── #films ───────────────────────────────────────────────────── */}
+        {films.length > 0 && (
+          <section id="films" aria-label="Films" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <Label className="mb-4">Films</Label>
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["Wedding films"]} />
+            <p className="mt-3 max-w-prose text-mute">Made to be watched again and again.</p>
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              {films.map((film) =>
+                film.youtubeUrl ? (
+                  <FilmYouTube
+                    key={film.id}
+                    film={film}
+                    sizes="(min-width: 64rem) 33vw, (min-width: 48rem) 50vw, 100vw"
+                  />
+                ) : (
+                  <FilmPreview
+                    key={film.id}
+                    film={film}
+                    sizes="(min-width: 64rem) 33vw, (min-width: 48rem) 50vw, 100vw"
+                  />
+                ),
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* ── #faq ─────────────────────────────────────────────────────── */}
+        {vendor.faqs.length > 0 && (
+          <section id="faq" aria-label="Frequently asked questions" className="scroll-profile-anchor border-t border-line py-section-sm">
+            <Label className="mb-4">Good to know</Label>
+            <MaskedHeading as="h2" className="font-serif text-h2" lines={["Questions, answered"]} />
+            <div className="mt-10">
+              <Accordion items={vendor.faqs} />
+            </div>
+          </section>
+        )}
+      </Container>
+
+      {/* ── #inquire: full-width check availability section ──────────────── */}
+      <section id="inquire" aria-label="Check availability" className="scroll-profile-anchor border-t border-line">
+        <div className="grid md:grid-cols-[1fr_1fr] lg:grid-cols-[2fr_3fr]">
+          {vendor.cover && (
+            <div className="relative hidden min-h-[30rem] md:block">
+              <Photo photo={vendor.cover} mode="cover" sizes="(min-width: 48rem) 40vw, 0vw" quality={60} />
+            </div>
+          )}
+          <div className="bg-parchment px-6 py-12 md:px-10 md:py-14 lg:px-16">
+            <Label className="mb-4">Check availability</Label>
+            <h2 className="font-serif text-[clamp(2.375rem,4.2vw,3.875rem)] leading-[1.04] text-ink">
+              Tell us your <em>date</em>
+            </h2>
+            <p className="mt-4 mb-8 max-w-[32em] text-mute">
+              Free to ask, with no obligation. Replies usually within a day.
+            </p>
+            <div className="flex items-center gap-3 mb-8">
+              <SaveButton slug={vendor.slug} name={vendor.name} tone="ink" withLabel className="border border-line px-4 py-3 hover:border-ink" />
+              {whatsappHref && (
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`WhatsApp ${vendor.name}`}
+                  className="tap inline-flex items-center gap-2 border border-line px-4 py-3 text-ink transition-chrome hover:border-ink"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 20l1.3-3.9A8 8 0 1112 20a8 8 0 01-4-1.1z" />
+                    <path d="M9 9.5c.3 1.6 1.9 3.6 3.9 4.4l1.2-1.1 1.9.9c-.2 1-.9 1.6-1.9 1.6-3.1 0-6.6-3.4-6.6-6.5 0-1 .7-1.7 1.6-1.9l.9 1.9z" />
+                  </svg>
+                  <span className="label">WhatsApp</span>
+                </a>
+              )}
+            </div>
+            <InquiryForm
+              vendorName={vendor.name}
+              vendorSlug={vendor.slug}
+              packageLabels={vendor.packages.length > 0 ? packageLabels : undefined}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Similar vendors rail ──────────────────────────────────────────── */}
       {similar.length > 0 && (
         <section aria-label="Similar vendors" className="border-t border-line py-section-sm">
           <Container>

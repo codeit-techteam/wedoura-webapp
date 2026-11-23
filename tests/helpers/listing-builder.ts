@@ -124,6 +124,34 @@ export function makeVenueListing(overrides: Partial<VendorListing> = {}): Vendor
     venue: {
       capacity: { min: 80, max: 600 },
       spaces: ["The courtyard", "The lawn"],
+      spaceDetails: [
+        {
+          name: "The courtyard",
+          kind: "Covered · heritage",
+          ceremony: 120,
+          dinner: 90,
+          standing: 150,
+          areaSqFt: 3200,
+          photoId: photos.p13.id,
+          sceneId: "courtyard",
+        },
+        {
+          name: "The lawn",
+          kind: "Outdoor · lawn",
+          ceremony: 400,
+          dinner: 350,
+          standing: 600,
+          areaSqFt: 12000,
+          photoId: photos.p35.id,
+          sceneId: "lawn",
+        },
+      ],
+      rooms: { count: 42, types: "Palace rooms", rateFromINR: 12000 },
+      overviewFacts: [
+        { label: "Type", value: "Heritage palace" },
+        { label: "Guests", value: "80 to 600 guests" },
+        { label: "Stay", value: "42 rooms on site" },
+      ],
       tour: {
         scenes: [
           { id: "courtyard", photoId: photos.pano01.id, name: "The courtyard", startYaw: 40 },
