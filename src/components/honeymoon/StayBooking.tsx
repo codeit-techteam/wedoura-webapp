@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { Photo } from "@/components/media/Photo";
 import type { Experience, HotelRoom, Photo as PhotoType } from "@/data/types";
+import { getCoupleEmail } from "@/lib/couple-auth";
 import { formatINR } from "@/lib/format";
 import { createInquiry } from "@/lib/vendor-api";
 
@@ -103,10 +104,13 @@ export function StayBooking({ slug, name, cityName, cover, rooms, roomPhotos, mo
       vendorSlug: slug,
       name: nm,
       whatsapp: digits,
+      email: email.trim() || undefined,
       city: cityName,
       weddingMonth: checkIn.slice(0, 7),
       guests: adults,
       message: lines.join("\n"),
+      source: "package_book",
+      coupleEmail: getCoupleEmail() ?? undefined,
     });
     setBusy(false);
     if (!result.ok) {

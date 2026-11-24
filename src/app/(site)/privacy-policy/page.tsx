@@ -77,9 +77,9 @@ export default function PrivacyPolicyPage() {
             as="h1"
             className="mt-3.5 font-serif text-h1"
             lines={[
-              <>
+              <span key="headline">
                 Privacy, <em>plainly</em>.
-              </>,
+              </span>,
             ]}
           />
           <Text tone="mute" className="mt-4">

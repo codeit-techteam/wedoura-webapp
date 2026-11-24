@@ -37,9 +37,9 @@ export default function SoulmatesPage() {
           as="h1"
           className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
           lines={[
-            <>
+            <span key="headline">
               A quieter way to <em>meet</em>
-            </>,
+            </span>,
           ]}
         />
         <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">

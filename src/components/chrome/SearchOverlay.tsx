@@ -126,6 +126,7 @@ function SearchPanel({ onClose, categories, cities }: Omit<Props, "open">) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3, ease: EASE }}
+          data-lenis-prevent
           className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-white text-ink"
         >
           <div className="container-wide flex h-nav shrink-0 items-center justify-between border-b border-line bg-white">
@@ -141,7 +142,7 @@ function SearchPanel({ onClose, categories, cities }: Omit<Props, "open">) {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-ivory">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-ivory">
             <form onSubmit={submit} className="container-site flex min-h-full flex-col justify-center py-section-sm">
               <div className="mx-auto w-full max-w-(--container-hero-search)">
                 <Label className="text-mute">Search vendors, venues and cities</Label>

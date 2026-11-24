@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Heart } from "lucide-react";
+import { EmptyState } from "@/components/studio/EmptyState";
 import { Field, inputClass } from "@/components/studio/Field";
-import { SaveState } from "@/components/studio/autosave";
 import { ScreenSkeleton, useListingForm } from "@/components/studio/screen";
 import type { WeddingSubmission } from "@/data/types";
 
@@ -13,7 +14,7 @@ const STATUS_LABEL: Record<WeddingSubmission["status"], string> = {
 };
 
 export default function WeddingsPage() {
-  const { form, apply, status, error } = useListingForm<{ weddingSubmissions: WeddingSubmission[] }>((l) => ({
+  const { form, apply } = useListingForm<{ weddingSubmissions: WeddingSubmission[] }>((l) => ({
     weddingSubmissions: l.weddingSubmissions ?? [],
   }));
   const [open, setOpen] = useState(false);
@@ -61,21 +62,11 @@ export default function WeddingsPage() {
 
   return (
     <div>
-      <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-h1">Real weddings</h1>
-          <p className="mt-3 max-w-prose italic text-mute">
-            Be featured on Wedoura Real Weddings, our editorial section read by couples planning their own.
-          </p>
-        </div>
-        <SaveState status={status} error={error} />
-      </header>
+      <p className="mb-6 max-w-prose text-[length:var(--text-dash-body)] text-mute">
+        Be featured on Wedoura Real Weddings, our editorial section read by couples planning their own.
+      </p>
 
-      <button
-        type="button"
-        className="min-h-12 bg-ink px-6 font-sans text-button font-medium tracking-button text-ivory uppercase"
-        onClick={() => setOpen(true)}
-      >
+      <button type="button" className="studio-btn" onClick={() => setOpen(true)}>
         Add a real wedding
       </button>
 
@@ -138,24 +129,34 @@ export default function WeddingsPage() {
         </form>
       ) : null}
 
-      <ul className="mt-10 grid gap-4">
+      <div className="mt-10">
         {form.weddingSubmissions.length === 0 ? (
-          <li className="border border-line bg-white p-6 text-mute">No submissions yet.</li>
+          <EmptyState
+            icon={Heart}
+            title="No submissions yet. Add a wedding the couple has agreed you can share."
+            action={
+              <button type="button" className="studio-btn" onClick={() => setOpen(true)}>
+                Add a real wedding
+              </button>
+            }
+          />
         ) : (
-          form.weddingSubmissions.map((w) => (
-            <li key={w.id} className="border border-line bg-white p-5">
-              <div className="flex flex-wrap items-baseline justify-between gap-3">
-                <h2 className="font-serif text-h3">{w.coupleNames}</h2>
-                <span className="label text-gold-deep">{STATUS_LABEL[w.status]}</span>
-              </div>
-              <p className="mt-2 text-small text-mute">
-                {w.weddingMonth} · {w.venue}, {w.city}
-              </p>
-              {w.note ? <p className="mt-3 text-mute">{w.note}</p> : null}
-            </li>
-          ))
+          <ul className="grid gap-4">
+            {form.weddingSubmissions.map((w) => (
+              <li key={w.id} className="studio-card">
+                <div className="flex flex-wrap items-baseline justify-between gap-3">
+                  <h2 className="studio-section-title">{w.coupleNames}</h2>
+                  <span className="label text-gold-deep">{STATUS_LABEL[w.status]}</span>
+                </div>
+                <p className="mt-2 text-[length:var(--text-dash-help)] text-mute">
+                  {w.weddingMonth} · {w.venue}, {w.city}
+                </p>
+                {w.note ? <p className="mt-3 text-mute">{w.note}</p> : null}
+              </li>
+            ))}
+          </ul>
         )}
-      </ul>
+      </div>
     </div>
   );
 }

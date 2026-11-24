@@ -23,9 +23,9 @@ export default function ContactPage() {
               as="h1"
               className="mt-3.5 font-serif text-h1"
               lines={[
-                <>
+                <span key="headline">
                   Say <em>hello</em>.
-                </>,
+                </span>,
               ]}
             />
             <p className="mt-5 max-w-sm text-mute">

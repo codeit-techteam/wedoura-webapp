@@ -23,11 +23,12 @@ import type {
 // The hand-written sample rows only — never the seeded dataset, which would
 // blow the localStorage quota and clutter /demo.
 import { sampleListings } from "@/data/vendors";
+import { normalizeInquiry } from "@/lib/inquiry";
 
 const KEY = "wedoura:mock-db";
 const EVENT = "wedoura:mock-db-change";
-// v2: VenueDetails.tour became { scenes, links, markers } over portfolio photo ids.
-const VERSION = 2;
+// v3: Inquiry pipeline (stage/quote) → status New/Replied/Booked/Closed.
+const VERSION = 3;
 
 export interface MockDb {
   version: number;
@@ -98,9 +99,31 @@ let cache: MockDb = SEED;
 function parse(raw: string | null): MockDb {
   if (!raw) return SEED;
   try {
-    const value = JSON.parse(raw) as MockDb;
-    if (!value || value.version !== VERSION || !Array.isArray(value.accounts)) return SEED;
-    return value;
+    const value = JSON.parse(raw) as MockDb & { version?: number };
+    if (!value || !Array.isArray(value.accounts)) return SEED;
+    // Migrate v2 (and anything older with arrays) onto the enquiry status model.
+    if (value.version !== VERSION) {
+      const migrated: MockDb = {
+        version: VERSION,
+        accounts: value.accounts,
+        applications: Array.isArray(value.applications) ? value.applications : [],
+        listings: Array.isArray(value.listings) ? value.listings : SEED.listings,
+        inquiries: Array.isArray(value.inquiries)
+          ? value.inquiries.map((row) => normalizeInquiry(row as never))
+          : [],
+        sessionAccountId: value.sessionAccountId ?? null,
+      };
+      try {
+        window.localStorage.setItem(KEY, JSON.stringify(migrated));
+      } catch {
+        /* ignore */
+      }
+      return migrated;
+    }
+    return {
+      ...value,
+      inquiries: value.inquiries.map((row) => normalizeInquiry(row as never)),
+    };
   } catch {
     return SEED;
   }

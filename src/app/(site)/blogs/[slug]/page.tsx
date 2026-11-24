@@ -149,9 +149,9 @@ export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]"
               as="h2"
               className="mt-3.5 font-serif text-h2"
               lines={[
-                <>
+                <span key="headline">
                   Keep <em>reading</em>
-                </>,
+                </span>,
               ]}
             />
             <ul className="mt-10 grid grid-cols-1 gap-2 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">

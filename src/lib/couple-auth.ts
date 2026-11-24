@@ -46,7 +46,7 @@ function demoCouple(): CoupleAccount {
     notifications: [
       {
         id: "n1",
-        text: "Aperture & Marigold sent a quote for your December enquiry.",
+        text: "Aperture & Marigold replied to your December enquiry.",
         read: false,
         at: new Date(Date.now() - 1 * day).toISOString(),
       },

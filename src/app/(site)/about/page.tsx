@@ -26,9 +26,9 @@ export default async function AboutPage() {
           as="h1"
           className="mt-3.5 max-w-3xl font-serif text-h1"
           lines={[
-            <>
+            <span key="people">
               Weddings are made by <em>people</em>,
-            </>,
+            </span>,
             "not listings.",
           ]}
         />

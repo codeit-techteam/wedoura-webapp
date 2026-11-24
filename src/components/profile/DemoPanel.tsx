@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { useHydrated, useMockDb } from "@/lib/mock-store";
 import {
   demoApprove,
+  demoApproveInterview,
   demoApproveMedia,
   demoPublish,
   demoReject,
@@ -134,7 +135,12 @@ export function DemoPanel() {
         <ul className="mt-4 border-t border-line">
           {db.listings.map((listing) => {
             const pendingCount = listing.pendingMediaIds?.length ?? 0;
+            const pendingInterview = Boolean(listing.pendingInterview);
             const hasContent = listing.cardPhotos.length > 0 || listing.portfolio.length > 0;
+            const publicPath =
+              listing.venue || listing.category === "venues"
+                ? `/venues/${listing.slug}`
+                : `/vendors/${listing.slug}`;
             return (
               <li key={listing.id} className="border-b border-line py-4">
                 <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
@@ -143,11 +149,11 @@ export function DemoPanel() {
                     <p className="mt-1 text-small text-mute">
                       {listing.category} · {listing.baseCity} ·{" "}
                       {listing.status === "published" && hasContent ? (
-                        <a href={`/vendors/${listing.slug}`} className="link-draw text-ink">
-                          /vendors/{listing.slug}
+                        <a href={publicPath} className="link-draw text-ink">
+                          {publicPath}
                         </a>
                       ) : (
-                        <>/vendors/{listing.slug}</>
+                        <>{publicPath}</>
                       )}
                     </p>
                     {listing.status === "changes_requested" && listing.reviewNote && (
@@ -163,6 +169,15 @@ export function DemoPanel() {
                         className="label tap border border-gold px-4 py-2 text-ink transition-chrome hover:border-ink"
                       >
                         Approve {pendingCount} pending
+                      </button>
+                    )}
+                    {pendingInterview && (
+                      <button
+                        type="button"
+                        onClick={() => void demoApproveInterview(listing.id)}
+                        className="label tap border border-gold px-4 py-2 text-ink transition-chrome hover:border-ink"
+                      >
+                        Approve interview
                       </button>
                     )}
                     {(listing.status === "in_review" || listing.status === "published") && (

@@ -10,6 +10,10 @@ import "lenis/dist/lenis.css";
  * values (Parallax, the navbar) read the same scroll position each frame.
  * Lenis >= 1.3.26 switches itself off under prefers-reduced-motion, and
  * `anchors` keeps in-page links such as /#faq working.
+ *
+ * `allowNestedScroll` lets overflow panels (forms, drawers, story viewers)
+ * take the wheel/trackpad instead of Lenis swallowing them — without it,
+ * those panels only move if you drag the scrollbar.
  */
 export function SmoothScroll({ children }: { children: ReactNode }) {
   const lenisRef = useRef<LenisRef>(null);
@@ -23,7 +27,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ReactLenis root options={{ autoRaf: false, anchors: true }} ref={lenisRef}>
+    <ReactLenis
+      root
+      options={{ autoRaf: false, anchors: true, allowNestedScroll: true }}
+      ref={lenisRef}
+    >
       {children}
     </ReactLenis>
   );

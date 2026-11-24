@@ -40,6 +40,8 @@ export interface Album {
   location: string;
   /** ISO date of the wedding the album documents. */
   date?: string;
+  /** Short lede shown in the frame-by-frame story reader. */
+  excerpt?: string;
   photos: Photo[];
 }
 
@@ -337,31 +339,55 @@ export interface VenueDetails {
   tour?: VenueTourData;
 }
 
-export type InquiryStatus = "new" | "replied" | "closed";
+/** Vendor-facing enquiry status (couple account shows the same). */
+export type InquiryStatus = "new" | "replied" | "booked" | "closed";
 
-/** Pipeline stage shared by the vendor dashboard and the couple account. */
-export type InquiryStage = "new" | "contacted" | "quote_sent" | "booked" | "lost";
+/** Why a vendor closed an enquiry. */
+export type InquiryCloseReason =
+  | "not_available"
+  | "budget"
+  | "no_response"
+  | "booked_elsewhere";
 
+/** Which public form created the enquiry. */
+export type InquirySource =
+  | "vendor_profile"
+  | "venue_profile"
+  | "shortlist"
+  | "package_book";
+
+/**
+ * One couple enquiry against a listing. Only form submissions appear —
+ * never vendor-added leads. Status is New / Replied / Booked / Closed.
+ */
 export interface Inquiry {
   id: string;
   listingId: string;
+  /** Couple name as submitted. */
   name: string;
   partner?: string;
   whatsapp: string;
-  date?: string; // ISO date
+  email?: string;
+  /** Exact wedding date when the form asked for one (ISO date). */
+  date?: string;
+  /** Month when the form asked for a month (YYYY-MM). */
+  weddingMonth?: string;
+  /** City or venue line from the form. */
   city: string;
-  message: string;
-  status: InquiryStatus;
-  stage?: InquiryStage;
-  quoteINR?: number;
-  followUpOn?: string; // ISO date
-  notes?: string;
   guests?: number;
   budget?: string;
-  weddingMonth?: string;
+  message: string;
+  /** Package / collection label when the form had one. */
+  collection?: string;
+  source: InquirySource;
+  status: InquiryStatus;
+  closeReason?: InquiryCloseReason;
+  /** Private vendor note; not shown to the couple. */
+  notes?: string;
   /** When set, the couple account can list this enquiry. */
   coupleEmail?: string;
   createdAt: string; // ISO datetime
+  updatedAt: string; // ISO datetime
 }
 
 /* ------------------------------------------------------ vendor accounts */
@@ -463,6 +489,9 @@ export interface VendorListing {
   testimonials?: Testimonial[];
   /** Written by Wedoura. Hidden on the profile when absent. */
   interview?: Interview;
+  /** Vendor-proposed interview edits while published. Live profile keeps
+   *  `interview` until an admin approves this draft (same idea as pending media). */
+  pendingInterview?: Interview;
   /** Publication names, with no invented circulation figures. */
   press?: string[];
   /** Founder intro: a short video or poster + caption. */
@@ -718,6 +747,10 @@ export interface Interview {
 export interface FounderProfile {
   caption: string;
   poster: Photo;
+  /** Display name under the caption, e.g. the founder. */
+  name?: string;
+  /** Short about paragraphs below the film / poster. */
+  about?: string[];
   youtubeUrl?: string;
   previewSrc?: string;
 }

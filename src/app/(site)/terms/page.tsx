@@ -69,9 +69,9 @@ export default function TermsPage() {
             as="h1"
             className="mt-3.5 font-serif text-h1"
             lines={[
-              <>
+              <span key="headline">
                 The terms, <em>briefly</em>.
-              </>,
+              </span>,
             ]}
           />
           <Text tone="mute" className="mt-4">

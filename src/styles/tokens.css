@@ -70,7 +70,7 @@
   --text-body--line-height: 1.6;
   --text-body-lg: 1.125rem;
   --text-body-lg--line-height: 1.6;
-  --text-small: 0.875rem;
+  --text-small: 0.9375rem; /* 15px — filter values, helper copy */
   --text-small--line-height: 1.5;
   --text-label: 0.71875rem; /* 11.5px eyebrows */
   --text-label--line-height: 1.4;
@@ -89,12 +89,26 @@
   --text-wordmark-lg--line-height: 1.1;
   --text-search: clamp(1.75rem, 1.25rem + 2.5vw, 3rem);
   --text-search--line-height: 1.25;
+  /* Vendor dashboard type scale (scoped under .studio-app). */
+  --text-dash-title: 2rem; /* 32px page title */
+  --text-dash-title--line-height: 1.15;
+  --text-dash-section: 1.375rem; /* 22px section title */
+  --text-dash-section--line-height: 1.25;
+  --text-dash-body: 0.9375rem; /* 15px body and inputs */
+  --text-dash-body--line-height: 1.5;
+  --text-dash-label: 0.75rem; /* 12px field labels */
+  --text-dash-label--line-height: 1.3;
+  --text-dash-help: 0.8125rem; /* 13px helper text */
+  --text-dash-help--line-height: 1.45;
+  --text-dash-mark: 1.125rem; /* ~18px sidebar wordmark */
+  --text-dash-mark--line-height: 1.1;
 
   --tracking-*: initial;
   --tracking-tight: -0.01em;
   --tracking-normal: 0;
   --tracking-wordmark: 0.42em;
   --tracking-label: 0.3em;
+  --tracking-dash-label: 0.12em; /* dashboard field labels */
   --tracking-nav: 0.2em;
   --tracking-button: 0.24em;
   --tracking-wide: 0.32em; /* gold eyebrow labels */
@@ -110,6 +124,11 @@
   --container-prose: 44rem;
   --container-article: 56rem; /* long-form reading, wider than legal prose */
   --container-hero-search: 55rem; /* 880px, the hero search bar */
+  --container-dash: 75rem; /* 1200px dashboard content */
+  --spacing-dash-pad: 2rem; /* 32px dashboard content padding */
+  --spacing-dash-side: 15.5rem; /* 248px sidebar */
+  --spacing-dash-top: 4rem; /* 64px top bar */
+  --radius-dash: 0.25rem; /* 4px dashboard cards */
 
   /* Breakpoints: 390 (base), 768 (md), 1024 (lg).
      xl used to be 1440px, which made laptop 100%/110% zoom fall into the

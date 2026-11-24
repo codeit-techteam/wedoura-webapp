@@ -17,6 +17,7 @@ import { Container } from "@/components/ui/Container";
 import { SaveButton } from "@/components/ui/SaveButton";
 import type { VendorDetail, VendorSummary } from "@/data/types";
 import { formatINR, formatPrice } from "@/lib/format";
+import { profileSubnav } from "@/lib/profile-sections";
 import { resolveTour } from "@/lib/tour";
 import "@/styles/venue-profile.css";
 
@@ -110,19 +111,8 @@ export function VenueProfile({ vendor }: Props) {
   const hasKindWords = testimonials.length > 0 || Boolean(vendor.press?.length);
   const hasReach = distances.length > 0 || Boolean(venue?.location?.address);
 
-  const sections: SubnavSection[] = [
-    ...(hasOverview ? [{ id: "overview", label: "Overview" }] : []),
-    ...(hasSpaces ? [{ id: "spaces", label: "Spaces" }] : []),
-    ...(hasTour ? [{ id: "tour", label: "360° tour" }] : []),
-    ...(hasCapacity ? [{ id: "capacity", label: "Capacity" }] : []),
-    ...(hasStay ? [{ id: "stay", label: "Stay" }] : []),
-    ...(hasRules ? [{ id: "rules", label: "Food & rules" }] : []),
-    ...(hasPricing ? [{ id: "pricing", label: "Prices" }] : []),
-    ...(hasGallery ? [{ id: "gallery", label: "Gallery" }] : []),
-    ...(hasKindWords ? [{ id: "kind-words", label: "Kind words" }] : []),
-    ...(hasReach ? [{ id: "reach", label: "Getting there" }] : []),
-    { id: "enquire", label: "Enquire" },
-  ];
+  // Subnav from the shared registry: only sections that have content.
+  const sections: SubnavSection[] = profileSubnav("venue", vendor);
 
   const roomCountLabel =
     venue?.rooms?.count != null

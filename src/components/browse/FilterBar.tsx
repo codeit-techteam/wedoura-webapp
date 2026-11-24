@@ -11,12 +11,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { createPortal } from "react-dom";
 import { BottomSheet } from "@/components/browse/BottomSheet";
 import { Icon } from "@/components/ui/Icon";
 import { Container } from "@/components/ui/Container";
 import { cn } from "@/lib/cn";
-import { useIsDesktop, useMounted } from "@/lib/media";
+import { useIsDesktop } from "@/lib/media";
 import { patchedHref, type ParamRecord } from "@/lib/url";
 
 export type FilterOption = { value: string; label: string };
@@ -36,67 +35,27 @@ type SelectProps = {
   pathname: string;
   params: ParamRecord;
   className?: string;
+  /** Anchor the menu to the start or end of the trigger. Default start. */
+  menuAlign?: "start" | "end";
 };
 
-function StrapMenu({
-  anchor,
-  width,
-  children,
-  onClose,
-  panelRef,
-}: {
-  anchor: { left: number; top: number };
-  width: number;
-  children: ReactNode;
-  onClose: () => void;
-  panelRef: React.RefObject<HTMLUListElement | null>;
-}) {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (!panelRef.current?.contains(t)) onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [onClose, panelRef]);
-
-  return createPortal(
-    <ul
-      ref={panelRef}
-      role="listbox"
-      className="no-scrollbar max-h-60 overflow-y-auto border border-line bg-white"
-      style={{
-        position: "fixed",
-        top: anchor.top,
-        left: anchor.left,
-        width: Math.max(width, 200),
-        zIndex: 50,
-        transform: "translateY(1px)",
-      }}
-    >
-      {children}
-    </ul>,
-    document.body,
-  );
-}
-
 /** One compact filter inside the strap (custom menu; no native select). */
-export function FilterSelect({ param, label, options, allLabel = "All", pathname, params, className }: SelectProps) {
+export function FilterSelect({
+  param,
+  label,
+  options,
+  allLabel = "All",
+  pathname,
+  params,
+  className,
+  menuAlign = "start",
+}: SelectProps) {
   const router = useRouter();
   const isDesktop = useIsDesktop();
   const strap = useContext(FilterStrapContext);
   const [localOpen, setLocalOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLUListElement>(null);
-  const [menu, setMenu] = useState<{ left: number; top: number; width: number } | null>(null);
-  const mounted = useMounted();
 
   const value = params[param] ?? "";
   const active = Boolean(value);
@@ -108,7 +67,6 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
   const close = useCallback(() => {
     if (strap) strap.setOpenParam(null);
     else setLocalOpen(false);
-    setMenu(null);
   }, [strap]);
 
   const toggle = useCallback(() => {
@@ -117,23 +75,23 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
     else setLocalOpen(true);
   }, [close, open, param, strap]);
 
-  const positionMenu = useCallback(() => {
-    if (!rootRef.current) return;
-    const r = rootRef.current.getBoundingClientRect();
-    setMenu({ left: r.left, top: r.bottom, width: r.width });
-  }, []);
-
   useEffect(() => {
     if (!open || !isDesktop) return;
-    positionMenu();
-    const sync = () => positionMenu();
-    window.addEventListener("scroll", sync, { passive: true });
-    window.addEventListener("resize", sync);
-    return () => {
-      window.removeEventListener("scroll", sync);
-      window.removeEventListener("resize", sync);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
     };
-  }, [open, isDesktop, positionMenu]);
+    const onPointerDown = (e: PointerEvent) => {
+      const t = e.target as Node;
+      if (rootRef.current?.contains(t)) return;
+      close();
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [open, isDesktop, close]);
 
   const pick = (next: string) => {
     router.replace(patchedHref(pathname, params, { [param]: next || null, show: null }), { scroll: false });
@@ -147,7 +105,7 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
           type="button"
           onClick={() => pick("")}
           className={cn(
-            "tap w-full px-4 py-2 text-left text-small transition-chrome hover:bg-ivory",
+            "tap w-full px-4 py-2.5 text-left text-small transition-chrome hover:bg-ivory",
             !value ? "bg-ivory font-medium text-ink" : "text-mute hover:text-ink",
           )}
         >
@@ -160,7 +118,7 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
             type="button"
             onClick={() => pick(o.value)}
             className={cn(
-              "tap w-full border-t border-line px-4 py-2 text-left text-small transition-chrome hover:bg-ivory",
+              "tap w-full border-t border-line px-4 py-2.5 text-left text-small transition-chrome hover:bg-ivory",
               value === o.value ? "bg-ivory font-medium text-ink" : "text-ink",
             )}
           >
@@ -215,7 +173,7 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
     <div
       ref={rootRef}
       className={cn(
-        "relative flex min-h-14 min-w-0 flex-1 flex-col justify-center gap-0.5 px-4 py-2",
+        "relative flex min-h-14 min-w-0 flex-col justify-center gap-0.5 px-4 py-2",
         active && "bg-ivory",
         className,
       )}
@@ -231,10 +189,18 @@ export function FilterSelect({ param, label, options, allLabel = "All", pathname
         <span className="truncate text-small text-ink">{display}</span>
         <Icon name="chevron-down" size={14} className={cn("shrink-0 text-mute transition-chrome", open && "rotate-180")} />
       </button>
-      {open && mounted && menu && (
-        <StrapMenu anchor={menu} width={menu.width} onClose={close} panelRef={panelRef}>
+      {open && (
+        <ul
+          ref={panelRef}
+          role="listbox"
+          className={cn(
+            "no-scrollbar absolute top-full z-50 mt-px max-h-60 min-w-full overflow-y-auto border border-line bg-white",
+            menuAlign === "end" ? "right-0" : "left-0",
+          )}
+          style={{ minWidth: "12.5rem" }}
+        >
           {optionButtons}
-        </StrapMenu>
+        </ul>
       )}
     </div>
   );

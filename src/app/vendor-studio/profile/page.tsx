@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Field, inputClass, selectClass } from "@/components/studio/Field";
-import { SaveState } from "@/components/studio/autosave";
+import { VenueFields } from "@/components/studio/VenueFields";
 import { ScreenSkeleton, TagListInput, useListingForm } from "@/components/studio/screen";
 import type {
   Category,
@@ -11,6 +11,8 @@ import type {
   City,
   Contact,
   Faq,
+  FounderProfile,
+  Interview,
   Package,
   PriceUnit,
   Testimonial,
@@ -40,11 +42,24 @@ type Form = {
   packages: Package[];
   faqs: Faq[];
   testimonials: Testimonial[];
+  founderCaption: string;
+  founderName: string;
+  founderAbout: string;
+  founderYoutube: string;
+  interviewTitle: string;
+  interviewBy: string;
+  interviewLede: string;
+  interviewParagraphs: string;
+  interviewYoutube: string;
+  interviewDuration: string;
+  interviewQuestions: { question: string; answer: string }[];
 };
 
 const JUMP = [
   { id: "basics", label: "Basics" },
   { id: "about", label: "About" },
+  { id: "founder", label: "Founder" },
+  { id: "interview", label: "Interview" },
   { id: "category", label: "Category" },
   { id: "locations", label: "Locations" },
   { id: "contact", label: "Contact" },
@@ -66,28 +81,127 @@ export default function ProfilePage() {
     });
   }, []);
 
-  const { listing, form, apply, status, error } = useListingForm<Form>((l) => ({
-    name: l.name,
-    tagline: l.tagline,
-    about: l.about.join("\n\n"),
-    team: l.team ?? "",
-    yearsActive: l.yearsActive ? String(l.yearsActive) : "",
-    press: (l.press ?? []).join(", "),
-    category: l.category,
-    services: l.services,
-    styles: l.styles,
-    categoryValues: l.categoryValues,
-    venue: l.venue,
-    baseCity: l.baseCity,
-    citiesServed: l.citiesServed,
-    travels: l.travels ?? "",
-    contact: l.contact,
-    startingPriceINR: l.startingPriceINR != null ? String(l.startingPriceINR) : "",
-    priceUnit: l.priceUnit,
-    packages: l.packages,
-    faqs: l.faqs,
-    testimonials: l.testimonials ?? [],
-  }));
+  const { listing, form, apply } = useListingForm<Form>((l) => {
+    const interview = l.pendingInterview ?? l.interview;
+    return {
+      name: l.name,
+      tagline: l.tagline,
+      about: l.about.join("\n\n"),
+      team: l.team ?? "",
+      yearsActive: l.yearsActive ? String(l.yearsActive) : "",
+      press: (l.press ?? []).join(", "),
+      category: l.category,
+      services: l.services,
+      styles: l.styles,
+      categoryValues: l.categoryValues,
+      venue: l.venue,
+      baseCity: l.baseCity,
+      citiesServed: l.citiesServed,
+      travels: l.travels ?? "",
+      contact: l.contact,
+      startingPriceINR: l.startingPriceINR != null ? String(l.startingPriceINR) : "",
+      priceUnit: l.priceUnit,
+      packages: l.packages,
+      faqs: l.faqs,
+      testimonials: l.testimonials ?? [],
+      founderCaption: l.founder?.caption ?? "",
+      founderName: l.founder?.name ?? "",
+      founderAbout: (l.founder?.about ?? []).join("\n\n"),
+      founderYoutube: l.founder?.youtubeUrl ?? "",
+      interviewTitle: interview?.title ?? "",
+      interviewBy: interview?.by ?? "",
+      interviewLede: interview?.lede ?? "",
+      interviewParagraphs: (interview?.paragraphs ?? []).join("\n\n"),
+      interviewYoutube: interview?.youtubeUrl ?? "",
+      interviewDuration: interview?.durationLabel ?? "",
+      interviewQuestions: interview?.questions ?? [],
+    };
+  });
+
+  function saveInterview(patch: Partial<Form>) {
+    const next = { ...form!, ...patch };
+    const paragraphs = next.interviewParagraphs
+      .split(/\n{2,}/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const questions = next.interviewQuestions
+      .map((q) => ({ question: q.question.trim(), answer: q.answer.trim() }))
+      .filter((q) => q.question || q.answer);
+    const empty =
+      !next.interviewTitle.trim() &&
+      !next.interviewBy.trim() &&
+      !next.interviewLede.trim() &&
+      paragraphs.length === 0 &&
+      !next.interviewYoutube.trim() &&
+      !next.interviewDuration.trim() &&
+      questions.length === 0;
+    const interview: Interview | undefined = empty
+      ? undefined
+      : {
+          title: next.interviewTitle.trim() || "In conversation",
+          by: next.interviewBy.trim() || "Wedoura",
+          lede: next.interviewLede.trim() || undefined,
+          paragraphs: paragraphs.length ? paragraphs : undefined,
+          questions: questions.length ? questions : undefined,
+          youtubeUrl: next.interviewYoutube.trim() || undefined,
+          durationLabel: next.interviewDuration.trim() || undefined,
+          poster: listing!.pendingInterview?.poster ?? listing!.interview?.poster,
+        };
+    apply(
+      {
+        interviewTitle: next.interviewTitle,
+        interviewBy: next.interviewBy,
+        interviewLede: next.interviewLede,
+        interviewParagraphs: next.interviewParagraphs,
+        interviewYoutube: next.interviewYoutube,
+        interviewDuration: next.interviewDuration,
+        interviewQuestions: next.interviewQuestions,
+      },
+      { interview },
+    );
+  }
+
+  function saveFounder(patch: Partial<Form>) {
+    const next = { ...form!, ...patch };
+    const caption = next.founderCaption.trim();
+    const about = next.founderAbout
+      .split(/\n{2,}/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    const existing = listing!.founder;
+    if (!caption && !next.founderName.trim() && about.length === 0 && !next.founderYoutube.trim()) {
+      apply(
+        {
+          founderCaption: "",
+          founderName: "",
+          founderAbout: "",
+          founderYoutube: "",
+        },
+        { founder: undefined },
+      );
+      return;
+    }
+    if (!existing?.poster && !listing!.cover && listing!.portfolio.length === 0) {
+      return;
+    }
+    const founder: FounderProfile = {
+      caption: caption || "About the founder",
+      name: next.founderName.trim() || undefined,
+      about: about.length ? about : undefined,
+      youtubeUrl: next.founderYoutube.trim() || undefined,
+      poster: existing?.poster ?? listing!.cover ?? listing!.portfolio[0],
+      previewSrc: existing?.previewSrc,
+    };
+    apply(
+      {
+        founderCaption: next.founderCaption,
+        founderName: next.founderName,
+        founderAbout: next.founderAbout,
+        founderYoutube: next.founderYoutube,
+      },
+      { founder },
+    );
+  }
 
   if (!form || !listing || categories.length === 0 || cities.length === 0) return <ScreenSkeleton />;
 
@@ -103,15 +217,9 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <header className="mb-4 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-h1">Profile</h1>
-          <p className="mt-3 max-w-prose italic text-mute">
-            Everything couples see on your Wedoura page. Complete each section below.
-          </p>
-        </div>
-        <SaveState status={status} error={error} />
-      </header>
+      <p className="mb-4 max-w-prose text-[length:var(--text-dash-body)] text-mute">
+        Everything couples see on your Wedoura page. Complete each section below.
+      </p>
 
       <nav className="jump" aria-label="Jump to section">
         {JUMP.filter((j) => (j.id === "venue" ? isVenue : true)).map((j) => (
@@ -211,6 +319,169 @@ export default function ProfilePage() {
         </Field>
       </section>
 
+      <section id="founder" className="mt-8 scroll-mt-24 border border-line bg-white p-6">
+        <h2 className="font-serif text-h3">02b · About the founder</h2>
+        <p className="mt-2 max-w-prose text-small text-mute">
+          Shows on your public profile under Voices. Uses your cover photograph as the poster until you
+          set one in Photos and videos.
+        </p>
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <Field id="pf-founder-caption" label="Caption">
+            <input
+              id="pf-founder-caption"
+              className={inputClass}
+              value={form.founderCaption}
+              placeholder="Hello from behind the camera"
+              onChange={(e) => saveFounder({ founderCaption: e.target.value })}
+            />
+          </Field>
+          <Field id="pf-founder-name" label="Name (optional)">
+            <input
+              id="pf-founder-name"
+              className={inputClass}
+              value={form.founderName}
+              onChange={(e) => saveFounder({ founderName: e.target.value })}
+            />
+          </Field>
+          <Field id="pf-founder-yt" label="YouTube link (optional)">
+            <input
+              id="pf-founder-yt"
+              className={inputClass}
+              value={form.founderYoutube}
+              placeholder="https://"
+              onChange={(e) => saveFounder({ founderYoutube: e.target.value })}
+            />
+          </Field>
+        </div>
+        <Field id="pf-founder-about" label="About paragraphs" hint="A blank line starts a new paragraph.">
+          <textarea
+            id="pf-founder-about"
+            rows={5}
+            className={inputClass + " mt-3 resize-y"}
+            value={form.founderAbout}
+            onChange={(e) => saveFounder({ founderAbout: e.target.value })}
+          />
+        </Field>
+      </section>
+
+      <section id="interview" className="mt-8 scroll-mt-24 border border-line bg-white p-6">
+        <h2 className="font-serif text-h3">02c · Interview</h2>
+        <p className="mt-2 max-w-prose text-small text-mute">
+          Written with Wedoura. While your listing is published, edits stay in review until Wedoura approves them —
+          the live Voices section keeps the last approved interview.
+        </p>
+        {listing.pendingInterview ? (
+          <p className="mt-3 inline-flex border border-gold px-3 py-1.5 font-sans text-label font-medium tracking-label text-gold-deep uppercase">
+            In review
+          </p>
+        ) : null}
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <Field id="pf-iv-title" label="Title">
+            <input
+              id="pf-iv-title"
+              className={inputClass}
+              value={form.interviewTitle}
+              onChange={(e) => saveInterview({ interviewTitle: e.target.value })}
+            />
+          </Field>
+          <Field id="pf-iv-by" label="By">
+            <input
+              id="pf-iv-by"
+              className={inputClass}
+              value={form.interviewBy}
+              placeholder="Wedoura"
+              onChange={(e) => saveInterview({ interviewBy: e.target.value })}
+            />
+          </Field>
+          <Field id="pf-iv-lede" label="Lede">
+            <input
+              id="pf-iv-lede"
+              className={inputClass}
+              value={form.interviewLede}
+              onChange={(e) => saveInterview({ interviewLede: e.target.value })}
+            />
+          </Field>
+          <Field id="pf-iv-duration" label="Duration label">
+            <input
+              id="pf-iv-duration"
+              className={inputClass}
+              value={form.interviewDuration}
+              placeholder="4 min"
+              onChange={(e) => saveInterview({ interviewDuration: e.target.value })}
+            />
+          </Field>
+          <Field id="pf-iv-yt" label="YouTube link">
+            <input
+              id="pf-iv-yt"
+              className={inputClass}
+              value={form.interviewYoutube}
+              placeholder="https://"
+              onChange={(e) => saveInterview({ interviewYoutube: e.target.value })}
+            />
+          </Field>
+        </div>
+        <Field id="pf-iv-paras" label="Introductory paragraphs" hint="A blank line starts a new paragraph.">
+          <textarea
+            id="pf-iv-paras"
+            rows={4}
+            className={inputClass + " mt-3 resize-y"}
+            value={form.interviewParagraphs}
+            onChange={(e) => saveInterview({ interviewParagraphs: e.target.value })}
+          />
+        </Field>
+        <p className="label mt-6 text-mute">Questions and answers</p>
+        <ul className="mt-3 grid gap-4">
+          {form.interviewQuestions.map((qa, i) => (
+            <li key={i} className="grid gap-3 border border-line p-4">
+              <input
+                className={inputClass}
+                value={qa.question}
+                placeholder="Question"
+                onChange={(e) => {
+                  const interviewQuestions = form.interviewQuestions.map((row, idx) =>
+                    idx === i ? { ...row, question: e.target.value } : row,
+                  );
+                  saveInterview({ interviewQuestions });
+                }}
+              />
+              <textarea
+                className={inputClass + " resize-y"}
+                rows={3}
+                value={qa.answer}
+                placeholder="Answer"
+                onChange={(e) => {
+                  const interviewQuestions = form.interviewQuestions.map((row, idx) =>
+                    idx === i ? { ...row, answer: e.target.value } : row,
+                  );
+                  saveInterview({ interviewQuestions });
+                }}
+              />
+              <button
+                type="button"
+                className="text-small text-mute"
+                onClick={() => {
+                  const interviewQuestions = form.interviewQuestions.filter((_, idx) => idx !== i);
+                  saveInterview({ interviewQuestions });
+                }}
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          className="mt-4 border-b border-gold pb-1 text-button tracking-[0.2em] uppercase"
+          onClick={() =>
+            saveInterview({
+              interviewQuestions: [...form.interviewQuestions, { question: "", answer: "" }],
+            })
+          }
+        >
+          + Add question
+        </button>
+      </section>
+
       <section id="category" className="mt-8 scroll-mt-24 border border-line bg-white p-6">
         <h2 className="font-serif text-h3">03 · Category & services</h2>
         <div className="mt-6 grid gap-6">
@@ -260,55 +531,17 @@ export default function ProfilePage() {
 
       {isVenue ? (
         <section id="venue" className="mt-8 scroll-mt-24 border border-line bg-white p-6">
-          <h2 className="font-serif text-h3">Venue spaces</h2>
-          <p className="mt-2 text-mute">Space names couples see. Full capacity and food details stay editable here.</p>
+          <h2 className="font-serif text-h3">Venue details</h2>
+          <p className="mt-2 text-mute">
+            Capacity, spaces, food, rules, location and your 360° tour — everything couples see on a venue
+            profile.
+          </p>
           <div className="mt-6">
-            <TagListInput
-              id="pf-spaces"
-              values={form.venue?.spaces ?? []}
-              onChange={(spaces) => {
-                const venue: VenueDetails = {
-                  ...(form.venue ?? { capacity: { min: 50, max: 200 }, spaces: [] }),
-                  spaces,
-                };
-                apply({ venue }, { venue });
-              }}
-              placeholder="e.g. Lawn"
+            <VenueFields
+              venue={form.venue ?? { capacity: { min: 50, max: 200 }, spaces: [] }}
+              portfolio={listing.portfolio}
+              onChange={(venue) => apply({ venue }, { venue })}
             />
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <Field id="pf-cap-min" label="Min guests">
-              <input
-                id="pf-cap-min"
-                className={inputClass}
-                inputMode="numeric"
-                value={form.venue?.capacity?.min ?? ""}
-                onChange={(e) => {
-                  const min = Number(e.target.value) || 0;
-                  const venue: VenueDetails = {
-                    ...(form.venue ?? { capacity: { min: 50, max: 200 }, spaces: [] }),
-                    capacity: { min, max: form.venue?.capacity?.max ?? 200 },
-                  };
-                  apply({ venue }, { venue });
-                }}
-              />
-            </Field>
-            <Field id="pf-cap-max" label="Max guests">
-              <input
-                id="pf-cap-max"
-                className={inputClass}
-                inputMode="numeric"
-                value={form.venue?.capacity?.max ?? ""}
-                onChange={(e) => {
-                  const max = Number(e.target.value) || 0;
-                  const venue: VenueDetails = {
-                    ...(form.venue ?? { capacity: { min: 50, max: 200 }, spaces: [] }),
-                    capacity: { min: form.venue?.capacity?.min ?? 50, max },
-                  };
-                  apply({ venue }, { venue });
-                }}
-              />
-            </Field>
           </div>
         </section>
       ) : null}
@@ -444,6 +677,72 @@ export default function ProfilePage() {
                     apply({ packages }, { packages });
                   }}
                 />
+                <select
+                  className={selectClass + " mt-3"}
+                  value={pkg.unit}
+                  aria-label="Package unit"
+                  onChange={(e) => {
+                    const packages = form.packages.map((p, idx) =>
+                      idx === i ? { ...p, unit: e.target.value as PriceUnit } : p,
+                    );
+                    apply({ packages }, { packages });
+                  }}
+                >
+                  <option value="per_event">Event</option>
+                  <option value="per_day">Day</option>
+                  <option value="per_plate">Guest</option>
+                  <option value="on_request">On request</option>
+                </select>
+                <input
+                  className={inputClass + " mt-3"}
+                  value={pkg.note ?? ""}
+                  placeholder="Short note under the price"
+                  onChange={(e) => {
+                    const packages = form.packages.map((p, idx) =>
+                      idx === i ? { ...p, note: e.target.value } : p,
+                    );
+                    apply({ packages }, { packages });
+                  }}
+                />
+                <textarea
+                  className={inputClass + " mt-3 resize-y"}
+                  rows={3}
+                  value={(pkg.inclusions ?? []).join("\n")}
+                  placeholder="What is included (one line each)"
+                  onChange={(e) => {
+                    const inclusions = e.target.value
+                      .split("\n")
+                      .map((s) => s.trim())
+                      .filter(Boolean);
+                    const packages = form.packages.map((p, idx) =>
+                      idx === i ? { ...p, inclusions } : p,
+                    );
+                    apply({ packages }, { packages });
+                  }}
+                />
+                <label className="mt-3 flex items-center gap-2 text-small text-ink">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(pkg.featured)}
+                    onChange={(e) => {
+                      const packages = form.packages.map((p, idx) =>
+                        idx === i ? { ...p, featured: e.target.checked } : p,
+                      );
+                      apply({ packages }, { packages });
+                    }}
+                  />
+                  Mark as most booked
+                </label>
+                <button
+                  type="button"
+                  className="mt-3 text-small text-mute"
+                  onClick={() => {
+                    const packages = form.packages.filter((_, idx) => idx !== i);
+                    apply({ packages }, { packages });
+                  }}
+                >
+                  Remove package
+                </button>
               </li>
             ))}
           </ul>
@@ -541,6 +840,17 @@ export default function ProfilePage() {
                   apply({ testimonials }, { testimonials });
                 }}
               />
+              <input
+                className={inputClass}
+                value={t.location ?? ""}
+                placeholder="Place (city or destination)"
+                onChange={(e) => {
+                  const testimonials = form.testimonials.map((x, idx) =>
+                    idx === i ? { ...x, location: e.target.value.trim() || undefined } : x,
+                  );
+                  apply({ testimonials }, { testimonials });
+                }}
+              />
             </li>
           ))}
         </ul>
@@ -548,7 +858,7 @@ export default function ProfilePage() {
           type="button"
           className="mt-4 border-b border-gold pb-1 text-button tracking-[0.2em] uppercase"
           onClick={() => {
-            const testimonials = [...form.testimonials, { quote: "", couple: "" }];
+            const testimonials = [...form.testimonials, { quote: "", couple: "", location: "" }];
             apply({ testimonials }, { testimonials });
           }}
         >

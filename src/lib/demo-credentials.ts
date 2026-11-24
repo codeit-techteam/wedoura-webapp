@@ -1,48 +1,45 @@
-"use client";
-
 /**
- * ------------------------------------------------------------------
- * DEMO ONLY — DELETE THIS FILE WHEN THE BACKEND IS CONNECTED.
- * ------------------------------------------------------------------
- * A walk-in demo login that always works: vendor@gmail.com / 123456.
- * Logging in with it seeds an approved account that OWNS the published
- * "Aperture & Marigold" sample listing (lst-01), fully filled in, so the
- * studio opens on a real, live profile instead of an empty draft.
- * src/lib/vendor-api.ts special-cases these credentials in login().
+ * Demo logins. Deletable when the real backend arrives.
+ * Logging in with vendor@gmail.com seeds an approved account that OWNS the
+ * published sample listing (Aperture & Marigold), so the studio and public
+ * profile stay in sync for demos.
  */
 import type { Inquiry, VendorAccount, VendorListing } from "@/data/types";
 import { sampleListings } from "@/data/vendors";
 
 export const DEMO_EMAIL = "vendor@gmail.com";
 export const DEMO_PASSWORD = "123456";
-export const DEMO_ACCOUNT_ID = "acc-demo";
-/** The demo vendor owns the first sample listing: Aperture & Marigold. */
+export const DEMO_ACCOUNT_ID = "acct-demo-vendor";
 export const DEMO_LISTING_ID = "lst-01";
 
+export const COUPLE_DEMO_EMAIL = "couple@gmail.com";
+export const COUPLE_DEMO_PASSWORD = "123456";
+
+/** Slim account for the demo vendor. */
 export function demoAccount(): VendorAccount {
   return {
     id: DEMO_ACCOUNT_ID,
     email: DEMO_EMAIL,
     password: DEMO_PASSWORD,
-    contactName: "Aperture & Marigold",
-    whatsapp: "+910000000000",
+    contactName: "Demo Vendor",
+    whatsapp: "+919876543210",
     status: "approved",
     listingId: DEMO_LISTING_ID,
-    createdAt: new Date().toISOString(),
+    createdAt: "2026-01-01T00:00:00.000Z",
   };
 }
 
-/** The full Aperture & Marigold listing, reassigned to the demo account.
- *  A deep copy, so studio edits never mutate the static sample data. */
+/** The sample listing the demo account owns (first published photography listing). */
 export function demoListing(): VendorListing {
-  const source = sampleListings.find((l) => l.id === DEMO_LISTING_ID) ?? sampleListings[0];
-  const copy = JSON.parse(JSON.stringify(source)) as VendorListing;
+  const sample = sampleListings.find((l) => l.id === DEMO_LISTING_ID) ?? sampleListings[0];
+  const copy = structuredClone(sample);
   return { ...copy, accountId: DEMO_ACCOUNT_ID };
 }
 
 /** Sample inquiries so the portal and the demo couple account have content. */
 export function demoInquiries(): Inquiry[] {
   const day = 24 * 60 * 60 * 1000;
+  const now = Date.now();
   return [
     {
       id: "inq-demo-1",
@@ -50,15 +47,17 @@ export function demoInquiries(): Inquiry[] {
       name: "Ananya",
       partner: "Kabir",
       whatsapp: "+919876543210",
+      email: "couple@gmail.com",
       date: "2026-12-12",
       city: "Mumbai",
       message: "We are planning two days in December, mostly outdoors. Are you free around the 12th?",
       status: "replied",
-      stage: "quote_sent",
-      quoteINR: 185000,
+      source: "vendor_profile",
       coupleEmail: "couple@gmail.com",
       weddingMonth: "2026-12",
-      createdAt: new Date(Date.now() - 2 * day).toISOString(),
+      guests: 120,
+      createdAt: new Date(now - 2 * day).toISOString(),
+      updatedAt: new Date(now - 1 * day).toISOString(),
     },
     {
       id: "inq-demo-2",
@@ -68,9 +67,9 @@ export function demoInquiries(): Inquiry[] {
       city: "Jaipur",
       message: "What does your one-day package cover, and do you travel to Jaipur?",
       status: "replied",
-      stage: "contacted",
-      followUpOn: new Date(Date.now() + 2 * day).toISOString().slice(0, 10),
-      createdAt: new Date(Date.now() - 6 * day).toISOString(),
+      source: "shortlist",
+      createdAt: new Date(now - 6 * day).toISOString(),
+      updatedAt: new Date(now - 5 * day).toISOString(),
     },
     {
       id: "inq-demo-3",
@@ -81,8 +80,11 @@ export function demoInquiries(): Inquiry[] {
       city: "Goa",
       message: "Looking for a small registry shoot, about twenty guests.",
       status: "closed",
-      stage: "lost",
-      createdAt: new Date(Date.now() - 20 * day).toISOString(),
+      closeReason: "budget",
+      source: "vendor_profile",
+      guests: 20,
+      createdAt: new Date(now - 20 * day).toISOString(),
+      updatedAt: new Date(now - 18 * day).toISOString(),
     },
     {
       id: "inq-demo-5",
@@ -93,10 +95,26 @@ export function demoInquiries(): Inquiry[] {
       date: "2026-11-28",
       city: "Udaipur",
       message: "Booked us for the Mehendi and the wedding day.",
-      status: "replied",
-      stage: "booked",
-      quoteINR: 240000,
-      createdAt: new Date(Date.now() - 14 * day).toISOString(),
+      status: "booked",
+      source: "package_book",
+      collection: "Full day",
+      createdAt: new Date(now - 14 * day).toISOString(),
+      updatedAt: new Date(now - 10 * day).toISOString(),
+    },
+    {
+      id: "inq-demo-6",
+      listingId: DEMO_LISTING_ID,
+      name: "Ishaan",
+      partner: "Diya",
+      whatsapp: "+919900011122",
+      city: "Bengaluru",
+      weddingMonth: "2027-01",
+      message: "Checking availability for a January weekend.",
+      status: "new",
+      source: "vendor_profile",
+      guests: 80,
+      createdAt: new Date(now - 0.5 * day).toISOString(),
+      updatedAt: new Date(now - 0.5 * day).toISOString(),
     },
     {
       id: "inq-demo-4",
@@ -107,10 +125,11 @@ export function demoInquiries(): Inquiry[] {
       city: "Mumbai",
       message: "Would love a quote for florals for a December wedding in Mumbai.",
       status: "new",
-      stage: "new",
+      source: "shortlist",
       coupleEmail: "couple@gmail.com",
       weddingMonth: "2026-12",
-      createdAt: new Date(Date.now() - 4 * day).toISOString(),
+      createdAt: new Date(now - 4 * day).toISOString(),
+      updatedAt: new Date(now - 4 * day).toISOString(),
     },
   ];
 }

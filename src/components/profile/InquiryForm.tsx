@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
+import type { InquirySource } from "@/data/types";
 import { getCoupleEmail } from "@/lib/couple-auth";
 import { createInquiry } from "@/lib/vendor-api";
 
@@ -12,6 +13,12 @@ type Props = {
   vendorSlug: string;
   /** If set, a "Collection" select appears above the message field. */
   packageLabels?: string[];
+  /** Prefill the collection select (e.g. from Book now on a package). */
+  defaultCollection?: string;
+  /** Which public form created the enquiry. */
+  source?: InquirySource;
+  /** Button label; defaults to "Check availability". */
+  submitLabel?: string;
   /** Single-column layout for the profile's side panel. */
   compact?: boolean;
 };
@@ -52,8 +59,16 @@ const field =
  * Check-availability form. Validates, writes one Inquiry via createInquiry,
  * then shows a success state. Labels sit over hairline fields.
  */
-export function InquiryForm({ vendorName, vendorSlug, packageLabels, compact = false }: Props) {
-  const [values, setValues] = useState<Values>(EMPTY);
+export function InquiryForm({
+  vendorName,
+  vendorSlug,
+  packageLabels,
+  defaultCollection = "",
+  source = "vendor_profile",
+  submitLabel = "Check availability",
+  compact = false,
+}: Props) {
+  const [values, setValues] = useState<Values>({ ...EMPTY, collection: defaultCollection });
   const [errors, setErrors] = useState<Partial<Record<keyof Values, string>>>({});
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -70,20 +85,17 @@ export function InquiryForm({ vendorName, vendorSlug, packageLabels, compact = f
     if (Object.keys(next).length > 0) return;
 
     setBusy(true);
-    const messageParts = [
-      values.message.trim(),
-      values.collection ? `Collection: ${values.collection}` : "",
-      values.partner.trim() ? `Partner: ${values.partner.trim()}` : "",
-      values.date ? `Date: ${values.date}` : "",
-    ].filter(Boolean);
-
     const result = await createInquiry({
       vendorSlug,
       name: values.name.trim(),
+      partner: values.partner.trim() || undefined,
       whatsapp: values.whatsapp.trim(),
       city: values.city.trim(),
-      message: messageParts.join("\n") || `Hi ${vendorName}, we would love to check availability.`,
+      date: values.date || undefined,
       weddingMonth: values.date ? values.date.slice(0, 7) : undefined,
+      collection: values.collection.trim() || undefined,
+      message: values.message.trim() || `Hi ${vendorName}, we would love to check availability.`,
+      source,
       coupleEmail: getCoupleEmail() ?? undefined,
     });
     setBusy(false);
@@ -223,7 +235,7 @@ export function InquiryForm({ vendorName, vendorSlug, packageLabels, compact = f
       ) : null}
       <div className={cn(!compact && "md:col-span-2")}>
         <Button type="submit" disabled={busy}>
-          {busy ? "Sending…" : "Check availability"}
+          {busy ? "Sending…" : submitLabel}
         </Button>
         <p className="mt-4 text-small text-mute">Free to ask, with no obligation. Replies usually within a day.</p>
       </div>

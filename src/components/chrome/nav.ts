@@ -8,7 +8,7 @@ export const NAV_LEFT = [
 export const NAV_RIGHT = [
   { href: "/honeymoon", label: "Honeymoon" },
   { href: "/blogs", label: "Journal" },
-  { href: "/contact", label: "Free planning help" },
+  { href: "/contact", label: "Contact us" },
 ] as const;
 
 export const NAV_LIST = { href: "/list-your-business", label: "List your business" } as const;

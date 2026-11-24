@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function LegacyInquiriesPage() {
-  redirect("/vendor-studio/leads");
+export default function InquiriesRedirectPage() {
+  redirect("/vendor-studio/enquiries");
 }

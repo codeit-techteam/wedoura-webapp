@@ -11,7 +11,7 @@ type Props = {
   onClose: () => void;
 };
 
-/** Full-screen menu. Serif links, then Free planning help as the button and List your business under it. */
+/** Full-screen menu. Serif links, then Contact us as the button and List your business under it. */
 export function MobileMenu({ open, onClose }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +68,7 @@ export function MobileMenu({ open, onClose }: Props) {
           onClick={onClose}
           className="inline-flex min-h-12 w-full items-center justify-center bg-ink px-6 font-sans text-button font-medium tracking-button text-ivory uppercase"
         >
-          Free planning help
+          Contact us
         </Link>
         <Link
           href={NAV_LIST.href}

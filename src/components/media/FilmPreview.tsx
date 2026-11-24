@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import type { Film } from "@/data/types";
 import { cn } from "@/lib/cn";
 import { viewer } from "@/lib/motion";
+import { usePageScrollLock } from "@/lib/scroll-lock";
 
 type Props = {
   film: Film;
@@ -46,18 +47,15 @@ export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
     }
   }, [inView, reduce, open]);
 
+  usePageScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
     document.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
   const ratio = `${film.poster.width} / ${film.poster.height}`;
@@ -115,6 +113,7 @@ export function FilmPreview({ film, sizes, eyebrow, className }: Props) {
             role="dialog"
             aria-modal="true"
             aria-label={`${film.title} film`}
+            data-lenis-prevent
             className="fixed inset-0 z-50 flex flex-col bg-ink text-white"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

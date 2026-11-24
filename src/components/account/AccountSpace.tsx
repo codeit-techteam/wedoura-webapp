@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Wordmark } from "@/components/chrome/Wordmark";
 import { Photo } from "@/components/media/Photo";
 import { Button } from "@/components/ui/Button";
-import type { InquiryStage, VendorSummary } from "@/data/types";
+import type { VendorSummary } from "@/data/types";
 import {
   coupleLogout,
   markCoupleNotificationsRead,
@@ -15,7 +15,8 @@ import {
   useCoupleHydrated,
 } from "@/lib/couple-auth";
 import { cn } from "@/lib/cn";
-import { formatINR, formatPrice } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
+import { INQUIRY_STATUS_LABEL, inquiryWeddingLabel } from "@/lib/inquiry";
 import { useSavedVendors, toggleSaved } from "@/lib/saved";
 import { listCoupleInquiries, type CoupleInquiryView } from "@/lib/vendor-api";
 
@@ -29,14 +30,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "details", label: "Details" },
   { id: "notify", label: "Alerts" },
 ];
-
-const STAGE_LABEL: Record<InquiryStage, string> = {
-  new: "New",
-  contacted: "Contacted",
-  quote_sent: "Quote sent",
-  booked: "Booked",
-  lost: "Closed",
-};
 
 function monthLabel(value: string) {
   if (!value) return "—";
@@ -355,46 +348,41 @@ function Enquiries({ items }: { items: CoupleInquiryView[] }) {
     return (
       <div>
         <h1 className="font-serif text-h2">Enquiries</h1>
-        <p className="mt-4 text-mute">When you enquire with a vendor, the stage and quote appear here. Replies stay on WhatsApp.</p>
+        <p className="mt-4 text-mute">
+          When you enquire with a vendor, the status appears here. Replies stay on WhatsApp.
+        </p>
       </div>
     );
   }
   return (
     <div>
       <h1 className="font-serif text-h2">Enquiries</h1>
-      <p className="mt-3 text-mute">Stage and quote from each Inquiry. No in-app chat.</p>
+      <p className="mt-3 text-mute">Status from each enquiry. No in-app chat.</p>
       <ul className="mt-8 grid gap-4">
-        {items.map((inq) => {
-          const stage = (inq.stage ?? "new") as InquiryStage;
-          return (
-            <li key={inq.id} className="acct-card">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-serif text-h3">
-                    {inq.vendorSlug ? (
-                      <Link href={`/vendors/${inq.vendorSlug}`} className="link-draw">
-                        {inq.vendorName ?? "Vendor"}
-                      </Link>
-                    ) : (
-                      inq.vendorName ?? "Vendor"
-                    )}
-                  </p>
-                  <p className="mt-2 text-small text-mute">
-                    {inq.city}
-                    {inq.weddingMonth ? ` · ${monthLabel(inq.weddingMonth)}` : ""}
-                  </p>
-                </div>
-                <span className="acct-pill">{STAGE_LABEL[stage]}</span>
-              </div>
-              <p className="mt-4 max-w-prose text-mute">{inq.message}</p>
-              {inq.quoteINR != null ? (
-                <p className="mt-4 font-sans text-body font-medium text-gold-deep">
-                  Quote {formatINR(inq.quoteINR)}
+        {items.map((inq) => (
+          <li key={inq.id} className="acct-card">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-serif text-h3">
+                  {inq.vendorSlug ? (
+                    <Link href={`/vendors/${inq.vendorSlug}`} className="link-draw">
+                      {inq.vendorName ?? "Vendor"}
+                    </Link>
+                  ) : (
+                    inq.vendorName ?? "Vendor"
+                  )}
                 </p>
-              ) : null}
-            </li>
-          );
-        })}
+                <p className="mt-2 text-small text-mute">
+                  {[inq.city, inquiryWeddingLabel(inq) !== "—" ? inquiryWeddingLabel(inq) : null]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              </div>
+              <span className="acct-pill">{INQUIRY_STATUS_LABEL[inq.status]}</span>
+            </div>
+            <p className="mt-4 max-w-prose text-mute">{inq.message}</p>
+          </li>
+        ))}
       </ul>
     </div>
   );

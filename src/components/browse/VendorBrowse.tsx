@@ -98,9 +98,9 @@ export async function VendorBrowse({
     lede = intro ?? "Hand-picked photographers, planners, venues and more — with real work and open prices.";
   } else if (!activeCategorySlug) {
     headingLines = [
-      <>
+      <span key="headline">
         Find your <em>vendors</em>
-      </>,
+      </span>,
     ];
     lede = "Hand-picked photographers, planners, venues and more — with real work and open prices.";
   } else {
@@ -109,16 +109,16 @@ export async function VendorBrowse({
     const cityObj = allCitiesData.find((c) => c.slug === activeCitySlug);
     if (activeCitySlug && cityObj) {
       headingLines = [
-        <>
+        <span key="headline">
           {catName} in <em>{cityObj.name}</em>
-        </>,
+        </span>,
       ];
       lede = `Based in or serving ${cityObj.name}.`;
     } else {
       headingLines = [
-        <>
+        <span key="headline">
           {catName} <em>across India</em>
-        </>,
+        </span>,
       ];
       lede = activeCategory?.description ?? "Hand-picked vendors with real work and open prices.";
     }
@@ -322,31 +322,27 @@ export async function VendorBrowse({
             /* ---- List view ---- */
             <ul className="flex flex-col divide-y divide-line">
               {result.items.map((vendor, i) => (
-                <>
-                  <li key={vendor.slug} className="py-9 first:pt-0">
-                    <VendorListCard vendor={vendor} index={i} priority={i < 3} />
-                  </li>
+                <li key={vendor.slug} className="py-9 first:pt-0">
+                  <VendorListCard vendor={vendor} index={i} priority={i < 3} />
                   {/* Editorial interrupter after item 3 (if ≥4 results) */}
-                  {i === 2 && result.total >= 4 && (
-                    <li key="interrupter" className="py-10">
-                      <div className="border border-line bg-ivory px-8 py-10 text-center">
-                        <p className="label text-gold-deep uppercase tracking-widest">Free planning help</p>
-                        <p className="mt-3 font-serif text-h3 text-ink">
-                          Not sure where to <em>start?</em>
-                        </p>
-                        <p className="mt-3 max-w-xs mx-auto text-body text-mute">
-                          Tell us about your wedding and we&rsquo;ll put together a free shortlist just for you.
-                        </p>
-                        <Link
-                          href="/#plan"
-                          className="mt-6 inline-flex min-h-11 items-center justify-center border border-ink px-7 font-sans text-button font-medium tracking-button uppercase text-ink transition-chrome hover:bg-ink hover:text-ivory tap"
-                        >
-                          Get my free shortlist
-                        </Link>
-                      </div>
-                    </li>
-                  )}
-                </>
+                  {i === 2 && result.total >= 4 ? (
+                    <div className="mt-10 border border-line bg-ivory px-8 py-10 text-center">
+                      <p className="label text-gold-deep uppercase tracking-widest">Free planning help</p>
+                      <p className="mt-3 font-serif text-h3 text-ink">
+                        Not sure where to <em>start?</em>
+                      </p>
+                      <p className="mt-3 mx-auto max-w-xs text-body text-mute">
+                        Tell us about your wedding and we&rsquo;ll put together a free shortlist just for you.
+                      </p>
+                      <Link
+                        href="/#plan"
+                        className="mt-6 inline-flex min-h-11 items-center justify-center border border-ink px-7 font-sans text-button font-medium tracking-button uppercase text-ink transition-chrome hover:bg-ink hover:text-ivory tap"
+                      >
+                        Get my free shortlist
+                      </Link>
+                    </div>
+                  ) : null}
+                </li>
               ))}
             </ul>
           )}

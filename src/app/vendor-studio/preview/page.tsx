@@ -12,8 +12,13 @@ export default function PreviewRedirectPage() {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (listing?.slug) router.replace(`/vendors/${listing.slug}`);
-    else router.replace("/vendor-studio");
+    if (listing?.slug) {
+      const path =
+        listing.venue || listing.category === "venues"
+          ? `/venues/${listing.slug}`
+          : `/vendors/${listing.slug}`;
+      router.replace(path);
+    } else router.replace("/vendor-studio");
   }, [hydrated, listing, router]);
 
   return <ScreenSkeleton />;

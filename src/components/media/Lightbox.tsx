@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { usePageScrollLock } from "@/lib/scroll-lock";
 
 export type LightboxSlide = {
   src: string;
@@ -34,6 +35,8 @@ export function Lightbox({ slides, index, onClose, onIndex }: Props) {
     [index, onIndex, slides.length],
   );
 
+  usePageScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -42,13 +45,8 @@ export function Lightbox({ slides, index, onClose, onIndex }: Props) {
       if (event.key === "ArrowLeft") step(-1);
     };
     document.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     closeRef.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose, step]);
 
   if (!open || index === null) return null;
@@ -59,6 +57,7 @@ export function Lightbox({ slides, index, onClose, onIndex }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label="Photo viewer"
+      data-lenis-prevent
       className="fixed inset-0 z-50 flex flex-col bg-ink/97 text-ivory"
       onPointerDown={(event) => {
         startX.current = event.clientX;

@@ -42,7 +42,8 @@ export function BottomSheet({ open, onClose, title, children }: Props) {
             role="dialog"
             aria-modal="true"
             aria-label={title}
-            className="relative max-h-[85dvh] w-full overflow-y-auto bg-white px-gutter pt-5 pb-bottombar"
+            data-lenis-prevent
+            className="relative max-h-[85dvh] w-full overflow-y-auto overscroll-contain bg-white px-gutter pt-5 pb-bottombar"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

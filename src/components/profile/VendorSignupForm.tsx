@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { FormSelect } from "@/components/ui/FormSelect";
 import { MultiStepForm } from "@/components/ui/MultiStepForm";
 import type { CategorySlug } from "@/data/types";
 import { cn } from "@/lib/cn";
@@ -254,7 +255,11 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
       onExit={() => setStarted(false)}
       exitLabel="Save & exit"
       review={preview}
-      onBack={step > 0 ? () => setStep((s) => s - 1) : undefined}
+      onBack={() => {
+        setErrors({});
+        if (step === 0) setStarted(false);
+        else setStep((s) => s - 1);
+      }}
       onContinue={() => {
         if (step < 2) {
           if (validateStep(step)) setStep((s) => s + 1);
@@ -282,28 +287,24 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
             <label htmlFor="su-category" className="label text-mute">
               Category
             </label>
-            <select id="su-category" value={values.category} onChange={set("category")} className={cn(field, "mt-3 cursor-pointer appearance-none")}>
-              <option value="">Choose one</option>
-              {categories.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+            <FormSelect
+              id="su-category"
+              value={values.category}
+              options={categories}
+              onChange={(category) => setValues((current) => ({ ...current, category }))}
+            />
             {error("category")}
           </div>
           <div>
             <label htmlFor="su-city" className="label text-mute">
               Base city
             </label>
-            <select id="su-city" value={values.city} onChange={set("city")} className={cn(field, "mt-3 cursor-pointer appearance-none")}>
-              <option value="">Choose one</option>
-              {cities.map((c) => (
-                <option key={c.value} value={c.value}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+            <FormSelect
+              id="su-city"
+              value={values.city}
+              options={cities}
+              onChange={(city) => setValues((current) => ({ ...current, city }))}
+            />
             {error("city")}
           </div>
           <div>
