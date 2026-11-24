@@ -1,60 +1,102 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Wordmark } from "@/components/chrome/Wordmark";
+import {
+  Camera,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Settings,
+  UserRound,
+  X,
+} from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { StudioSaveBar, SaveState, useDirty } from "@/components/studio/autosave";
+import { checklistProgress, computeChecklist } from "@/components/studio/checklist";
 import { StatusBadge } from "@/components/studio/status";
-import { useDirty } from "@/components/studio/autosave";
-import { Icon } from "@/components/ui/Icon";
 import type { VendorAccount, VendorListing } from "@/data/types";
 import { cn } from "@/lib/cn";
-import { useFocusTrap } from "@/lib/focus-trap";
-import { EASE } from "@/lib/motion";
-import { logout } from "@/lib/vendor-api";
+import { logout, useMyInquiries } from "@/lib/vendor-api";
 
-const NAV: { group: string; items: { href: string; label: string; when?: (listing: VendorListing) => boolean }[] }[] = [
-  {
-    group: "Studio",
-    items: [{ href: "/vendor-studio", label: "Overview" }],
-  },
-  {
-    group: "Profile",
-    items: [
-      { href: "/vendor-studio/business", label: "Business details" },
-      { href: "/vendor-studio/category", label: "Category & services" },
-      { href: "/vendor-studio/locations", label: "Locations" },
-      { href: "/vendor-studio/contact", label: "Contact" },
-    ],
-  },
-  {
-    group: "Media",
-    items: [
-      { href: "/vendor-studio/photos", label: "Photos" },
-      { href: "/vendor-studio/covers", label: "Cover & card photos" },
-      { href: "/vendor-studio/albums", label: "Albums" },
-      { href: "/vendor-studio/films", label: "Films" },
-      { href: "/vendor-studio/tour", label: "360 tour", when: (l) => l.category === "venues" },
-    ],
-  },
-  {
-    group: "Business",
-    items: [
-      { href: "/vendor-studio/pricing", label: "Pricing" },
-      { href: "/vendor-studio/faqs", label: "FAQs" },
-      { href: "/vendor-studio/inquiries", label: "Inquiries" },
-      { href: "/vendor-studio/submit", label: "Submit for review" },
-      { href: "/vendor-studio/account", label: "Account" },
-    ],
-  },
+type NavItem = {
+  href: string;
+  label: string;
+  short: string;
+  icon: typeof LayoutDashboard;
+  badge?: "enquiries";
+  main?: boolean;
+};
+
+const NAV: NavItem[] = [
+  { href: "/vendor-studio", label: "Overview", short: "Home", icon: LayoutDashboard, main: true },
+  { href: "/vendor-studio/enquiries", label: "Enquiries", short: "Inbox", icon: MessageSquare, badge: "enquiries", main: true },
+  { href: "/vendor-studio/profile", label: "Profile", short: "Profile", icon: UserRound, main: true },
+  { href: "/vendor-studio/media", label: "Photos and videos", short: "Media", icon: Camera, main: true },
+  { href: "/vendor-studio/weddings", label: "Real weddings", short: "Stories", icon: Heart, main: true },
+  { href: "/vendor-studio/settings", label: "Settings", short: "Settings", icon: Settings },
 ];
 
-const LEAVE_MESSAGE = "You have unsaved changes. Leave this screen anyway?";
+const PAGE_TITLE: { match: (path: string) => boolean; title: string }[] = [
+  { match: (p) => p === "/vendor-studio", title: "Overview" },
+  { match: (p) => p.startsWith("/vendor-studio/enquiries"), title: "Enquiries" },
+  { match: (p) => p.startsWith("/vendor-studio/profile"), title: "Profile" },
+  { match: (p) => p.startsWith("/vendor-studio/media"), title: "Photos and videos" },
+  { match: (p) => p.startsWith("/vendor-studio/weddings"), title: "Real weddings" },
+  { match: (p) => p.startsWith("/vendor-studio/settings"), title: "Settings" },
+];
+
+function pageTitle(pathname: string): string {
+  return PAGE_TITLE.find((row) => row.match(pathname))?.title ?? "Dashboard";
+}
+
+function isActivePath(pathname: string, href: string) {
+  return href === "/vendor-studio" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function StudioNavLinks({
+  pathname,
+  dirty,
+  newEnquiries,
+  onNavigate,
+}: {
+  pathname: string;
+  dirty: boolean;
+  newEnquiries: number;
+  onNavigate?: () => void;
+}) {
+  return (
+    <>
+      {NAV.map((item) => {
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn("studio-nav-link", isActivePath(pathname, item.href) && "on")}
+            onClick={(e) => {
+              if (dirty && item.href !== pathname && !window.confirm("You have unsaved changes. Leave this page?")) {
+                e.preventDefault();
+                return;
+              }
+              onNavigate?.();
+            }}
+          >
+            <Icon className="size-[1.125rem] shrink-0" strokeWidth={1.5} aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+            {item.badge === "enquiries" && newEnquiries > 0 ? <span className="studio-bd">{newEnquiries}</span> : null}
+          </Link>
+        );
+      })}
+    </>
+  );
+}
 
 /**
- * The portal chrome: a dense left sidebar on desktop, a top bar with a
- * slide-in menu on phones. Same tokens as the public site, calmer.
+ * Vendor dashboard chrome: white sidebar, content top bar, drawer under lg,
+ * bottom tabs under sm. Completeness and logout live in the sidebar footer.
  */
 export function StudioShell({
   account,
@@ -67,173 +109,145 @@ export function StudioShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { dirty, setDirty } = useDirty();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(drawerRef, menuOpen);
-
-  useEffect(() => setMenuOpen(false), [pathname]);
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
-
-  // The leave-warning for in-portal navigation; autosave keeps the window small.
-  const guard = (e: React.MouseEvent) => {
-    if (dirty && !window.confirm(LEAVE_MESSAGE)) {
-      e.preventDefault();
-    } else {
-      setDirty(false);
-    }
-  };
+  const inquiries = useMyInquiries();
+  const { dirty, status, error } = useDirty();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const newEnquiries = inquiries.filter((i) => i.status === "new").length;
+  const items = listing ? computeChecklist(listing) : [];
+  const { done, total } = checklistProgress(items);
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
+  const avatar = listing?.avatar ?? listing?.cardPhotos[0];
+  const displayName = listing?.name ?? account.contactName;
+  const initial = displayName.slice(0, 1).toUpperCase();
+  const publicHref = listing?.slug
+    ? listing.venue || listing.category === "venues"
+      ? `/venues/${listing.slug}`
+      : `/vendors/${listing.slug}`
+    : "/vendors";
+  const title = pageTitle(pathname);
 
   const signOut = () => {
-    if (dirty && !window.confirm(LEAVE_MESSAGE)) return;
-    void logout().then(() => router.push("/"));
+    void logout().then(() => router.push("/vendor/login"));
   };
 
-  const nav = (onNavigate?: () => void) => (
-    <nav aria-label="Studio sections" className="flex flex-1 flex-col gap-7 overflow-y-auto py-6">
-      {NAV.map((section) => (
-        <div key={section.group}>
-          <p className="label px-5 text-mute/70">{section.group}</p>
-          <ul className="mt-2.5">
-            {section.items
-              .filter((item) => !item.when || (listing !== null && item.when(listing)))
-              .map((item) => {
-              const active = pathname === item.href;
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    onClick={(e) => {
-                      guard(e);
-                      if (!e.defaultPrevented) onNavigate?.();
-                    }}
-                    className={cn(
-                      "tap flex items-center border-l-2 px-5 py-2.5 text-label-lg transition-chrome",
-                      active
-                        ? "border-ink bg-ivory font-medium text-ink"
-                        : "border-transparent text-mute hover:border-line hover:bg-ivory/60 hover:text-ink",
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </nav>
-  );
+  const closeDrawer = () => setDrawerOpen(false);
 
-  const header = (
-    <div className="border-b border-line px-5 py-5">
-      <Wordmark size="menu" />
-      <p className="mt-4 truncate font-serif text-h3">{listing?.name ?? account.contactName}</p>
-      {listing && <StatusBadge status={listing.status} className="mt-2" />}
+  const who = (
+    <div className="studio-who">
+      {avatar ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={avatar.src} alt="" className="studio-avatar" />
+      ) : (
+        <span className="studio-avatar mono" aria-hidden="true">
+          {initial}
+        </span>
+      )}
+      <span className="sname">{displayName}</span>
     </div>
   );
 
-  const footer = (
-    <div className="border-t border-line p-5">
-      <Link
-        href="/vendor-studio/preview"
-        onClick={guard}
-        className="label tap flex items-center justify-center border border-ink px-4 py-2.5 text-ink transition-chrome hover:bg-ink hover:text-white"
-      >
-        View preview
-      </Link>
-      <button
-        type="button"
-        onClick={signOut}
-        className="link-draw tap mt-4 text-small text-mute hover:text-ink"
-      >
-        Sign out
+  const sideFooter = (
+    <div className="studio-side-foot">
+      <div className="studio-pc">
+        <div className="flex items-baseline justify-between gap-2">
+          <span>Profile completeness</span>
+          <b>{pct}%</b>
+        </div>
+        <div className="bar" aria-hidden="true">
+          <i style={{ width: `${pct}%` }} />
+        </div>
+      </div>
+      <button type="button" onClick={signOut} className="studio-nav-link studio-logout">
+        <LogOut className="size-[1.125rem] shrink-0" strokeWidth={1.5} aria-hidden="true" />
+        <span>Log out</span>
       </button>
     </div>
   );
 
   return (
-    <div className="flex min-h-dvh bg-ivory/60">
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-line bg-white lg:flex">
-        {header}
-        {nav()}
-        {footer}
+    <div className="studio-app">
+      <aside className="studio-side" aria-label="Dashboard sidebar">
+        <Link href="/" className="studio-mark" aria-label="Wedoura, home">
+          Wedoura
+        </Link>
+        {who}
+        <nav className="studio-nav" aria-label="Dashboard">
+          <StudioNavLinks pathname={pathname} dirty={dirty} newEnquiries={newEnquiries} />
+        </nav>
+        {sideFooter}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobile top bar */}
-        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-line bg-white px-gutter py-2.5 lg:hidden">
-          <p className="min-w-0 truncate font-serif text-h3">{listing?.name ?? account.contactName}</p>
-          <div className="flex shrink-0 items-center gap-3">
-            {listing && <StatusBadge status={listing.status} className="hidden sm:inline-flex" />}
+      <div className="studio-stage">
+        <header className="studio-top">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
-              aria-haspopup="dialog"
-              aria-expanded={menuOpen}
-              className="tap inline-flex items-center gap-2 text-label-lg font-medium text-ink"
+              className="studio-menu-btn"
+              aria-label={drawerOpen ? "Close menu" : "Open menu"}
+              aria-expanded={drawerOpen}
+              onClick={() => setDrawerOpen((o) => !o)}
             >
-              <Icon name="menu" size={20} />
-              Menu
+              {drawerOpen ? <X className="size-5" strokeWidth={1.5} /> : <Menu className="size-5" strokeWidth={1.5} />}
             </button>
+            <h1 className="studio-page-title truncate">{title}</h1>
+          </div>
+          <div className="studio-top-actions">
+            {listing ? <StatusBadge status={listing.status} /> : null}
+            <Link href={publicHref} target="_blank" rel="noopener noreferrer" className="studio-top-link">
+              View public profile ↗
+            </Link>
+            <SaveState
+              status={dirty && status === "idle" ? "saving" : status}
+              error={error}
+              className="hidden sm:inline-flex"
+            />
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 px-gutter py-8 lg:px-10 lg:py-10">{children}</main>
+        <main className="studio-main" id="view">
+          {children}
+        </main>
       </div>
 
-      {/* Mobile slide-in menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            className="fixed inset-0 z-50 flex lg:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: EASE }}
-          >
-            <motion.div
-              ref={drawerRef}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Studio menu"
-              className="relative flex h-full w-80 max-w-[85vw] flex-col bg-white"
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ duration: 0.35, ease: EASE }}
+      {drawerOpen ? (
+        <div className="studio-drawer" role="dialog" aria-modal="true" aria-label="Menu">
+          <button type="button" className="studio-drawer-scrim" aria-label="Close menu" onClick={closeDrawer} />
+          <div className="studio-drawer-panel">
+            <Link href="/" className="studio-mark" aria-label="Wedoura, home" onClick={closeDrawer}>
+              Wedoura
+            </Link>
+            {who}
+            <nav className="studio-nav" aria-label="Dashboard">
+              <StudioNavLinks pathname={pathname} dirty={dirty} newEnquiries={newEnquiries} onNavigate={closeDrawer} />
+            </nav>
+            {sideFooter}
+          </div>
+        </div>
+      ) : null}
+
+      <nav className="studio-bar" aria-label="Dashboard">
+        {NAV.filter((item) => item.main).map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(isActivePath(pathname, item.href) && "on")}
+              onClick={(e) => {
+                if (dirty && item.href !== pathname && !window.confirm("You have unsaved changes. Leave this page?")) {
+                  e.preventDefault();
+                }
+              }}
             >
-              <div className="border-b border-line px-5 py-4">
-                <div className="flex items-center justify-between">
-                  <Wordmark size="menu" />
-                  <button
-                    type="button"
-                    onClick={() => setMenuOpen(false)}
-                    aria-label="Close menu"
-                    className="tap inline-flex items-center justify-center text-ink"
-                  >
-                    <Icon name="close" size={22} />
-                  </button>
-                </div>
-                <p className="mt-3 truncate font-serif text-h3">{listing?.name ?? account.contactName}</p>
-                {listing && <StatusBadge status={listing.status} className="mt-2" />}
-              </div>
-              {nav(() => setMenuOpen(false))}
-              {footer}
-            </motion.div>
-            <button type="button" aria-label="Close menu" onClick={() => setMenuOpen(false)} className="flex-1 bg-ink/50" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <Icon className="size-5" strokeWidth={1.5} aria-hidden="true" />
+              <span>{item.short}</span>
+              {item.badge === "enquiries" && newEnquiries > 0 ? <span className="studio-bd">{newEnquiries}</span> : null}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <StudioSaveBar />
     </div>
   );
 }

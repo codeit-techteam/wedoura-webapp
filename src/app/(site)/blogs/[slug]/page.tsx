@@ -17,7 +17,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { cn } from "@/lib/cn";
 import { getArticle, listArticles } from "@/lib/api";
 import { articleSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 const longDate = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
@@ -37,12 +37,12 @@ export async function generateMetadata({ params }: PageProps<"/blogs/[slug]">): 
   const { slug } = await params;
   const post = await getArticle(slug);
   if (!post) return { title: "Article" };
-  return {
+  return pageMeta({
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: absoluteUrl(`/blogs/${post.slug}`) },
-    openGraph: { images: [{ url: absoluteUrl(post.cover.src) }] },
-  };
+    path: `/blogs/${post.slug}`,
+    image: post.cover.src,
+  });
 }
 
 export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]">) {
@@ -149,9 +149,9 @@ export default async function BlogPostPage({ params }: PageProps<"/blogs/[slug]"
               as="h2"
               className="mt-3.5 font-serif text-h2"
               lines={[
-                <>
+                <span key="headline">
                   Keep <em>reading</em>
-                </>,
+                </span>,
               ]}
             />
             <ul className="mt-10 grid grid-cols-1 gap-2 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">

@@ -12,7 +12,7 @@ import { Accordion } from "@/components/ui/Accordion";
 import type { Experience } from "@/data/types";
 import { getExperience, getHoneymoonPackage, getPhoto, getVendor, listHoneymoonPackages } from "@/lib/api";
 import { formatINR } from "@/lib/format";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const packages = await listHoneymoonPackages();
@@ -22,12 +22,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/honeymoon/packages/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const pkg = await getHoneymoonPackage(slug);
-  if (!pkg) return {};
-  return {
+  if (!pkg) return { title: "Honeymoon package", robots: { index: false, follow: false } };
+  return pageMeta({
     title: `${pkg.name} — honeymoon package`,
     description: pkg.summary,
-    alternates: { canonical: absoluteUrl(`/honeymoon/packages/${pkg.slug}`) },
-  };
+    path: `/honeymoon/packages/${pkg.slug}`,
+    image: pkg.cover.src,
+  });
 }
 
 export default async function HoneymoonPackagePage({ params }: PageProps<"/honeymoon/packages/[slug]">) {

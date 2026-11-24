@@ -32,8 +32,15 @@ export function LoginShell({ imageSrc, imageAlt, credit, topRight, children }: P
         )}
       </header>
       <main className="auth-wrap">
-        <figure className="auth-fig" aria-hidden={imageAlt ? undefined : true}>
-          <Image src={imageSrc} alt={imageAlt} fill sizes="(min-width: 768px) 50vw, 100vw" priority quality={75} />
+        <figure className="auth-fig relative" aria-hidden={imageAlt ? undefined : true}>
+          <Image
+            src={imageSrc}
+            alt={imageAlt || ""}
+            fill
+            sizes="(min-width: 768px) 50vw, 100vw"
+            priority
+            quality={75}
+          />
         </figure>
         <section className="auth-col">
           {children}

@@ -21,14 +21,17 @@ import {
   listPartners,
   listWeddings,
 } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
+  ...pageMeta({
+    title: "Luxury wedding vendors, venues and honeymoons in India",
+    description:
+      "Hand-picked photographers, venues, planners, makeup artists and more across India. Prices shown openly. Connect directly with the vendors you love.",
+    path: "/",
+  }),
   title: { absolute: "Wedoura · Luxury wedding vendors, venues and honeymoons in India" },
-  description:
-    "Hand-picked photographers, venues, planners, makeup artists and more across India. Prices shown openly. Connect directly with the vendors you love.",
-  alternates: { canonical: absoluteUrl("/") },
 };
 
 export default async function HomePage() {

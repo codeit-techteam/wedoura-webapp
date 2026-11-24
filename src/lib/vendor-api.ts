@@ -19,11 +19,14 @@ import { emptyListing, readDb, resetDb, useHydrated, useMockDb, writeDb, type Mo
 import type {
   CategorySlug,
   Inquiry,
+  InquiryCloseReason,
+  InquirySource,
   InquiryStatus,
   VendorAccount,
   VendorApplication,
   VendorListing,
 } from "@/data/types";
+import { normalizeInquiry } from "@/lib/inquiry";
 
 /* ------------------------------------------------------------- helpers */
 
@@ -69,7 +72,9 @@ export function useMyInquiries(): Inquiry[] {
   const db = useMockDb();
   const account = db.accounts.find((a) => a.id === db.sessionAccountId);
   const inquiries = account?.listingId ? db.inquiries.filter((i) => i.listingId === account.listingId) : [];
-  return inquiries.slice().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  return inquiries
+    .map((i) => normalizeInquiry(i as never))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 /** Store-published listings with actual content: what the public overlay
@@ -206,15 +211,37 @@ export async function getMyListing(): Promise<VendorListing | null> {
 
 /** PATCH /me/listing. While the listing is published, newly added photos and
  *  films go into pendingMediaIds: text edits go live at once, new media stays
- *  hidden publicly until the admin approves it. */
+ *  hidden publicly until the admin approves it. Interview edits go to
+ *  pendingInterview the same way. */
 export async function updateMyListing(patch: Partial<VendorListing>): Promise<Result<VendorListing>> {
   const db = readDb();
   const listing = myListing(db);
   if (!listing) return { ok: false, error: "No listing on this account yet." };
   // Status and admin flags move only through their own endpoints.
-  const { status: _s, featured: _f, featuredOrder: _o, verified: _v, id: _i, accountId: _a, reviewNote: _r, pendingMediaIds: _p, ...safe } = patch;
-  void _s; void _f; void _o; void _v; void _i; void _a; void _r; void _p;
+  const {
+    status: _s,
+    featured: _f,
+    featuredOrder: _o,
+    verified: _v,
+    id: _i,
+    accountId: _a,
+    reviewNote: _r,
+    pendingMediaIds: _p,
+    pendingInterview: _pi,
+    interview: interviewPatch,
+    ...safe
+  } = patch;
+  void _s; void _f; void _o; void _v; void _i; void _a; void _r; void _p; void _pi;
   const next: VendorListing = { ...listing, ...safe };
+  if (interviewPatch !== undefined) {
+    if (listing.status === "published") {
+      next.interview = listing.interview;
+      next.pendingInterview = interviewPatch || undefined;
+    } else {
+      next.interview = interviewPatch || undefined;
+      next.pendingInterview = undefined;
+    }
+  }
   if (listing.status === "published") {
     const before = listingMediaIds(listing);
     const after = listingMediaIds(next);
@@ -246,39 +273,58 @@ export async function submitListingForReview(): Promise<Result<VendorListing>> {
 export async function listMyInquiries(): Promise<Inquiry[]> {
   const db = readDb();
   const listing = myListing(db);
-  return listing ? db.inquiries.filter((i) => i.listingId === listing.id) : [];
+  return listing
+    ? db.inquiries
+        .filter((i) => i.listingId === listing.id)
+        .map((i) => normalizeInquiry(i as never))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    : [];
 }
 
-/** POST /inquiries — a couple enquiry against one listing (by slug).
- *  Resolves listingId from the mock store (sample rows are always seeded). */
-export async function createInquiry(input: {
+export type CreateInquiryInput = {
   vendorSlug: string;
   name: string;
   whatsapp: string;
   city: string;
   message: string;
+  source: InquirySource;
+  partner?: string;
+  email?: string;
+  date?: string;
   weddingMonth?: string;
   guests?: number;
+  budget?: string;
+  collection?: string;
   coupleEmail?: string;
-}): Promise<Result<Inquiry>> {
+};
+
+/** POST /inquiries — couple enquiry from a public form (profile, venue, shortlist, book now). */
+export async function createInquiry(input: CreateInquiryInput): Promise<Result<Inquiry>> {
   const db = readDb();
   const listing = db.listings.find((l) => l.slug === input.vendorSlug);
   const listingId = listing?.id;
   if (!listingId) return { ok: false, error: "That vendor is not available." };
 
+  const now = new Date().toISOString();
   const inquiry: Inquiry = {
     id: id(),
     listingId,
     name: input.name.trim(),
+    partner: input.partner?.trim() || undefined,
     whatsapp: input.whatsapp.trim(),
+    email: input.email?.trim() || undefined,
     city: input.city.trim(),
     message: input.message.trim(),
+    date: input.date || undefined,
     weddingMonth: input.weddingMonth,
     guests: input.guests,
+    budget: input.budget?.trim() || undefined,
+    collection: input.collection?.trim() || undefined,
+    source: input.source,
     coupleEmail: input.coupleEmail?.trim().toLowerCase() || undefined,
     status: "new",
-    stage: "new",
-    createdAt: new Date().toISOString(),
+    createdAt: now,
+    updatedAt: now,
   };
   writeDb({ ...db, inquiries: [...db.inquiries, inquiry] });
   return { ok: true, value: inquiry };
@@ -303,25 +349,43 @@ export async function listCoupleInquiries(emailRaw: string): Promise<CoupleInqui
     .filter((i) => i.coupleEmail?.toLowerCase() === email)
     .map((i) => {
       const listing = db.listings.find((l) => l.id === i.listingId);
+      const inquiry = normalizeInquiry(i as never);
       return {
-        ...i,
+        ...inquiry,
         vendorName: listing?.name ?? "Vendor",
         vendorSlug: listing?.status === "published" ? listing.slug : listing?.slug,
       };
     });
 }
 
-/** PATCH /me/inquiries/{id} */
-export async function setInquiryStatus(id: string, status: InquiryStatus): Promise<Result<Inquiry>> {
+/** PATCH /me/inquiries/{id} — status, close reason, private note. */
+export async function updateInquiry(
+  inquiryId: string,
+  patch: Partial<Pick<Inquiry, "status" | "closeReason" | "notes">>,
+): Promise<Result<Inquiry>> {
   const db = readDb();
   const listing = myListing(db);
-  const inquiry = db.inquiries.find((i) => i.id === id);
+  const inquiry = db.inquiries.find((i) => i.id === inquiryId);
   if (!listing || !inquiry || inquiry.listingId !== listing.id) {
-    return { ok: false, error: "No such inquiry on this account." };
+    return { ok: false, error: "No such enquiry on this account." };
   }
-  const next = { ...inquiry, status };
-  writeDb({ ...db, inquiries: db.inquiries.map((i) => (i.id === id ? next : i)) });
+  const status = patch.status ?? inquiry.status;
+  const closeReason: InquiryCloseReason | undefined =
+    status === "closed" ? (patch.closeReason ?? inquiry.closeReason) : undefined;
+  const next: Inquiry = normalizeInquiry({
+    ...inquiry,
+    ...patch,
+    status,
+    closeReason,
+    updatedAt: new Date().toISOString(),
+  });
+  writeDb({ ...db, inquiries: db.inquiries.map((i) => (i.id === inquiryId ? next : i)) });
   return { ok: true, value: next };
+}
+
+/** @deprecated Prefer updateInquiry({ status }). */
+export async function setInquiryStatus(id: string, status: InquiryStatus): Promise<Result<Inquiry>> {
+  return updateInquiry(id, { status });
 }
 
 /* ------------------------------------------- demo admin (/demo only) */
@@ -413,6 +477,18 @@ export async function demoApproveMedia(listingId: string): Promise<void> {
   writeDb({
     ...db,
     listings: db.listings.map((l) => (l.id === listingId ? { ...l, pendingMediaIds: [] } : l)),
+  });
+}
+
+/** POST /admin/listings/{id}/approve-interview — pending interview goes live. */
+export async function demoApproveInterview(listingId: string): Promise<void> {
+  const db = readDb();
+  writeDb({
+    ...db,
+    listings: db.listings.map((l) => {
+      if (l.id !== listingId || !l.pendingInterview) return l;
+      return { ...l, interview: l.pendingInterview, pendingInterview: undefined };
+    }),
   });
 }
 

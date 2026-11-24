@@ -103,18 +103,24 @@ export const sampleListings: VendorListing[] = [
         slug: "lake-palace-morning",
         title: "A lake-palace morning",
         location: "Udaipur",
+        date: "2024-11-18",
+        excerpt: "Pheras at sunrise, a quiet walk on the terrace, and the lake turning gold.",
         photos: [photos.p24, photos.p13, photos.p01, photos.p45, photos.p18],
       },
       {
         slug: "garden-vows",
         title: "Garden vows",
         location: "Bengaluru",
+        date: "2024-02-14",
+        excerpt: "An intimate ceremony under the trees, with soft light and no rush.",
         photos: [photos.p40, photos.p08, photos.p12, photos.p39, photos.p46],
       },
       {
         slug: "haldi-at-home",
         title: "A haldi at home",
         location: "Udaipur",
+        date: "2025-01-05",
+        excerpt: "Family, turmeric and courtyard laughter before the big day.",
         photos: [photos.p35, photos.p32, photos.p36, photos.p07],
       },
     ],
@@ -168,7 +174,12 @@ export const sampleListings: VendorListing[] = [
     },
     founder: {
       caption: "Hello from behind the camera",
+      name: "A & M",
       poster: photos.p46,
+      about: [
+        "We trained as documentary photographers before we ever covered a wedding, so we still think in sequences rather than single frames.",
+        "Two of us shoot every wedding — one close, one wide — so nothing is asked for twice. Editing stays restrained: true colour, true skin, no presets that will date.",
+      ],
     },
   },
   {

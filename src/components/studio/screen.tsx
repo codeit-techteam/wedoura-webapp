@@ -28,7 +28,11 @@ export function useListingForm<T>(pick: (listing: VendorListing) => T) {
     }
   }, [listing]);
 
-  const autosave = useListingAutosave();
+  const reseed = () => {
+    if (listing) setFormState(pickRef.current(listing));
+  };
+
+  const autosave = useListingAutosave(reseed);
 
   /** Update local state and queue the matching listing patch in one go. */
   const apply = (next: Partial<T>, patch: Partial<VendorListing>) => {

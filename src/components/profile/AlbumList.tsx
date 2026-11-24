@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Photo } from "@/components/media/Photo";
-import { PhotoViewer } from "@/components/motion/PhotoViewer";
+import { AlbumStoryViewer } from "@/components/profile/AlbumStoryViewer";
 import type { Album } from "@/data/types";
 
 type Props = { albums: Album[] };
@@ -16,33 +16,29 @@ function albumDate(iso?: string): string | undefined {
 }
 
 /**
- * Albums as large covers with title, city, date and photo count; each opens
- * its own full-screen sequence in the viewer.
+ * Wedding story covers. Opens the frame-by-frame story reader (title, lede,
+ * scrolled photographs) — not a single-image lightbox.
  */
 export function AlbumList({ albums }: Props) {
-  const [openAlbum, setOpenAlbum] = useState<number | null>(null);
-  const [index, setIndex] = useState<number | null>(null);
-  const album = openAlbum === null ? null : albums[openAlbum];
+  const [open, setOpen] = useState<number | null>(null);
+  const album = open === null ? null : albums[open];
 
   return (
     <>
-      <ul className="grid gap-x-2 gap-y-10 sm:grid-cols-2">
+      <ul className="mx-auto grid max-w-[90rem] gap-x-[clamp(1.25rem,5vw,5rem)] gap-y-10 sm:grid-cols-2">
         {albums.map((item, i) => {
           const meta = [item.location, albumDate(item.date), `${item.photos.length} photographs`]
             .filter(Boolean)
             .join(" · ");
           return (
-            <li key={item.slug}>
+            <li key={item.slug} className={i % 2 === 1 ? "sm:mt-24" : undefined}>
               <button
                 type="button"
-                onClick={() => {
-                  setOpenAlbum(i);
-                  setIndex(0);
-                }}
-                aria-label={`Open the album ${item.title}, ${item.photos.length} photographs`}
+                onClick={() => setOpen(i)}
+                aria-label={`Open the story ${item.title}, ${item.photos.length} photographs`}
                 className="group block w-full text-left outline-offset-4"
               >
-                <div className="relative aspect-4/3 overflow-hidden bg-ivory">
+                <div className="relative aspect-4/5 overflow-hidden bg-sand">
                   <Photo
                     photo={item.photos[0]}
                     mode="cover"
@@ -50,25 +46,15 @@ export function AlbumList({ albums }: Props) {
                     className="transition-transform duration-1200 ease-wedoura group-hover:scale-104"
                   />
                 </div>
-                <p className="mt-5 font-serif text-h3">{item.title}</p>
-                <p className="mt-1 text-small text-mute">{meta}</p>
+                <p className="mt-5 font-serif text-[1.875rem] leading-tight text-ink">{item.title}</p>
+                <p className="mt-1 label text-mute">{meta}</p>
+                {item.excerpt ? <p className="mt-2 max-w-[36em] text-small text-mute">{item.excerpt}</p> : null}
               </button>
             </li>
           );
         })}
       </ul>
-      {album && (
-        <PhotoViewer
-          photos={album.photos}
-          index={index}
-          onChange={setIndex}
-          onClose={() => {
-            setIndex(null);
-            setOpenAlbum(null);
-          }}
-          layoutPrefix={`album-${album.slug}`}
-        />
-      )}
+      {album ? <AlbumStoryViewer album={album} onClose={() => setOpen(null)} /> : null}
     </>
   );
 }

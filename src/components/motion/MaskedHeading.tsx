@@ -6,7 +6,10 @@ import { cn } from "@/lib/cn";
 import { EASE } from "@/lib/motion";
 
 type Props = {
-  /** One entry per visual line; each reveals from behind its own mask. */
+  /**
+   * One entry per visual line; each reveals from behind its own mask.
+   * String lines are fine; JSX elements in the array must carry a key.
+   */
   lines: ReactNode[];
   as?: "h1" | "h2" | "h3" | "p";
   className?: string;

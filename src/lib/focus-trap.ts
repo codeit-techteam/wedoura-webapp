@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, type RefObject } from "react";
+import { usePageScrollLock } from "@/lib/scroll-lock";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Keeps Tab inside `ref` while `active`, moves focus in on open, locks page
- * scroll, and returns focus to whatever was focused before on close.
+ * scroll (and Lenis), and returns focus to whatever was focused before on close.
  */
 export function useFocusTrap(
   ref: RefObject<HTMLElement | null>,
   active: boolean,
   initialFocus?: RefObject<HTMLElement | null>,
 ) {
+  usePageScrollLock(active);
+
   useEffect(() => {
     if (!active) return;
     const root = ref.current;
@@ -41,12 +44,8 @@ export function useFocusTrap(
     };
     root.addEventListener("keydown", onKey);
 
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
     return () => {
       root.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previousOverflow;
       previous?.focus({ preventScroll: true });
     };
   }, [ref, active, initialFocus]);

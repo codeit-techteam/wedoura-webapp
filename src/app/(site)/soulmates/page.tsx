@@ -3,15 +3,15 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import { WaitlistForm } from "./WaitlistForm";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Soulmates",
   description:
     "A quieter way to meet someone serious about marriage. Soulmates is opening soon — join the waiting list with just a name and an email.",
-  alternates: { canonical: absoluteUrl("/soulmates") },
-};
+  path: "/soulmates",
+});
 
 const PRINCIPLES = [
   {
@@ -37,9 +37,9 @@ export default function SoulmatesPage() {
           as="h1"
           className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
           lines={[
-            <>
+            <span key="headline">
               A quieter way to <em>meet</em>
-            </>,
+            </span>,
           ]}
         />
         <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">

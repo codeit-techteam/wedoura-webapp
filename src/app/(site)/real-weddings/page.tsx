@@ -10,13 +10,13 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Label } from "@/components/ui/Label";
 import { listCitiesWithCounts, listWeddings, listWeddingStyles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Real Weddings",
   description: "Whole weddings across India, told the way they happened, with the people who made them.",
-  alternates: { canonical: absoluteUrl("/real-weddings") },
-};
+  path: "/real-weddings",
+});
 
 const PAGE = 6;
 const PATHNAME = "/real-weddings";
@@ -47,9 +47,10 @@ export default async function RealWeddingsPage({ searchParams }: PageProps<"/rea
           as="h1"
           className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
           lines={[
-            <>
+            // Elements in the lines array need keys (strings do not).
+            <span key="headline">
               Whole weddings, <em>start to finish</em>
-            </>,
+            </span>,
           ]}
         />
         <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">
@@ -83,7 +84,8 @@ export default async function RealWeddingsPage({ searchParams }: PageProps<"/rea
             allLabel="Anywhere"
             pathname={PATHNAME}
             params={params}
-            className="w-40"
+            menuAlign="end"
+            className="w-44 shrink-0"
           />
         </div>
 

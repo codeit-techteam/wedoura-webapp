@@ -3,14 +3,14 @@ import Link from "next/link";
 import "@/styles/honeymoon.css";
 import { StayCard } from "@/components/honeymoon/StayCard";
 import { listHoneymoonMoods, listStays } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 import { patchedHref, pickParams } from "@/lib/url";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Honeymoon stays",
   description: "Hotels and resorts we trust with a first week of marriage, picked room by room.",
-  alternates: { canonical: absoluteUrl("/honeymoon/stays") },
-};
+  path: "/honeymoon/stays",
+});
 
 export default async function HoneymoonStaysPage({ searchParams }: PageProps<"/honeymoon/stays">) {
   const params = pickParams(await searchParams, ["mood"]);

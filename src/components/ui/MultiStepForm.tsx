@@ -128,8 +128,8 @@ export function MultiStepForm({
             <button
               type="button"
               onClick={onBack}
-              disabled={!onBack || step === 0}
-              className="min-h-12 font-sans text-button font-medium tracking-[0.2em] uppercase disabled:opacity-40"
+              disabled={!onBack}
+              className="min-h-12 cursor-pointer font-sans text-button font-medium tracking-[0.2em] uppercase disabled:cursor-default disabled:opacity-40"
             >
               {backLabel}
             </button>

@@ -55,7 +55,7 @@ export function UnderlineTabs({ param, tabs, allLabel = "All", label, pathname, 
             scroll={false}
             aria-current={selected ? "true" : undefined}
             className={cn(
-              "tap relative inline-flex shrink-0 items-end pb-3 text-label-lg whitespace-nowrap transition-colors duration-300 ease-wedoura",
+              "tap relative inline-flex shrink-0 items-end pb-3 text-small whitespace-nowrap transition-colors duration-300 ease-wedoura",
               selected ? "font-medium text-ink" : "text-mute hover:text-ink",
             )}
           >

@@ -3,13 +3,14 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { ContactForm } from "@/components/profile/AuthForms";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
-import { SITE_EMAIL, absoluteUrl } from "@/lib/site-config";
+import { SITE_EMAIL } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Contact",
   description: "Write to the Wedoura team. We read everything.",
-  alternates: { canonical: absoluteUrl("/contact") },
-};
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
@@ -22,9 +23,9 @@ export default function ContactPage() {
               as="h1"
               className="mt-3.5 font-serif text-h1"
               lines={[
-                <>
+                <span key="headline">
                   Say <em>hello</em>.
-                </>,
+                </span>,
               ]}
             />
             <p className="mt-5 max-w-sm text-mute">

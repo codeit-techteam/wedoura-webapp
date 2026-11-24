@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Photo } from "@/components/media/Photo";
 import type { Experience, HoneymoonPackage } from "@/data/types";
+import { getCoupleEmail } from "@/lib/couple-auth";
 import { formatINR } from "@/lib/format";
 import { createInquiry } from "@/lib/vendor-api";
 
@@ -94,10 +95,14 @@ export function PackageBooking({ pkg, moments, children }: Props) {
       vendorSlug: pkg.vendorSlug ?? "wedoura-journeys",
       name: nm,
       whatsapp: digits,
+      email: email.trim() || undefined,
       city: pkg.destination,
       weddingMonth: arrival.slice(0, 7),
       guests: 2,
+      collection: chosen?.name,
       message: lines.join("\n"),
+      source: "package_book",
+      coupleEmail: getCoupleEmail() ?? undefined,
     });
     setBusy(false);
     if (!result.ok) {

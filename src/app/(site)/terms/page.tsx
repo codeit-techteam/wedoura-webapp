@@ -3,13 +3,14 @@ import { MaskedHeading } from "@/components/motion/MaskedHeading";
 import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
-import { SITE_EMAIL, absoluteUrl } from "@/lib/site-config";
+import { SITE_EMAIL } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Terms",
   description: "The terms for using Wedoura, for couples browsing and for vendors who list their work.",
-  alternates: { canonical: absoluteUrl("/terms") },
-};
+  path: "/terms",
+});
 
 const LAST_UPDATED = "16 November 2026";
 
@@ -68,9 +69,9 @@ export default function TermsPage() {
             as="h1"
             className="mt-3.5 font-serif text-h1"
             lines={[
-              <>
+              <span key="headline">
                 The terms, <em>briefly</em>.
-              </>,
+              </span>,
             ]}
           />
           <Text tone="mute" className="mt-4">

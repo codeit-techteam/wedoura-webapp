@@ -28,15 +28,213 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 20 | v2 session 3b: remaining public pages restyled (listings, journal, saved, about, contact, legal, 404, Soulmates waiting list) | ✅ Done (2026-11-23) |
 | 21 | v2 session 4: honeymoon landing, packages, stays from the client references | ✅ Done (2026-11-23) |
 | 22 | v2 session 5: login, signup and couple account | ✅ Done (2026-11-23) |
+| 23 | v2 session 6: vendor dashboard (`/vendor-studio`) | ✅ Done (2026-11-23) |
+| 24 | v2 session 7: full audit (Soulmates create skipped) | ✅ Done (2026-11-23) |
+| 25 | Vendor profile polish: hero, stories, founder, Book now + dashboard sync | ✅ Done (2026-11-24) |
 
 ## Session log
+
+### 2026-11-24 · Profile-sync QA, enquiries couple status, leftovers
+
+Done:
+- Browser QA: vendor@gmail.com dashboard ↔ public Aperture & Marigold (name, tagline, price, collection, FAQ, story, film) and venue overlay on Courtyard House; empty sections hide (registry + vitest).
+- Check availability → Enquiries → status change; couple@gmail.com `/account?tab=enquiries` shows the same status (tab URL + mock-store refresh). Fixed leftover “Stage and quote” copy.
+- Removed Calendar route and Leads redirect pages; renamed sidebar badge to `newEnquiries`. Overview numbers stay derived from inquiries.
+- Tests: `tests/profile-sync-roundtrip.test.tsx` (business name, tagline, starting price, collection, FAQ, testimonial, caption/cover, story, film, empty-hide, venue, enquiry labels). Docs: `docs/v2/profile-sync.md` statuses OK / READ-ONLY / DERIVED only.
+- Verification: lint, typecheck, tests, production build.
+
+Routes to check:
+- `/vendor-studio/profile/business`, `/vendor-studio/enquiries`, `/vendors/aperture-marigold`, `/venues/courtyard-house`, `/account?tab=enquiries`
+
+Next up:
+- Backend; optional form redesign.
+
+### 2026-11-24 · Profile + Photos/videos editor redesign
+
+Done:
+- Profile split into sub-pages (`business`, `contact`, `about`, `pricing`, `faqs`, `kind-words`, `interview`, `venue`) with second-level nav (desktop tabs / mobile select), `SectionCard` (shown/hidden + See on profile ↗), and `RepeatableList` (drag, edit drawer, delete + undo) for collections, FAQs, testimonials, interview Q&A.
+- Photos and videos: one portfolio grid with badges and hover/tap toolbar (highlight max 7, cover, 360° + shared viewer, caption drawer, delete), multi-select, upload progress, `n of 12` counter. Wedding stories as cards + drawer + `PhotoPickerModal`. Films as cards + modal with validated YouTube/Vimeo link, auto thumbnail, poster from photos only via modal. Album `featured` drives Inside the stories carousel.
+- Registry, checklist, field-map, legacy redirects updated. Saves still via `updateMyListing` / autosave; pending media and interview review unchanged.
+- Verification: lint, typecheck, 86 tests (incl. profile-sections + field-map), production build.
+
+Routes to check:
+- `/vendor-studio/profile/business` (and other profile sub-pages)
+- `/vendor-studio/media`
+- `/vendors/aperture-marigold` after edits
+
+Next up:
+- Backend; Real weddings screen polish if needed.
+
+### 2026-11-24 · Enquiries replace Leads pipeline
+
+Done:
+- Inquiry model: status New / Replied / Booked / Closed (+ close reason), source, submitted fields, private notes, timestamps. Sample data + mock-store v3 migration. No stage / quote / Add lead.
+- `/vendor-studio/enquiries`: status tabs with counts, search, desktop table + mobile cards, New bold + gold dot, detail drawer (WhatsApp / Call / Email, status actions, autosaved note). Opening New does not change status.
+- Forms pass `source` (`vendor_profile`, `venue_profile`, `shortlist`, `package_book`). Overview + sidebar badge use the same Inquiry status counts. Couple account shows status only. `/leads` and `/inquiries` redirect.
+- Docs: BUILD-PLAN §4, api-contract, PROGRESS. Verified: check-availability on Aperture & Marigold → Enquiries as New (“Test Couple”).
+- Verification: lint, typecheck, 86 tests, production build.
+
+Routes to check:
+- `/vendors/aperture-marigold` (check availability)
+- `/vendor-studio/enquiries`
+- `/vendor-studio`
+- `/account` (couple enquiries tab)
+
+Next up:
+- Backend; optional form redesign prompt 4.
+
+### 2026-11-24 · Vendor dashboard redesign
+
+Done:
+- Shell: 248px white sidebar (wordmark, avatar+name, icon nav), 64px top bar (title, status, public link, save), content max 1200px / 32px pad; drawer under 1024px; bottom tabs under 640px.
+- Removed Calendar from nav (redirects to Overview); Availability types kept. BUILD-PLAN §4 updated. Added Settings.
+- Overview: welcome, status card, three enquiry stats (no money), latest five + WhatsApp, progress ring + unfinished-only checklist.
+- Shared sticky save bar (Discard / Save) + leave warning; empty states on lists; dashboard type tokens.
+- Verification: lint, typecheck, tests, production build.
+
+Routes to check:
+- `/vendor-studio`
+- `/vendor-studio/enquiries`
+- `/vendor-studio/profile`
+- `/vendor-studio/media`
+- `/vendor-studio/weddings`
+- `/vendor-studio/settings`
+
+Next up:
+- Backend; optional form redesign prompt 4.
+
+### 2026-11-24 · Profile ↔ dashboard sync
+
+Done:
+- Audit in `docs/v2/profile-sync.md`; registry in `src/lib/profile-sections.ts` drives vendor/venue sticky nav and empty-hiding.
+- Filled missing editors: avatar, about photo, testimonial place, per-package unit, full venue fields, interview (published edits → `pendingInterview` / In review; `/demo` approve).
+- Venue “View my profile” / preview / demo links go to `/venues/{slug}`. Updated `docs/field-map.md`; `tests/profile-sections.test.ts` guards editors.
+- Verification: lint, typecheck, 86 tests, production build.
+
+Next up:
+- Prompt 4 redesign of dashboard forms if needed; backend.
+
+### 2026-11-24 · Portal venue field editor
+
+Done:
+- Added `VenueFields` on vendor studio **Profile** for the full `VenueDetails` shape: capacity, spaces, space details, room tiers, food, rules, overview facts, estimate, season months, location, and 360° tour (scenes, links, markers) with portfolio photo pickers.
+- Replaced the thin venue block (tags + min/max only) with `VenueFields`, still gated to the venues category.
+- Verification: lint, typecheck, tests, production build.
+
+Next up:
+- Hero refinements if needed; backend.
+
+### 2026-11-24 · Registration dropdown and Back
+
+Done:
+- Category and city on the vendor application use a custom menu (ivory row, gold mark) instead of the browser’s native list.
+- ← Back on the first step returns to the intro; later steps still go to the previous step.
+
+Next up:
+- Hero refinements if needed; backend.
+
+### 2026-11-24 · Nav label: Contact us
+
+Done:
+- Renamed the `/contact` nav link from "Free planning help" to "Contact us" in desktop nav (`nav.ts`) and the mobile menu CTA.
+
+Next up:
+- Hero refinements if needed; backend.
+
+### 2026-11-24 · Nested scroll / Lenis (forms & overlays)
+
+Done:
+- **Cause**: Lenis was capturing wheel/trackpad on the page, so nested panels (Book now form, drawers, story viewer) only moved if you dragged the scrollbar.
+- **Fix**: `allowNestedScroll: true` on SmoothScroll; `usePageScrollLock` stops Lenis while overlays lock the body (wired through `useFocusTrap` + story/lightbox/photo/film viewers); `data-lenis-prevent` + `overscroll-contain` / `min-h-0` on scrollable overlay panels.
+
+Next up:
+- Hero refinements if needed; backend.
+
+### 2026-11-24 · Story viewer scroll fix
+
+Done:
+- **Fix**: `AlbumStoryViewer` scroll pane was a flex child without `min-h-0`, so `overflow-y-auto` never engaged; also Lenis was eating wheel events. Added `overflow-hidden` on the dialog, `min-h-0` / `overscroll-contain` on the scroller, and `data-lenis-prevent`.
+
+Next up:
+- Hero refinements if needed; backend.
+
+### 2026-11-24 · Restore vendor profile hero
+
+Done:
+- **Revert**: Vendor profile hero back to the previous full-bleed dark cover (avatar, name, tagline, meta row, Inquire/WhatsApp) plus the horizontal key-facts strip — undid the ivory mast / centred uppercase name layout.
+- **Kept**: Pricing Book now, story viewer, founder/dashboard polish from the same session.
+- **Verification**: lint, typecheck, tests, production build.
+
+Next up:
+- Small refinements to that restored hero if needed; backend.
+
+### 2026-11-24 · MaskedHeading list key warning
+
+Done:
+- **Fix**: JSX entries in `MaskedHeading` `lines` arrays now carry keys (same pattern as HeroV2). Cleared the React key warning on `/real-weddings` and the same unkeyed-fragment pattern on saved, about, contact, soulmates, blogs, terms, privacy, and VendorBrowse.
+- **Docs**: `MaskedHeading` prop comment notes that element lines need keys.
+- **Verification**: lint, typecheck, 83 tests, production build.
+
+Next up:
+- Backend; optional Soulmates create if confirmed.
+
+### 2026-11-24 · Real weddings city filter dropdown
+
+Done:
+- **Fix**: City `FilterSelect` on `/real-weddings` no longer stretches with `flex-1` (menu was anchoring mid-row over the style tabs). Menu is absolutely positioned under the trigger with `menuAlign="end"`.
+- **Type**: `--text-small` 14px → 15px; style tabs use `text-small`; filter options get slightly taller tap rows.
+- **Verification**: lint, typecheck, tests, production build.
+
+Next up:
+- Backend; optional Soulmates create if confirmed.
+
+### 2026-11-24 · Vendor profile polish + dashboard sync
+
+Done:
+- **Hero / mast**: ivory mast with centred uppercase name + Inquire; full-bleed cover with tagline and CTAs; trust strip limited to ≤5 centred facts (no overflow from category fields).
+- **Wedding stories**: frame-by-frame story reader (`AlbumStoryViewer`) with title, lede, progress and scrolled photos — replaces image-only lightbox.
+- **Founder**: poster/film band + caption + about paragraphs; editable in Profile · About the founder.
+- **Pricing**: Book now opens contact Inquiry drawer (collection prefilled); no payment.
+- **Dashboard**: Media · Wedding stories editor; Profile packages (note, inclusions, featured); field-map updated.
+- **Fix**: VendorBrowse list key warning.
+- **Verification**: lint, typecheck, 83 tests, production build.
+
+Next up:
+- Backend; optional Soulmates create if confirmed.
+
+### 2026-11-23 · v2 session 7: full audit
+
+Done:
+- **Soulmates create** skipped per BUILD-PLAN §4 (waiting list only).
+- **SEO**: `pageMeta` in `src/lib/seo.ts` (title, description, canonical, OG/Twitter image); applied across public listings, detail pages, legal, honeymoon lists, and noindex auth/account/saved routes. Sitemap already covers all public routes; robots excludes private ones. Footer FAQs + Gallery confirmed.
+- **A11y / content**: home tile alts; vendor count string for screen readers; decorative signup images `aria-hidden`. No invented category/review counts; Kind words only; dashboard stats from Inquiry.
+- **Browser**: home, vendors (+ filters), vendor + venue profiles, honeymoon, vendor login → studio overview. Filters, forms and section nav working.
+- **Verification**: lint, typecheck, 83 tests, production build. Write-up in `docs/AUDIT.md` (incl. backend leftovers).
+
+Next up:
+- Backend integration; optional Soulmates create if the client confirms; licensed photography pass.
+
+### 2026-11-23 · v2 session 6: vendor dashboard
+
+Done:
+- **Shell**: sidebar (desktop) + bottom tab bar (mobile), View my profile, completeness meter, log out. Screens: Overview, Enquiries, Photos and videos, Profile, Real weddings, Settings. Calendar removed from nav.
+- **Overview**: welcome, status card, three Inquiry status stats, latest five + WhatsApp, completeness checklist. No analytics chart.
+- **Enquiries**: `/vendor-studio/enquiries` — form submissions only; status tabs, table/cards, detail drawer (WhatsApp / call / email, status, private note). No board, Add lead, or quotes.
+- **Calendar**: removed (Availability types kept for later).
+- **Media**: PhotoManager + highlights/cover + 360 detection, films as YouTube/Vimeo links.
+- **Profile**: long sectioned form with jump chips; category fields from definitions; venue spaces when relevant; kind words / FAQs / pricing / submit. Field map updated to the new screens.
+- **Real weddings**: submit with permission checkbox; `weddingSubmissions` status on the listing.
+- Legacy studio routes redirect into the new screens. Lint, typecheck, 83 tests (field-map), production build.
+
+Next up:
+- Session 7: Soulmates (only if confirmed) and full audit.
 
 ### 2026-11-23 · v2 session 5: login, signup and couple account
 
 Done:
 - **`/login` (couples)** and **`/vendor/login`**: shared login card (email + password, Show, Keep me logged in, Forgot password → check inbox, Continue with Google mocked, “You’re in” transition). No mobile OTP or magic link. Layout matches the reference (photo + form). Demos: `couple@gmail.com` / `123456`, `vendor@gmail.com` / `123456`.
 - **Couple onboarding**: three questions (names, wedding month, city) + terms for new accounts; demo couple is pre-onboarded.
-- **`/account`**: wedding space — Overview, Shortlist (Saved store), Enquiries (Inquiry stage + quote), Compare (≤3), Details, Notifications, log out. No payments, no in-app chat. New enquiries attach `coupleEmail` when a couple session exists.
+- **`/account`**: wedding space — Overview, Shortlist (Saved store), Enquiries (Inquiry status only, no quote), Compare (≤3), Details, Notifications, log out. No payments, no in-app chat. New enquiries attach `coupleEmail` when a couple session exists.
 - **`/list-your-business`**: intro screen + multi-step shell (Business → Contact → Review) with “how couples will see you” card, optional Founding Partner checkbox, success screen. Short fields only per plan §4.
 - **Verification.** Lint, typecheck, production build.
 

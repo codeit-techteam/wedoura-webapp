@@ -6,11 +6,14 @@ import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { listAllCities } from "@/lib/api";
 
-export const metadata: Metadata = {
+import { pageMeta } from "@/lib/seo";
+
+export const metadata: Metadata = pageMeta({
   title: "Saved",
   description: "Your shortlist of vendors and stories, kept on this device.",
-  robots: { index: false, follow: false },
-};
+  path: "/saved",
+  noIndex: true,
+});
 
 export default async function SavedPage() {
   // The shortlist lives in the browser; SavedList fetches exactly the saved
@@ -26,9 +29,9 @@ export default async function SavedPage() {
           as="h1"
           className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
           lines={[
-            <>
+            <span key="headline">
               Your <em>shortlist</em>
-            </>,
+            </span>,
           ]}
         />
         <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">

@@ -164,6 +164,7 @@ export function VenueEnquireForm({
       message:
         messageParts.join("\n") ||
         `Hi ${vendorName}, we would love to check availability.`,
+      source: "venue_profile",
       coupleEmail: getCoupleEmail() ?? undefined,
     });
     setBusy(false);

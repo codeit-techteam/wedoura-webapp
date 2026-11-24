@@ -286,6 +286,11 @@ export async function listAllCategories(): Promise<Category[]> {
   return categories;
 }
 
+/** Sync lookup for portal checklist / forms (same source as listAllCategories). */
+export function getCategoryDef(slug: string): Category | undefined {
+  return categories.find((c) => c.slug === slug);
+}
+
 /** Categories in the search-panel groups, including ones with no vendor yet. */
 export async function listCategoryGroups(): Promise<{ group: string; categories: Category[] }[]> {
   const groups: { group: string; categories: Category[] }[] = [];

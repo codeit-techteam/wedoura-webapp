@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { VendorSignupForm } from "@/components/profile/VendorSignupForm";
 import { listAllCategories, listAllCities, listFeatured } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "List Your Business",
   description: "Show your work to couples who are looking. A Wedoura profile is your portfolio, pricing and a direct line.",
-  alternates: { canonical: absoluteUrl("/list-your-business") },
-};
+  path: "/list-your-business",
+});
 
 export default async function ListYourBusinessPage() {
   const [categories, cities, featured] = await Promise.all([

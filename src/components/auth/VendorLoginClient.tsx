@@ -21,7 +21,7 @@ export function VendorLoginClient() {
             Welcome <em>back</em>
           </>
         }
-        lead="Log in to see your enquiries, calendar and profile."
+        lead="Log in to see your enquiries, profile and photos."
         emailPlaceholder="studio@example.com"
         demoHint={`Demo: ${DEMO_EMAIL} / ${DEMO_PASSWORD}`}
         successMessage="Taking you to your dashboard…"

@@ -34,7 +34,7 @@ export function HomeCategories() {
               <div className="relative aspect-4/5 overflow-hidden bg-sand">
                 <Image
                   src={`/ref/home/${tile.img}`}
-                  alt=""
+                  alt={tile.label}
                   fill
                   className="object-cover transition-transform duration-1200 ease-wedoura group-hover:scale-104"
                   style={"position" in tile ? { objectPosition: tile.position } : undefined}

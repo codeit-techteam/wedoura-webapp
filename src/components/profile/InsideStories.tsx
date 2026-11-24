@@ -15,10 +15,11 @@ type Props = {
  * individual photos; here we just link to the album anchor).
  */
 export function InsideStories({ albums }: Props) {
+  const carousel = albums.filter((a) => a.featured !== false);
   const [index, setIndex] = useState(0);
-  const album = albums[index];
+  const album = carousel[index];
 
-  if (albums.length === 0 || !album) return null;
+  if (carousel.length === 0 || !album) return null;
 
   const cover = album.photos[0];
 
@@ -45,19 +46,19 @@ export function InsideStories({ albums }: Props) {
       {/* Caption */}
       <div className="absolute inset-x-0 bottom-0 p-6 md:p-10" aria-live="polite">
         <p className="label text-white/60">
-          {index + 1} / {albums.length}
+          {index + 1} / {carousel.length}
         </p>
         <p className="mt-2 font-serif text-h2 text-white leading-tight">{album.title}</p>
         <p className="mt-1 text-small text-white/70">{album.location}</p>
       </div>
 
       {/* Prev / Next */}
-      {albums.length > 1 && (
+      {carousel.length > 1 && (
         <>
           <button
             type="button"
             aria-label="Previous story"
-            onClick={() => setIndex((i) => (i - 1 + albums.length) % albums.length)}
+            onClick={() => setIndex((i) => (i - 1 + carousel.length) % carousel.length)}
             className="tap absolute left-4 top-1/2 -translate-y-1/2 flex size-11 items-center justify-center bg-white/10 text-white backdrop-blur-sm transition-chrome hover:bg-white/20 md:left-6"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -67,7 +68,7 @@ export function InsideStories({ albums }: Props) {
           <button
             type="button"
             aria-label="Next story"
-            onClick={() => setIndex((i) => (i + 1) % albums.length)}
+            onClick={() => setIndex((i) => (i + 1) % carousel.length)}
             className="tap absolute right-4 top-1/2 -translate-y-1/2 flex size-11 items-center justify-center bg-white/10 text-white backdrop-blur-sm transition-chrome hover:bg-white/20 md:right-6"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -78,9 +79,9 @@ export function InsideStories({ albums }: Props) {
       )}
 
       {/* Dots */}
-      {albums.length > 1 && (
+      {carousel.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5" aria-hidden="true">
-          {albums.map((_, i) => (
+          {carousel.map((_, i) => (
             <button
               key={i}
               type="button"

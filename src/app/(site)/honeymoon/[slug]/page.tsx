@@ -11,7 +11,7 @@ import { Container } from "@/components/ui/Container";
 import { Label } from "@/components/ui/Label";
 import { Text } from "@/components/ui/Text";
 import { getDestination, listDestinations } from "@/lib/api";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
 export async function generateStaticParams() {
   const all = await listDestinations();
@@ -22,12 +22,12 @@ export async function generateMetadata({ params }: PageProps<"/honeymoon/[slug]"
   const { slug } = await params;
   const destination = await getDestination(slug);
   if (!destination) return { title: "Honeymoon" };
-  return {
+  return pageMeta({
     title: destination.name,
     description: destination.summary,
-    alternates: { canonical: absoluteUrl(`/honeymoon/${destination.slug}`) },
-    openGraph: { images: [{ url: absoluteUrl(destination.cover.src) }] },
-  };
+    path: `/honeymoon/${destination.slug}`,
+    image: destination.cover.src,
+  });
 }
 
 export default async function HoneymoonDestinationPage({ params }: PageProps<"/honeymoon/[slug]">) {

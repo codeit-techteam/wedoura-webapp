@@ -12,13 +12,13 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Label } from "@/components/ui/Label";
 import { listArticleCategories, listArticles } from "@/lib/api";
 import { patchedHref, pickParams } from "@/lib/url";
-import { absoluteUrl } from "@/lib/site-config";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Journal",
   description: "Planning guides, venue notes and ideas worth saving, from people who work weddings every week.",
-  alternates: { canonical: absoluteUrl("/blogs") },
-};
+  path: "/blogs",
+});
 
 const PAGE = 9;
 const PATHNAME = "/blogs";
@@ -44,9 +44,9 @@ export default async function BlogsPage({ searchParams }: PageProps<"/blogs">) {
           as="h1"
           className="mt-3.5 max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink"
           lines={[
-            <>
+            <span key="headline">
               Worth reading before you <em>book</em>
-            </>,
+            </span>,
           ]}
         />
         <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">

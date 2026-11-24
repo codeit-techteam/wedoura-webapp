@@ -13,6 +13,7 @@ import { InquiryForm } from "@/components/profile/InquiryForm";
 import { InsideStories } from "@/components/profile/InsideStories";
 import { InterviewBlock } from "@/components/profile/InterviewBlock";
 import { KindWords } from "@/components/profile/KindWords";
+import { PackageBookButton } from "@/components/profile/PackageBookButton";
 import { ShareProfileButton } from "@/components/profile/ShareProfileButton";
 import { StickyActionBar } from "@/components/profile/StickyActionBar";
 import { StickySubnav, type SubnavSection } from "@/components/profile/StickySubnav";
@@ -28,6 +29,7 @@ import { SaveButton } from "@/components/ui/SaveButton";
 import { Text } from "@/components/ui/Text";
 import type { CategoryFieldDef, Film, VendorDetail, VendorSummary } from "@/data/types";
 import { formatPrice } from "@/lib/format";
+import { profileSubnav } from "@/lib/profile-sections";
 
 type Props = {
   vendor: VendorDetail;
@@ -93,9 +95,8 @@ function filmPlayable(f: Film): boolean {
 }
 
 /**
- * The vendor profile: rebuilt to match the reference design. A full-bleed
- * cover with a mast bar, a trust/at-a-glance strip, sticky chip-nav, then
- * sections in order: inside the stories → portfolio → venue → albums →
+ * The vendor profile: full-bleed cover hero, key-facts strip, sticky chip-nav,
+ * then sections in order: inside the stories → portfolio → venue → albums →
  * kind words → about → voices → founder → pricing → films → faq → inquire.
  * Every section hides when empty. Desktop and mobile share one set of markup;
  * the sticky bottom bar carries the mobile actions.
@@ -138,35 +139,15 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
   const chips = [...new Set([...vendor.services, ...vendor.styles])];
   const packageLabels = vendor.packages.map((p) => p.label);
 
-  // Build subnav: only sections that have content
-  const sections: SubnavSection[] = [
-    ...(vendor.albums.length ? [{ id: "inside", label: "Stories" }] : []),
-    ...(vendor.portfolio.length ? [{ id: "portfolio", label: "Portfolio" }] : []),
-    ...(vendor.venue ? [{ id: "venue", label: "The venue" }] : []),
-    ...(vendor.albums.length ? [{ id: "albums", label: "Albums" }] : []),
-    ...((vendor.testimonials?.length || vendor.press?.length)
-      ? [{ id: "kind-words", label: "Kind words" }]
-      : []),
-    ...(vendor.about.length ? [{ id: "about", label: "About" }] : []),
-    ...(vendor.interview ? [{ id: "voices", label: "Voices" }] : []),
-    ...(vendor.founder ? [{ id: "founder", label: "Founder" }] : []),
-    ...(vendor.packages.length ? [{ id: "pricing", label: "Pricing" }] : []),
-    ...(films.length ? [{ id: "films", label: "Films" }] : []),
-    ...(vendor.faqs.length ? [{ id: "faq", label: "FAQ" }] : []),
-    { id: "inquire", label: "Inquire" },
-  ];
+  // Subnav from the shared registry: only sections that have content.
+  const sections: SubnavSection[] = profileSubnav("vendor", vendor);
 
   return (
     <main className="pb-24 lg:pb-0">
       {/* ── Cover ──────────────────────────────────────────────────────── */}
-      <section
-        data-nav-dark
-        className="relative -mt-nav bg-ink text-white"
-      >
-        {/* Mast bar: meta left / name center / inquire right */}
+      <section data-nav-dark className="relative -mt-nav bg-ink text-white">
         <div className="relative z-10 border-b border-white/10">
           <Container className="flex items-center justify-between gap-4 py-4 md:py-5">
-            {/* Left: breadcrumb / meta */}
             <div className="min-w-0 flex-1">
               <Breadcrumb
                 tone="white"
@@ -177,7 +158,6 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
                 ]}
               />
             </div>
-            {/* Right: share */}
             <ShareProfileButton
               title={vendor.name}
               className="tap shrink-0 inline-flex items-center gap-1.5 border border-white/30 px-4 py-2 text-white transition-chrome hover:border-white"
@@ -185,7 +165,6 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
           </Container>
         </div>
 
-        {/* Hero image */}
         <div className="relative flex h-[62svh] flex-col justify-end md:h-[75svh]">
           {vendor.cover && (
             <Photo photo={vendor.cover} sizes="100vw" mode="cover" priority quality={75} objectPosition="50% 45%" />
@@ -194,7 +173,7 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
 
           <Container className="relative pb-10 md:pb-14">
             {avatar && (
-              <span className="relative block size-18 overflow-hidden rounded-full border border-white/80 mb-5 md:mb-6">
+              <span className="relative mb-5 block size-18 overflow-hidden rounded-full border border-white/80 md:mb-6">
                 <Photo photo={avatar} mode="cover" sizes="72px" objectPosition="50% 30%" />
               </span>
             )}
@@ -428,21 +407,34 @@ export function VendorProfile({ vendor, similar, categoryFields }: Props) {
                       <span className="label italic text-gold-deep">Most booked</span>
                     </div>
                   )}
-                  <div className="p-6 md:p-7">
+                  <div className="flex flex-1 flex-col p-6 md:p-7">
                     <p className="font-serif text-h3">{pkg.label}</p>
-                    <p className="mt-3 text-body-lg font-medium">{formatPrice(pkg.priceINR, pkg.unit)}</p>
+                    <p className="mt-3 font-serif text-[1.25rem] italic text-gold-deep">
+                      {formatPrice(pkg.priceINR, pkg.unit)}
+                    </p>
                     {pkg.note && <p className="mt-2 text-small text-mute">{pkg.note}</p>}
+                    {pkg.inclusions && pkg.inclusions.length > 0 && (
+                      <ul
+                        aria-label={`What ${pkg.label} includes`}
+                        className="mt-6 flex flex-col gap-3 border-t border-line pt-6"
+                      >
+                        {pkg.inclusions.map((item) => (
+                          <li key={item} className="flex items-start gap-3 text-small text-ink">
+                            <InclusionMark />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="mt-8">
+                      <PackageBookButton
+                        vendorName={vendor.name}
+                        vendorSlug={vendor.slug}
+                        packageLabel={pkg.label}
+                        packageLabels={packageLabels}
+                      />
+                    </div>
                   </div>
-                  {pkg.inclusions && pkg.inclusions.length > 0 && (
-                    <ul aria-label={`What ${pkg.label} includes`} className="flex flex-col gap-3 border-t border-line p-6 md:p-7">
-                      {pkg.inclusions.map((item) => (
-                        <li key={item} className="flex items-start gap-3 text-small text-ink">
-                          <InclusionMark />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </Reveal>
               ))}
             </ul>

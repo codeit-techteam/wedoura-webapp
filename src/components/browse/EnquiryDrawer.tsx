@@ -95,9 +95,10 @@ export function EnquiryDrawer({ targets, onClose }: Props) {
             name: name.trim(),
             whatsapp: whatsapp.replace(/\D/g, ""),
             city: city.trim(),
-            message: message.trim(),
+            message: message.trim() || "Shortlist enquiry from Wedoura.",
             weddingMonth: weddingMonth || undefined,
             guests: guests ? Number(guests) : undefined,
+            source: "shortlist",
             coupleEmail: getCoupleEmail() ?? undefined,
           }),
         ),
@@ -140,7 +141,8 @@ export function EnquiryDrawer({ targets, onClose }: Props) {
             role="dialog"
             aria-modal="true"
             aria-label={isMulti ? "Enquire with vendors" : `Enquire with ${targets[0]?.name}`}
-            className="relative flex h-full w-full max-w-lg flex-col overflow-y-auto bg-white"
+            data-lenis-prevent
+            className="relative flex h-full w-full max-w-lg flex-col overflow-y-auto overscroll-contain bg-white"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}

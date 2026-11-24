@@ -8,6 +8,7 @@ import { PhotoSphere } from "@/components/media/PhotoSphere";
 import type { Photo as PhotoData } from "@/data/types";
 import { cn } from "@/lib/cn";
 import { viewer } from "@/lib/motion";
+import { usePageScrollLock } from "@/lib/scroll-lock";
 
 type Props = {
   photos: PhotoData[];
@@ -40,6 +41,8 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
     [index, onChange, photos.length],
   );
 
+  usePageScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -48,13 +51,8 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
       if (e.key === "ArrowLeft") step(-1);
     };
     document.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
     closeRef.current?.focus();
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose, step]);
 
   return (
@@ -64,6 +62,7 @@ export function PhotoViewer({ photos, index, onChange, onClose, layoutPrefix = "
           role="dialog"
           aria-modal="true"
           aria-label="Photo viewer"
+          data-lenis-prevent
           className="fixed inset-0 z-50 flex flex-col bg-ink text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
