@@ -59,7 +59,7 @@ export default function SettingsPage() {
             <dd className="text-ink">{listing?.contact.website || "—"}</dd>
           </div>
         </dl>
-        <Link href="/vendor-studio/profile#contact" className="studio-btn mt-6">
+        <Link href="/vendor-studio/profile/contact" className="studio-btn mt-6">
           Edit on Profile
         </Link>
       </section>

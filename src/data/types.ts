@@ -43,6 +43,11 @@ export interface Album {
   /** Short lede shown in the frame-by-frame story reader. */
   excerpt?: string;
   photos: Photo[];
+  /**
+   * When true, included in the "Inside the stories" carousel (order follows
+   * albums[]). Absent means included (legacy albums stay in the carousel).
+   */
+  featured?: boolean;
 }
 
 /* ------------------------------------------------------- categorisation */

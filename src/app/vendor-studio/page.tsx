@@ -200,7 +200,7 @@ export default function OverviewPage() {
           </ul>
         )}
         {complete && (listing.status === "draft" || listing.status === "changes_requested") ? (
-          <Link href="/vendor-studio/profile#submit" className="studio-btn mt-6">
+          <Link href="/vendor-studio/profile/business" className="studio-btn mt-6">
             Submit for review
           </Link>
         ) : null}

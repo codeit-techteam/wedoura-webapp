@@ -18,13 +18,13 @@ export function computeChecklist(listing: VendorListing): ChecklistItem[] {
       key: "identity",
       label: "Business name and tagline",
       done: Boolean(listing.name.trim() && listing.tagline.trim()),
-      href: "/vendor-studio/profile#basics",
+      href: "/vendor-studio/profile/business",
     },
     {
       key: "about",
       label: "About text",
       done: listing.about.length > 0,
-      href: "/vendor-studio/profile#about",
+      href: "/vendor-studio/profile/about",
     },
     {
       key: "photos",
@@ -48,13 +48,13 @@ export function computeChecklist(listing: VendorListing): ChecklistItem[] {
       key: "package",
       label: "At least one package or starting price",
       done: listing.packages.length > 0 || listing.startingPriceINR != null,
-      href: "/vendor-studio/profile#pricing",
+      href: "/vendor-studio/profile/pricing",
     },
     {
       key: "contact",
       label: "WhatsApp and email",
       done: Boolean(listing.contact.whatsapp && listing.contact.email),
-      href: "/vendor-studio/profile#contact",
+      href: "/vendor-studio/profile/contact",
     },
   ];
 
@@ -69,7 +69,7 @@ export function computeChecklist(listing: VendorListing): ChecklistItem[] {
       key: `cat-${field.key}`,
       label: field.label,
       done,
-      href: "/vendor-studio/profile#category",
+      href: "/vendor-studio/profile/business",
     });
   }
 
@@ -78,7 +78,7 @@ export function computeChecklist(listing: VendorListing): ChecklistItem[] {
       key: "venue-spaces",
       label: "At least one venue space",
       done: Boolean(listing.venue?.spaceDetails?.length || listing.venue?.spaces?.length),
-      href: "/vendor-studio/profile#venue",
+      href: "/vendor-studio/profile/venue",
     });
   }
 

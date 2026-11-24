@@ -34,6 +34,7 @@ const nextConfig: NextConfig = {
     // here when the real backend/CDN exists.
     qualities: [60, 75, 90],
     formats: ["image/avif", "image/webp"],
+    remotePatterns: [{ protocol: "https", hostname: "img.youtube.com", pathname: "/vi/**" }],
   },
   async redirects() {
     return [

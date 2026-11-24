@@ -34,6 +34,22 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-24 · Profile + Photos/videos editor redesign
+
+Done:
+- Profile split into sub-pages (`business`, `contact`, `about`, `pricing`, `faqs`, `kind-words`, `interview`, `venue`) with second-level nav (desktop tabs / mobile select), `SectionCard` (shown/hidden + See on profile ↗), and `RepeatableList` (drag, edit drawer, delete + undo) for collections, FAQs, testimonials, interview Q&A.
+- Photos and videos: one portfolio grid with badges and hover/tap toolbar (highlight max 7, cover, 360° + shared viewer, caption drawer, delete), multi-select, upload progress, `n of 12` counter. Wedding stories as cards + drawer + `PhotoPickerModal`. Films as cards + modal with validated YouTube/Vimeo link, auto thumbnail, poster from photos only via modal. Album `featured` drives Inside the stories carousel.
+- Registry, checklist, field-map, legacy redirects updated. Saves still via `updateMyListing` / autosave; pending media and interview review unchanged.
+- Verification: lint, typecheck, 86 tests (incl. profile-sections + field-map), production build.
+
+Routes to check:
+- `/vendor-studio/profile/business` (and other profile sub-pages)
+- `/vendor-studio/media`
+- `/vendors/aperture-marigold` after edits
+
+Next up:
+- Backend; Real weddings screen polish if needed.
+
 ### 2026-11-24 · Enquiries replace Leads pipeline
 
 Done:
