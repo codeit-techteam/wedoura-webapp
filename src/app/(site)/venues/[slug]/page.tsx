@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { DemoPublicProfile } from "@/components/profile/DemoPublicProfile";
 import { VenueProfile } from "@/components/profile/VenueProfile";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { getVenue, listSimilar, listVendors } from "@/lib/api";
+import { getVenue, listAllCategories, listAllCities, listSimilar, listVendors } from "@/lib/api";
 import { breadcrumbSchema, vendorSchema } from "@/lib/schema";
 import { pageMeta } from "@/lib/seo";
 
@@ -29,7 +30,11 @@ export default async function VenuePage({ params }: PageProps<"/venues/[slug]">)
   const venue = await getVenue(slug);
   if (!venue) notFound();
 
-  const similar = await listSimilar(slug);
+  const [similar, categories, cities] = await Promise.all([
+    listSimilar(slug),
+    listAllCategories(),
+    listAllCities(),
+  ]);
   return (
     <>
       <JsonLd
@@ -42,7 +47,15 @@ export default async function VenuePage({ params }: PageProps<"/venues/[slug]">)
           ]),
         ]}
       />
-      <VenueProfile vendor={venue} similar={similar} />
+      {/* Store overlay so a venue-category demo listing's studio edits show live. */}
+      <DemoPublicProfile
+        slug={slug}
+        surface="venue"
+        categories={categories.map(({ slug: s, name, fields }) => ({ slug: s, name, fields }))}
+        cities={cities.map(({ slug: s, name }) => ({ slug: s, name }))}
+        similar={similar}
+        fallback={<VenueProfile vendor={venue} similar={similar} />}
+      />
     </>
   );
 }

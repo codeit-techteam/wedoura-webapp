@@ -38,12 +38,28 @@ function monthLabel(value: string) {
   return new Date(y, m - 1, 1).toLocaleString("en-IN", { month: "long", year: "numeric" });
 }
 
+function tabFromSearch(): Tab {
+  if (typeof window === "undefined") return "overview";
+  const raw = new URLSearchParams(window.location.search).get("tab");
+  if (
+    raw === "overview" ||
+    raw === "shortlist" ||
+    raw === "enquiries" ||
+    raw === "compare" ||
+    raw === "details" ||
+    raw === "notify"
+  ) {
+    return raw;
+  }
+  return "overview";
+}
+
 export function AccountSpace() {
   const router = useRouter();
   const hydrated = useCoupleHydrated();
   const account = useCoupleAccount();
   const savedSlugs = useSavedVendors();
-  const [tab, setTab] = useState<Tab>("overview");
+  const [tab, setTab] = useState<Tab>(tabFromSearch);
   const savedKey = savedSlugs.join(",");
   const [fetchedVendors, setFetchedVendors] = useState<{ key: string; items: VendorSummary[] }>({
     key: "",
@@ -66,16 +82,42 @@ export function AccountSpace() {
   }, [hydrated, account, router]);
 
   useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
+    const sync = () => setTab(tabFromSearch());
+    sync();
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
+  }, [hydrated]);
+
+  function goTab(next: Tab) {
+    setTab(next);
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (next === "overview") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", next);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+  }
+
+  useEffect(() => {
     if (!account?.email) return;
+    const email: string = account.email;
     let cancelled = false;
-    (async () => {
-      const list = await listCoupleInquiries(account.email);
+    async function load() {
+      const list = await listCoupleInquiries(email);
       if (!cancelled) setInquiries(list);
-    })();
+    }
+    void load();
+    const onStore = () => {
+      void load();
+    };
+    window.addEventListener("storage", onStore);
+    window.addEventListener("wedoura:mock-db-change", onStore);
     return () => {
       cancelled = true;
+      window.removeEventListener("storage", onStore);
+      window.removeEventListener("wedoura:mock-db-change", onStore);
     };
-  }, [account?.email]);
+  }, [account]);
 
   useEffect(() => {
     if (!savedKey) return;
@@ -129,7 +171,7 @@ export function AccountSpace() {
                 <button
                   type="button"
                   className={cn(tab === t.id && "on")}
-                  onClick={() => setTab(t.id)}
+                  onClick={() => goTab(t.id)}
                 >
                   {t.label}
                   {t.id === "notify" && unread > 0 ? ` (${unread})` : ""}
@@ -157,10 +199,10 @@ export function AccountSpace() {
               className="absolute top-full right-0 z-40 mt-2 min-w-[12rem] border border-line bg-white py-2"
               role="menu"
             >
-              <button type="button" role="menuitem" className="block w-full px-4 py-2 text-left text-small hover:bg-sand" onClick={() => { setTab("details"); setMenuOpen(false); }}>
+              <button type="button" role="menuitem" className="block w-full px-4 py-2 text-left text-small hover:bg-sand" onClick={() => { goTab("details"); setMenuOpen(false); }}>
                 Wedding details
               </button>
-              <button type="button" role="menuitem" className="block w-full px-4 py-2 text-left text-small hover:bg-sand" onClick={() => { setTab("notify"); setMenuOpen(false); }}>
+              <button type="button" role="menuitem" className="block w-full px-4 py-2 text-left text-small hover:bg-sand" onClick={() => { goTab("notify"); setMenuOpen(false); }}>
                 Notifications
               </button>
               <button
@@ -188,7 +230,7 @@ export function AccountSpace() {
             shortlistCount={vendors.length}
             enquiryCount={inquiries.length}
             unread={unread}
-            onTab={setTab}
+            onTab={goTab}
           />
         )}
         {tab === "shortlist" && (
@@ -214,7 +256,7 @@ export function AccountSpace() {
 
       <nav className="acct-bar" aria-label="Your wedding">
         {TABS.filter((t) => t.id !== "notify").map((t) => (
-          <button key={t.id} type="button" className={cn(tab === t.id && "on")} onClick={() => setTab(t.id)}>
+          <button key={t.id} type="button" className={cn(tab === t.id && "on")} onClick={() => goTab(t.id)}>
             {t.label}
           </button>
         ))}
@@ -259,7 +301,7 @@ function Overview({
         <button type="button" className="acct-card text-left tap" onClick={() => onTab("enquiries")}>
           <p className="label text-gold-deep">Enquiries</p>
           <p className="mt-3 font-serif text-h2">{enquiryCount}</p>
-          <p className="mt-2 text-small text-mute">Stage and quote from each vendor</p>
+          <p className="mt-2 text-small text-mute">Status from each vendor</p>
         </button>
         <button type="button" className="acct-card text-left tap" onClick={() => onTab("notify")}>
           <p className="label text-gold-deep">Notifications</p>

@@ -34,6 +34,21 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-24 · Profile-sync QA, enquiries couple status, leftovers
+
+Done:
+- Browser QA: vendor@gmail.com dashboard ↔ public Aperture & Marigold (name, tagline, price, collection, FAQ, story, film) and venue overlay on Courtyard House; empty sections hide (registry + vitest).
+- Check availability → Enquiries → status change; couple@gmail.com `/account?tab=enquiries` shows the same status (tab URL + mock-store refresh). Fixed leftover “Stage and quote” copy.
+- Removed Calendar route and Leads redirect pages; renamed sidebar badge to `newEnquiries`. Overview numbers stay derived from inquiries.
+- Tests: `tests/profile-sync-roundtrip.test.tsx` (business name, tagline, starting price, collection, FAQ, testimonial, caption/cover, story, film, empty-hide, venue, enquiry labels). Docs: `docs/v2/profile-sync.md` statuses OK / READ-ONLY / DERIVED only.
+- Verification: lint, typecheck, tests, production build.
+
+Routes to check:
+- `/vendor-studio/profile/business`, `/vendor-studio/enquiries`, `/vendors/aperture-marigold`, `/venues/courtyard-house`, `/account?tab=enquiries`
+
+Next up:
+- Backend; optional form redesign.
+
 ### 2026-11-24 · Profile + Photos/videos editor redesign
 
 Done:

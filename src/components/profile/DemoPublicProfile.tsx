@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { VendorProfile } from "@/components/profile/VendorProfile";
+import { VenueProfile } from "@/components/profile/VenueProfile";
 import type { Category, City, VendorSummary } from "@/data/types";
 import { listingToDetail } from "@/lib/listing-view";
 import { useDemoPublishedListings, useSessionHydrated } from "@/lib/vendor-api";
@@ -15,6 +16,8 @@ type Props = {
   similar?: VendorSummary[];
   /** Server-rendered profile to show when the store has nothing newer. */
   fallback?: ReactNode;
+  /** Prefer venue chrome when the listing is a venue. */
+  surface?: "vendor" | "venue" | "auto";
 };
 
 /**
@@ -27,7 +30,14 @@ type Props = {
  *   vendor studio appear on the live page. The backend replaces all of this
  *   with ordinary server rendering.
  */
-export function DemoPublicProfile({ slug, categories, cities, similar = [], fallback }: Props) {
+export function DemoPublicProfile({
+  slug,
+  categories,
+  cities,
+  similar = [],
+  fallback,
+  surface = "auto",
+}: Props) {
   const hydrated = useSessionHydrated();
   const published = useDemoPublishedListings();
   if (!hydrated) return fallback ?? <div className="min-h-dvh" aria-busy="true" />;
@@ -40,5 +50,12 @@ export function DemoPublicProfile({ slug, categories, cities, similar = [], fall
 
   const detail = listingToDetail(listing, categories, cities, { includePending: false });
   const fields = categories.find((c) => c.slug === listing.category)?.fields;
+  const isVenue =
+    surface === "venue" ||
+    (surface === "auto" && (Boolean(listing.venue) || listing.category === "venues"));
+
+  if (isVenue) {
+    return <VenueProfile vendor={detail} similar={similar} />;
+  }
   return <VendorProfile vendor={detail} similar={similar} categoryFields={fields} />;
 }

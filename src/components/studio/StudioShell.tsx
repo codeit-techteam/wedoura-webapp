@@ -59,12 +59,12 @@ function isActivePath(pathname: string, href: string) {
 function StudioNavLinks({
   pathname,
   dirty,
-  newLeads,
+  newEnquiries,
   onNavigate,
 }: {
   pathname: string;
   dirty: boolean;
-  newLeads: number;
+  newEnquiries: number;
   onNavigate?: () => void;
 }) {
   return (
@@ -86,7 +86,7 @@ function StudioNavLinks({
           >
             <Icon className="size-[1.125rem] shrink-0" strokeWidth={1.5} aria-hidden="true" />
             <span className="min-w-0 flex-1 truncate">{item.label}</span>
-            {item.badge === "enquiries" && newLeads > 0 ? <span className="studio-bd">{newLeads}</span> : null}
+            {item.badge === "enquiries" && newEnquiries > 0 ? <span className="studio-bd">{newEnquiries}</span> : null}
           </Link>
         );
       })}
@@ -112,7 +112,7 @@ export function StudioShell({
   const inquiries = useMyInquiries();
   const { dirty, status, error } = useDirty();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const newLeads = inquiries.filter((i) => i.status === "new").length;
+  const newEnquiries = inquiries.filter((i) => i.status === "new").length;
   const items = listing ? computeChecklist(listing) : [];
   const { done, total } = checklistProgress(items);
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -172,7 +172,7 @@ export function StudioShell({
         </Link>
         {who}
         <nav className="studio-nav" aria-label="Dashboard">
-          <StudioNavLinks pathname={pathname} dirty={dirty} newLeads={newLeads} />
+          <StudioNavLinks pathname={pathname} dirty={dirty} newEnquiries={newEnquiries} />
         </nav>
         {sideFooter}
       </aside>
@@ -218,7 +218,7 @@ export function StudioShell({
             </Link>
             {who}
             <nav className="studio-nav" aria-label="Dashboard">
-              <StudioNavLinks pathname={pathname} dirty={dirty} newLeads={newLeads} onNavigate={closeDrawer} />
+              <StudioNavLinks pathname={pathname} dirty={dirty} newEnquiries={newEnquiries} onNavigate={closeDrawer} />
             </nav>
             {sideFooter}
           </div>
@@ -241,7 +241,7 @@ export function StudioShell({
             >
               <Icon className="size-5" strokeWidth={1.5} aria-hidden="true" />
               <span>{item.short}</span>
-              {item.badge === "enquiries" && newLeads > 0 ? <span className="studio-bd">{newLeads}</span> : null}
+              {item.badge === "enquiries" && newEnquiries > 0 ? <span className="studio-bd">{newEnquiries}</span> : null}
             </Link>
           );
         })}
