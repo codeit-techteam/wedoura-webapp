@@ -7,13 +7,17 @@
  * Admin (demo*) functions stand in for the separate admin app at /demo.
  */
 import {
+  DEMO_DOCUMENT_ID,
   DEMO_EMAIL,
   DEMO_LISTING_ID,
   DEMO_PASSWORD,
   demoAccount,
+  demoDocument,
   demoInquiries,
   demoListing,
 } from "@/lib/demo-credentials";
+import { createSampleDocumentBlob, putDocumentBlob } from "@/lib/document-store";
+import { idTypeNeedsBack } from "@/lib/identity-document";
 import { listingMediaIds } from "@/lib/listing-view";
 import { emptyListing, readDb, resetDb, useHydrated, useMockDb, writeDb, type MockDb } from "@/lib/mock-store";
 import type {
@@ -24,6 +28,9 @@ import type {
   InquiryStatus,
   VendorAccount,
   VendorApplication,
+  VendorDocument,
+  VendorDocumentFile,
+  VendorIdType,
   VendorListing,
 } from "@/data/types";
 import { normalizeInquiry } from "@/lib/inquiry";
@@ -88,6 +95,14 @@ export function useDemoPublishedListings(): VendorListing[] {
 
 /* ------------------------------------------------------- applications */
 
+export type ApplicationDocumentInput = {
+  type: VendorIdType;
+  front: File;
+  back?: File | null;
+  consent: true;
+  consentAt: string;
+};
+
 export interface ApplicationInput {
   businessName: string;
   category: CategorySlug;
@@ -99,17 +114,69 @@ export interface ApplicationInput {
   workLink: string;
   consent: true;
   foundingPartner?: boolean;
+  /** Identity document (multipart fields + files on the real API). */
+  document: ApplicationDocumentInput;
 }
 
-/** POST /vendor/applications — creates the application and an account in
- *  status "applied". Rejects an email that already has an account. */
+async function storeDocumentFiles(
+  type: VendorIdType,
+  front: File,
+  back: File | null | undefined,
+): Promise<Result<VendorDocumentFile[]>> {
+  if (idTypeNeedsBack(type) && !back) {
+    return { ok: false, error: "Upload both sides of this ID." };
+  }
+  try {
+    const files: VendorDocumentFile[] = [
+      {
+        name: front.name,
+        mimeType: front.type || "application/octet-stream",
+        size: front.size,
+        url: await putDocumentBlob(front),
+        side: "front",
+      },
+    ];
+    if (back) {
+      files.push({
+        name: back.name,
+        mimeType: back.type || "application/octet-stream",
+        size: back.size,
+        url: await putDocumentBlob(back),
+        side: "back",
+      });
+    }
+    return { ok: true, value: files };
+  } catch {
+    return { ok: false, error: "Could not store the identity document in this browser." };
+  }
+}
+
+/** POST /vendor/applications — multipart on the real API (fields + document
+ *  files + consent). Creates account (`applied`) + application + document. */
 export async function submitApplication(input: ApplicationInput): Promise<Result<{ accountId: string }>> {
   const db = readDb();
   const email = input.email.trim().toLowerCase();
   if (email === DEMO_EMAIL || db.accounts.some((a) => a.email.toLowerCase() === email)) {
     return { ok: false, error: "An account with this email already exists. Log in instead." };
   }
+  if (!input.document.consent || !input.document.consentAt) {
+    return { ok: false, error: "Please agree so we can use the document to verify your identity." };
+  }
+  const stored = await storeDocumentFiles(input.document.type, input.document.front, input.document.back);
+  if (!stored.ok) return stored;
+
   const accountId = id();
+  const documentId = id();
+  const now = new Date().toISOString();
+  const document: VendorDocument = {
+    id: documentId,
+    vendorId: accountId,
+    type: input.document.type,
+    files: stored.value,
+    status: "submitted",
+    consentAt: input.document.consentAt,
+    submittedAt: now,
+  };
   const account: VendorAccount = {
     id: accountId,
     email,
@@ -117,7 +184,8 @@ export async function submitApplication(input: ApplicationInput): Promise<Result
     contactName: input.contactName.trim(),
     whatsapp: input.whatsapp.trim(),
     status: "applied",
-    createdAt: new Date().toISOString(),
+    documentId,
+    createdAt: now,
   };
   const application: VendorApplication = {
     id: id(),
@@ -131,10 +199,107 @@ export async function submitApplication(input: ApplicationInput): Promise<Result
     workLink: input.workLink.trim(),
     consent: true,
     foundingPartner: input.foundingPartner || undefined,
-    submittedAt: new Date().toISOString(),
+    documentId,
+    submittedAt: now,
   };
-  writeDb({ ...db, accounts: [...db.accounts, account], applications: [...db.applications, application] });
+  writeDb({
+    ...db,
+    accounts: [...db.accounts, account],
+    applications: [...db.applications, application],
+    documents: [...db.documents, document],
+  });
   return { ok: true, value: { accountId } };
+}
+
+/** GET /vendor/me/documents — identity document for the signed-in vendor. */
+export async function getMyDocuments(): Promise<VendorDocument | null> {
+  const db = readDb();
+  const account = db.accounts.find((a) => a.id === db.sessionAccountId);
+  if (!account?.documentId) return null;
+  return db.documents.find((d) => d.id === account.documentId) ?? null;
+}
+
+export function useMyDocument(): VendorDocument | null {
+  const db = useMockDb();
+  const account = db.accounts.find((a) => a.id === db.sessionAccountId);
+  if (!account?.documentId) return null;
+  return db.documents.find((d) => d.id === account.documentId) ?? null;
+}
+
+export type ReuploadDocumentInput = {
+  type: VendorIdType;
+  front: File;
+  back?: File | null;
+  consent: true;
+  consentAt: string;
+};
+
+/** POST /vendor/me/documents — re-upload after rejection (status → submitted). */
+export async function submitMyDocument(input: ReuploadDocumentInput): Promise<Result<VendorDocument>> {
+  const db = readDb();
+  const account = db.accounts.find((a) => a.id === db.sessionAccountId);
+  if (!account) return { ok: false, error: "Sign in to upload a document." };
+  if (!input.consent || !input.consentAt) {
+    return { ok: false, error: "Please agree so we can use the document to verify your identity." };
+  }
+  const existing = account.documentId
+    ? db.documents.find((d) => d.id === account.documentId)
+    : undefined;
+  if (existing && existing.status === "approved") {
+    return { ok: false, error: "Your identity is already verified." };
+  }
+  const stored = await storeDocumentFiles(input.type, input.front, input.back);
+  if (!stored.ok) return stored;
+
+  const now = new Date().toISOString();
+  const documentId = existing?.id ?? id();
+  const document: VendorDocument = {
+    id: documentId,
+    vendorId: account.id,
+    type: input.type,
+    files: stored.value,
+    status: "submitted",
+    consentAt: input.consentAt,
+    submittedAt: now,
+  };
+  const documents = existing
+    ? db.documents.map((d) => (d.id === documentId ? document : d))
+    : [...db.documents, document];
+  writeDb({
+    ...db,
+    documents,
+    accounts: db.accounts.map((a) => (a.id === account.id ? { ...a, documentId } : a)),
+  });
+  return { ok: true, value: document };
+}
+
+/** Ensure the demo vendor has an approved SAMPLE document in IndexedDB. */
+async function ensureDemoDocument(db: MockDb, accountId: string): Promise<MockDb> {
+  const existing = db.documents.find((d) => d.id === DEMO_DOCUMENT_ID);
+  if (existing?.status === "approved" && existing.files.length > 0) {
+    if (!db.accounts.some((a) => a.id === accountId && a.documentId === DEMO_DOCUMENT_ID)) {
+      return {
+        ...db,
+        accounts: db.accounts.map((a) => (a.id === accountId ? { ...a, documentId: DEMO_DOCUMENT_ID } : a)),
+      };
+    }
+    return db;
+  }
+  try {
+    const blob = await createSampleDocumentBlob("SAMPLE");
+    const url = await putDocumentBlob(blob, `demo-sample-${DEMO_DOCUMENT_ID}`);
+    const document = demoDocument(url);
+    const documents = existing
+      ? db.documents.map((d) => (d.id === DEMO_DOCUMENT_ID ? document : d))
+      : [...db.documents, document];
+    return {
+      ...db,
+      documents,
+      accounts: db.accounts.map((a) => (a.id === accountId ? { ...a, documentId: DEMO_DOCUMENT_ID } : a)),
+    };
+  } catch {
+    return db;
+  }
 }
 
 /* ---------------------------------------------------------------- auth */
@@ -169,13 +334,17 @@ export async function login(emailRaw: string, password: string): Promise<Result<
           : [...db.listings, full],
       };
     } else if (existing.accountId !== account.id) {
+      const accountId = account.id;
       db = {
         ...db,
-        listings: db.listings.map((l) => (l.id === DEMO_LISTING_ID ? { ...l, accountId: account.id } : l)),
+        listings: db.listings.map((l) => (l.id === DEMO_LISTING_ID ? { ...l, accountId } : l)),
       };
     }
-    writeDb({ ...db, sessionAccountId: account.id });
-    return { ok: true, value: account };
+    const demoAccountId = account.id;
+    db = await ensureDemoDocument(db, demoAccountId);
+    const refreshed = db.accounts.find((a) => a.id === demoAccountId) ?? account;
+    writeDb({ ...db, sessionAccountId: refreshed.id });
+    return { ok: true, value: refreshed };
   }
 
   const account = db.accounts.find((a) => a.email.toLowerCase() === email);

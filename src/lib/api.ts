@@ -232,7 +232,7 @@ export async function isKnownVendorSlug(slug: string): Promise<boolean> {
   return listings.some((l) => l.slug === slug);
 }
 
-export async function listFeatured(category?: CategorySlug | string, limit = 8): Promise<VendorSummary[]> {
+export async function listFeatured(category?: CategorySlug | string, limit = 6): Promise<VendorSummary[]> {
   return published()
     .filter((l) => (category ? l.category === category : true))
     .sort(byFeatured)

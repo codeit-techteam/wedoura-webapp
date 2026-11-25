@@ -34,6 +34,22 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-25 · Vendor identity document at signup + Settings
+
+Done:
+- `VendorDocument` type (id, vendorId, type, files, status, consentAt, timestamps); linked on `VendorAccount` and `VendorApplication`. Mock metadata in localStorage; file blobs in IndexedDB (`document-store.ts` + `getDocumentObjectUrl`).
+- `/list-your-business`: required “Verify your identity” step before review (Masked Aadhaar default, PAN, Voter ID, Passport, Driving licence; front + back for Aadhaar/Voter; JPG/PNG/PDF ≤5 MB; consent timestamp; review shows “Identity document: added” + file names only). No Aadhaar number field.
+- Settings → Identity card: type, status, submitted date; Verified hides files; rejected shows reason + re-upload → `submitted`. Demo vendor@gmail.com gets an approved SAMPLE placeholder on login.
+- `docs/api-contract.md`: multipart `POST /vendor-applications`, `GET/POST /vendor/me/documents`, private storage note.
+- Verification: lint, typecheck, build.
+
+Routes to check:
+- `/list-your-business` (Identity step + review)
+- `/vendor-studio/settings` (Identity card after vendor@gmail.com login)
+
+Next up:
+- Backend; admin review of documents.
+
 ### 2026-11-24 · Profile-sync QA, enquiries couple status, leftovers
 
 Done:

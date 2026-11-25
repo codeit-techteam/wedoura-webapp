@@ -72,7 +72,7 @@ BASE_URL=http://localhost:3001 npm run screenshots  # docs/screenshots + keyboar
   `useIsDesktop()` (src/lib/media.ts).
 - **Nothing ships the whole dataset.** Search suggestions come from `/api/search` (≤5/3/3, debounced in
   `SearchOverlay`); `/saved` fetches only its shortlisted slugs (`/api/vendors/by-slugs`, `/api/weddings/by-slugs`);
-  the homepage is fixed-size (8 featured via `listFeatured`: featured → featuredOrder → `publishedAt` desc).
+  the homepage is fixed-size (6 featured via `listFeatured`: featured → featuredOrder → `publishedAt` desc; three cards per row).
   Never pass a full vendor list to a client component. The vendor directory is `<VendorBrowse>`
   (src/components/browse), rendered bare by `/vendors` and pinned by `/vendors/[category]/[city]`
   (the `[slug]` segment doubles as the category; non-category slugs 404 there).

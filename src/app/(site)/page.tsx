@@ -40,7 +40,7 @@ export default async function HomePage() {
       listCategoryGroups(),
       listAllCities(),
       listCitiesWithCounts(),
-      listFeatured(undefined, 8),
+      listFeatured(undefined, 6),
       listWeddings({ page: 1, limit: 2 }),
       listArticles({ limit: 3 }),
       listPartners("home"),

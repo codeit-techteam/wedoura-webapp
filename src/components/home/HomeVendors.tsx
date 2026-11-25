@@ -68,10 +68,13 @@ export function HomeVendors({ vendors, tabs }: Props) {
           </nav>
         )}
 
-        <ul className="grid grid-cols-1 gap-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((vendor) => (
             <li key={vendor.slug}>
-              <VendorTile vendor={vendor} />
+              <VendorTile
+                vendor={vendor}
+                sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+              />
             </li>
           ))}
         </ul>

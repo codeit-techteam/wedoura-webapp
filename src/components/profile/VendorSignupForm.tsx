@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  IdentityDocumentFields,
+  type IdentityDraft,
+} from "@/components/profile/IdentityDocumentFields";
 import { FormSelect } from "@/components/ui/FormSelect";
 import { MultiStepForm } from "@/components/ui/MultiStepForm";
 import type { CategorySlug } from "@/data/types";
 import { cn } from "@/lib/cn";
+import { idTypeNeedsBack, VENDOR_ID_TYPE_LABEL } from "@/lib/identity-document";
 import { submitApplication } from "@/lib/vendor-api";
 
 type Option = { value: string; label: string };
@@ -43,10 +48,18 @@ const EMPTY: Values = {
   consent: false,
 };
 
+const EMPTY_IDENTITY: IdentityDraft = {
+  type: "masked_aadhaar",
+  front: null,
+  back: null,
+  consent: false,
+};
+
 const STEPS = [
   { numeral: "I", label: "Business" },
   { numeral: "II", label: "Contact" },
-  { numeral: "III", label: "Review" },
+  { numeral: "III", label: "Identity" },
+  { numeral: "IV", label: "Review" },
 ];
 
 const field =
@@ -55,16 +68,19 @@ const field =
 const urlOk = (value: string) => /^https?:\/\/.+\..+/.test(value.trim());
 
 /**
- * Short vendor application: two steps plus review, with the "how couples
- * will see you" card and optional Founding Partner checkbox.
+ * Short vendor application: business, contact, identity, then review —
+ * with the "how couples will see you" card and optional Founding Partner checkbox.
  */
 export function VendorSignupForm({ categories, cities, previewImage }: Props) {
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
   const [values, setValues] = useState<Values>(EMPTY);
+  const [identity, setIdentity] = useState<IdentityDraft>(EMPTY_IDENTITY);
   const [errors, setErrors] = useState<Partial<Record<keyof Values, string>>>({});
+  const [idErrors, setIdErrors] = useState<Partial<Record<"type" | "front" | "back" | "consent", string>>>({});
   const [sent, setSent] = useState(false);
   const [refNo, setRefNo] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const set = (key: keyof Values) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setValues((v) => ({
@@ -83,6 +99,7 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
 
   function validateStep(index: number): boolean {
     const next: Partial<Record<keyof Values, string>> = {};
+    const nextId: Partial<Record<"type" | "front" | "back" | "consent", string>> = {};
     if (index === 0) {
       if (!values.business.trim()) next.business = "What is the business called?";
       if (!values.category) next.category = "Pick the closest category.";
@@ -97,14 +114,28 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
       if (values.password.length < 8) next.password = "At least 8 characters.";
     }
     if (index === 2) {
+      if (!identity.type) nextId.type = "Pick an ID type.";
+      if (!identity.front) nextId.front = "Upload the front of your ID.";
+      if (idTypeNeedsBack(identity.type) && !identity.back) nextId.back = "Upload the back of your ID.";
+      if (!identity.consent || !identity.consentAt) {
+        nextId.consent = "Please agree so we can use this document to verify your identity.";
+      }
+    }
+    if (index === 3) {
       if (!values.consent) next.consent = "Please confirm so we can review your application.";
+      if (!identity.front || (idTypeNeedsBack(identity.type) && !identity.back) || !identity.consent) {
+        nextId.front = "Go back and finish the identity step.";
+      }
     }
     setErrors(next);
-    return Object.keys(next).length === 0;
+    setIdErrors(nextId);
+    return Object.keys(next).length === 0 && Object.keys(nextId).length === 0;
   }
 
   async function submit() {
-    if (!validateStep(2)) return;
+    if (!validateStep(3)) return;
+    if (!identity.front || !identity.consentAt) return;
+    setBusy(true);
     const result = await submitApplication({
       businessName: values.business,
       category: values.category as CategorySlug,
@@ -116,7 +147,15 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
       workLink: values.workLink,
       consent: true,
       foundingPartner: values.foundingPartner || undefined,
+      document: {
+        type: identity.type,
+        front: identity.front,
+        back: identity.back,
+        consent: true,
+        consentAt: identity.consentAt,
+      },
     });
+    setBusy(false);
     if (!result.ok) {
       setErrors({ email: result.error });
       setStep(1);
@@ -132,6 +171,8 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
         {errors[key]}
       </p>
     ) : null;
+
+  const fileNames = [identity.front?.name, identity.back?.name].filter(Boolean) as string[];
 
   const preview = (
     <div>
@@ -225,7 +266,7 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
             >
               Start my application
             </button>
-            <span className="text-small text-mute">Two short steps · Review before you send</span>
+            <span className="text-small text-mute">A few short steps · Identity check · Review before you send</span>
           </div>
           <p className="mt-8 text-mute">
             Already on Wedoura?{" "}
@@ -257,17 +298,19 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
       review={preview}
       onBack={() => {
         setErrors({});
+        setIdErrors({});
         if (step === 0) setStarted(false);
         else setStep((s) => s - 1);
       }}
       onContinue={() => {
-        if (step < 2) {
+        if (busy) return;
+        if (step < 3) {
           if (validateStep(step)) setStep((s) => s + 1);
           return;
         }
         void submit();
       }}
-      continueLabel={step === 2 ? "Submit application" : "Continue"}
+      continueLabel={step === 3 ? (busy ? "Submitting…" : "Submit application") : "Continue"}
       chrome={false}
     >
       {step === 0 && (
@@ -357,6 +400,19 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
       {step === 2 && (
         <div className="grid gap-8">
           <div>
+            <h1 className="font-serif text-h2">Verify your identity</h1>
+            <p className="mt-3 text-mute">
+              We use this only to confirm you are a real wedding professional. Documents stay private — never on your
+              public profile.
+            </p>
+          </div>
+          <IdentityDocumentFields value={identity} onChange={setIdentity} errors={idErrors} />
+        </div>
+      )}
+
+      {step === 3 && (
+        <div className="grid gap-8">
+          <div>
             <h1 className="font-serif text-h2">Review and submit</h1>
             <p className="mt-3 text-mute">Check your details. You can edit any section.</p>
           </div>
@@ -385,7 +441,27 @@ export function VendorSignupForm({ categories, cities, previewImage }: Props) {
               <dt className="text-mute">Work link</dt>
               <dd className="max-w-[14rem] truncate text-right text-ink">{values.workLink}</dd>
             </div>
+            <div className="flex justify-between gap-4 border-t border-line pt-4">
+              <dt className="text-mute">Identity document</dt>
+              <dd className="text-right text-ink">
+                {fileNames.length > 0 ? (
+                  <>
+                    <span>added</span>
+                    <span className="mt-1 block text-mute">
+                      {VENDOR_ID_TYPE_LABEL[identity.type]} · {fileNames.join(", ")}
+                    </span>
+                  </>
+                ) : (
+                  "—"
+                )}
+              </dd>
+            </div>
           </dl>
+          {idErrors.front ? (
+            <p className="text-small text-ink" role="alert">
+              {idErrors.front}
+            </p>
+          ) : null}
           <label className="tap flex cursor-pointer items-start gap-3 py-1">
             <input
               type="checkbox"

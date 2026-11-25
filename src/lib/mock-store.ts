@@ -18,6 +18,7 @@ import type {
   ListingStatus,
   VendorAccount,
   VendorApplication,
+  VendorDocument,
   VendorListing,
 } from "@/data/types";
 // The hand-written sample rows only — never the seeded dataset, which would
@@ -27,8 +28,8 @@ import { normalizeInquiry } from "@/lib/inquiry";
 
 const KEY = "wedoura:mock-db";
 const EVENT = "wedoura:mock-db-change";
-// v3: Inquiry pipeline (stage/quote) → status New/Replied/Booked/Closed.
-const VERSION = 3;
+// v4: VendorDocument metadata (file bytes in IndexedDB).
+const VERSION = 4;
 
 export interface MockDb {
   version: number;
@@ -36,6 +37,7 @@ export interface MockDb {
   applications: VendorApplication[];
   listings: VendorListing[];
   inquiries: Inquiry[];
+  documents: VendorDocument[];
   sessionAccountId: string | null;
 }
 
@@ -90,6 +92,7 @@ const SEED: MockDb = Object.freeze({
     }),
   ),
   inquiries: [],
+  documents: [],
   sessionAccountId: null,
 });
 
@@ -101,7 +104,7 @@ function parse(raw: string | null): MockDb {
   try {
     const value = JSON.parse(raw) as MockDb & { version?: number };
     if (!value || !Array.isArray(value.accounts)) return SEED;
-    // Migrate v2 (and anything older with arrays) onto the enquiry status model.
+    // Migrate older stores onto the current schema.
     if (value.version !== VERSION) {
       const migrated: MockDb = {
         version: VERSION,
@@ -111,6 +114,7 @@ function parse(raw: string | null): MockDb {
         inquiries: Array.isArray(value.inquiries)
           ? value.inquiries.map((row) => normalizeInquiry(row as never))
           : [],
+        documents: Array.isArray((value as MockDb).documents) ? (value as MockDb).documents : [],
         sessionAccountId: value.sessionAccountId ?? null,
       };
       try {
@@ -122,6 +126,7 @@ function parse(raw: string | null): MockDb {
     }
     return {
       ...value,
+      documents: Array.isArray(value.documents) ? value.documents : [],
       inquiries: value.inquiries.map((row) => normalizeInquiry(row as never)),
     };
   } catch {
