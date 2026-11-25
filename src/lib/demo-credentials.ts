@@ -4,13 +4,14 @@
  * published sample listing (Aperture & Marigold), so the studio and public
  * profile stay in sync for demos.
  */
-import type { Inquiry, VendorAccount, VendorListing } from "@/data/types";
+import type { Inquiry, VendorAccount, VendorDocument, VendorListing } from "@/data/types";
 import { sampleListings } from "@/data/vendors";
 
 export const DEMO_EMAIL = "vendor@gmail.com";
 export const DEMO_PASSWORD = "123456";
 export const DEMO_ACCOUNT_ID = "acct-demo-vendor";
 export const DEMO_LISTING_ID = "lst-01";
+export const DEMO_DOCUMENT_ID = "doc-demo-vendor";
 
 export const COUPLE_DEMO_EMAIL = "couple@gmail.com";
 export const COUPLE_DEMO_PASSWORD = "123456";
@@ -25,7 +26,33 @@ export function demoAccount(): VendorAccount {
     whatsapp: "+919876543210",
     status: "approved",
     listingId: DEMO_LISTING_ID,
+    documentId: DEMO_DOCUMENT_ID,
     createdAt: "2026-01-01T00:00:00.000Z",
+  };
+}
+
+/**
+ * Approved sample identity document. The PNG blob (clearly marked SAMPLE)
+ * is written into IndexedDB on first demo login — never a real ID image.
+ */
+export function demoDocument(fileUrl: string): VendorDocument {
+  return {
+    id: DEMO_DOCUMENT_ID,
+    vendorId: DEMO_ACCOUNT_ID,
+    type: "pan",
+    files: [
+      {
+        name: "sample-id.png",
+        mimeType: "image/png",
+        size: 0,
+        url: fileUrl,
+        side: "front",
+      },
+    ],
+    status: "approved",
+    consentAt: "2026-01-01T00:00:00.000Z",
+    submittedAt: "2026-01-01T00:00:00.000Z",
+    reviewedAt: "2026-01-02T00:00:00.000Z",
   };
 }
 

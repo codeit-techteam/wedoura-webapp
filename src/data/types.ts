@@ -395,6 +395,44 @@ export interface Inquiry {
   updatedAt: string; // ISO datetime
 }
 
+/* -------------------------------------------- vendor identity documents */
+
+/** Government ID types accepted at signup. Never store the Aadhaar number. */
+export type VendorIdType =
+  | "masked_aadhaar"
+  | "pan"
+  | "voter_id"
+  | "passport"
+  | "driving_licence";
+
+export type VendorDocumentStatus = "submitted" | "approved" | "rejected";
+
+export interface VendorDocumentFile {
+  name: string;
+  mimeType: string;
+  size: number;
+  /**
+   * Private storage key (mock: `idb:…`). Never a public CDN URL — the real
+   * backend serves short-lived signed URLs to admins only.
+   */
+  url: string;
+  side: "front" | "back";
+}
+
+/** Identity document submitted at signup or re-uploaded from Settings. */
+export interface VendorDocument {
+  id: string;
+  vendorId: string;
+  type: VendorIdType;
+  files: VendorDocumentFile[];
+  status: VendorDocumentStatus;
+  rejectReason?: string;
+  /** When the vendor agreed to verification use of the document. */
+  consentAt: string;
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
 /* ------------------------------------------------------ vendor accounts */
 
 export interface VendorAccount {
@@ -409,6 +447,8 @@ export interface VendorAccount {
   rejectionNote?: string;
   /** Set when approval creates the draft listing. */
   listingId?: string;
+  /** Current identity document (latest submission). */
+  documentId?: string;
   createdAt: string; // ISO datetime
 }
 
@@ -427,6 +467,8 @@ export interface VendorApplication {
   consent: true;
   /** Optional early-access flag from the signup form. */
   foundingPartner?: boolean;
+  /** Identity document submitted with the application. */
+  documentId?: string;
   submittedAt: string; // ISO datetime
 }
 
