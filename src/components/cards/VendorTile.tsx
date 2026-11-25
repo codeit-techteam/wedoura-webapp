@@ -16,7 +16,7 @@ type Props = {
  */
 export function VendorTile({
   vendor,
-  sizes = "(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw",
+  sizes = "(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw",
   priority,
 }: Props) {
   const photo = vendor.cardPhotos[0];
@@ -35,9 +35,9 @@ export function VendorTile({
             />
           )}
         </div>
-        <div className="mt-3.5">
-          <p className="font-serif text-[1.2rem] leading-snug text-ink">{vendor.name}</p>
-          <p className="mt-1 text-small text-mute">
+        <div className="mt-4">
+          <p className="font-serif text-[1.35rem] leading-snug text-ink md:text-[1.45rem]">{vendor.name}</p>
+          <p className="mt-1.5 text-small text-mute">
             {vendor.cityName} · {vendor.categoryName} · {formatPrice(vendor.startingPriceINR, vendor.priceUnit)}
           </p>
         </div>
