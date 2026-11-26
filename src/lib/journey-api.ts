@@ -74,6 +74,7 @@ export interface SoulmatesWaitlistInput {
 }
 
 /** Waiting-list signup for Soulmates. No matrimony fields. */
+/** Legacy — the public site no longer writes waitlist entries. Kept for old local data. */
 export function createSoulmatesWaitlist(input: SoulmatesWaitlistInput): SoulmatesWaitlist {
   const store = readStore();
   const record: SoulmatesWaitlist = {

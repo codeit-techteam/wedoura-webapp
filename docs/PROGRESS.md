@@ -31,8 +31,46 @@ Update this file at the end of every session. Build order follows `docs/referenc
 | 23 | v2 session 6: vendor dashboard (`/vendor-studio`) | ✅ Done (2026-11-23) |
 | 24 | v2 session 7: full audit (Soulmates create skipped) | ✅ Done (2026-11-23) |
 | 25 | Vendor profile polish: hero, stories, founder, Book now + dashboard sync | ✅ Done (2026-11-24) |
+| 26 | Soulmates product: landing, create flow, member hub, mock API | ✅ Done (2026-11-26) |
+| 27 | Soulmates member area: intros, profile view, edit, settings | ✅ Done (2026-11-26) |
 
 ## Session log
+
+### 2026-11-26 · Soulmates member area
+
+Done:
+- `/soulmates/me` status card (draft → suspended), this week’s intros, interested-in-you, mutual, quick links.
+- `/soulmates/profile/[id]` introduced-only view; photos/contact/income rules; Interested / Not for me + undo toast; Report + Block.
+- `/soulmates/me/profile` preview; `/soulmates/me/edit` seven sections + sticky save + re-review warning; `/soulmates/me/settings` privacy, visibility, blocks, DELETE confirm.
+- Header/mobile/account menus: Soulmates link with activity dot.
+- API: intro views, undo, settings patch, update with review, unblock, activity seen.
+- Verification: lint, typecheck, production build.
+
+Routes to check:
+- `/login?next=/soulmates/me` as soulmates@gmail.com / 123456
+- `/soulmates/me`, `/soulmates/profile/{id}`, `/soulmates/me/edit`, `/soulmates/me/settings`
+
+Next up:
+- Visual QA; admin Soulmates tooling later.
+
+### 2026-11-26 · Soulmates product (replace waiting list)
+
+Done:
+- BUILD-PLAN §4 Soulmates decision → **build** (curated introductions; no gallery/browse; email/Google auth; ID upload not OTP).
+- Types: `SoulmateProfile`, `Introduction`, `SoulmateReport`, `SoulmateBlock`, `SoulmateDocument`; keep legacy `SoulmatesWaitlist`.
+- Mock API `src/lib/soulmates-api.ts` + store (`wedoura:soulmates-db`); photos/ID blobs in IndexedDB. Demo `soulmates@gmail.com` / `123456` (live profile, pending + mutual intros).
+- `/soulmates` landing (indexable): hero, how it works, private by design, family-created, FAQ, CTA. Waiting-list form removed.
+- `/soulmates/create` (noindex): reference 7-step flow + thank-you; account fields when signed out; ages 21/18; phone + identity document instead of OTP; Save & exit → `/soulmates/me`.
+- `/soulmates/me` (noindex): status, visibility, delete, introductions + respond.
+- Login `?next=` support; demo hint includes Soulmates account.
+- Verification: lint, typecheck, production build.
+
+Routes to check:
+- `/soulmates`, `/soulmates/create`, `/soulmates/me`
+- Login with `soulmates@gmail.com` / `123456`
+
+Next up:
+- Visual QA vs create-profile reference; admin review tooling later.
 
 ### 2026-11-26 · Homepage: Real weddings + Popular vendors save
 

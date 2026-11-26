@@ -961,11 +961,153 @@ export interface Subscriber {
   createdAt: string;
 }
 
+/** Legacy waiting-list entries. The site no longer writes these. */
 export interface SoulmatesWaitlist {
   id: string;
   name: string;
   email: string;
   city?: string;
+  createdAt: string;
+}
+
+/* ------------------------------------------------------------- Soulmates */
+
+export type SoulmateCreatedFor =
+  | "myself"
+  | "my_son"
+  | "my_daughter"
+  | "my_sibling"
+  | "other_relative_or_friend";
+
+export type SoulmateGender = "woman" | "man";
+
+export type SoulmateMaritalStatus =
+  | "Never married"
+  | "Divorced"
+  | "Widowed"
+  | "Awaiting divorce";
+
+export type SoulmatePhotoStatus = "pending" | "approved" | "rejected";
+
+export type SoulmatePhotoVisibility = "mutual" | "verified";
+
+export type SoulmateProfileStatus =
+  | "draft"
+  | "in_review"
+  | "changes_requested"
+  | "live"
+  | "paused"
+  | "hidden"
+  | "rejected"
+  | "suspended";
+
+export interface SoulmatePhoto {
+  id: string;
+  /** Private mock URL (`idb:…` or object/data URL while drafting). */
+  url: string;
+  order: number;
+  status: SoulmatePhotoStatus;
+}
+
+/** Identity document for a Soulmates profile — same shape as VendorDocument. */
+export interface SoulmateDocument {
+  id: string;
+  profileId: string;
+  type: VendorIdType;
+  files: VendorDocumentFile[];
+  status: VendorDocumentStatus;
+  rejectReason?: string;
+  consentAt: string;
+  submittedAt: string;
+  reviewedAt?: string;
+}
+
+export interface SoulmateProfile {
+  id: string;
+  accountId: string;
+  createdFor: SoulmateCreatedFor;
+  creator: { name: string; relation: string; whatsapp: string };
+  /** True when the profile is for someone else and they agreed. */
+  personConsents: boolean;
+  basics: {
+    firstName: string;
+    lastName: string;
+    gender: SoulmateGender;
+    dateOfBirth: string; // YYYY-MM-DD
+    heightCm: number;
+    maritalStatus: SoulmateMaritalStatus;
+    city: string;
+    community?: string;
+    languages: string[];
+  };
+  work: {
+    education: string;
+    fieldOfStudy: string;
+    profession: string;
+    /** Private — team only. */
+    organisation: string;
+    incomeBand?: string;
+    incomePrivate: boolean;
+  };
+  about: {
+    text: string;
+    familyType: string;
+    familyOutlook: string;
+    familyCanJoin: boolean;
+  };
+  preferences: {
+    ageMin: number;
+    ageMax: number;
+    locations: string[];
+    values: string[];
+    note?: string;
+  };
+  photos: SoulmatePhoto[];
+  photoVisibility: SoulmatePhotoVisibility;
+  /** Team only — never shown to members. */
+  phone: string;
+  identityDocument?: SoulmateDocument;
+  status: SoulmateProfileStatus;
+  changeRequest?: string;
+  rejectReason?: string;
+  submittedAt?: string;
+  verifiedAt?: string;
+  updatedAt: string;
+  createdAt: string;
+}
+
+export type IntroductionResponse = "pending" | "interested" | "not_for_me";
+
+export type IntroductionStatus = "pending" | "mutual" | "closed";
+
+export interface Introduction {
+  id: string;
+  profileAId: string;
+  profileBId: string;
+  /** Admin account id that created the introduction. */
+  createdBy: string;
+  createdAt: string;
+  note?: string;
+  responses: { a: IntroductionResponse; b: IntroductionResponse };
+  status: IntroductionStatus;
+}
+
+export type SoulmateReportStatus = "open" | "resolved";
+
+export interface SoulmateReport {
+  id: string;
+  reporterProfileId: string;
+  reportedProfileId: string;
+  reason: string;
+  note: string;
+  createdAt: string;
+  status: SoulmateReportStatus;
+}
+
+export interface SoulmateBlock {
+  id: string;
+  blockerProfileId: string;
+  blockedProfileId: string;
   createdAt: string;
 }
 

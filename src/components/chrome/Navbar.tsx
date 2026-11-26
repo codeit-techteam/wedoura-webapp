@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { AccountNav } from "@/components/chrome/AccountNav";
 import { MobileMenu } from "@/components/chrome/MobileMenu";
 import { NAV_LEFT, NAV_LIST, NAV_RIGHT } from "@/components/chrome/nav";
 import { SearchOverlay } from "@/components/chrome/SearchOverlay";
@@ -96,6 +97,9 @@ export function Navbar({ categories, cities }: Props) {
                 </Link>
               </li>
             ))}
+            <li>
+              <AccountNav />
+            </li>
             <li>
               <Link
                 href={NAV_LIST.href}

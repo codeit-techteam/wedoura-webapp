@@ -3,11 +3,13 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Couple session (localStorage mock). Separate from the vendor mock-store
- * session. Demo: couple@gmail.com / 123456.
+ * Couple / member session (localStorage mock). Separate from the vendor
+ * mock-store session. Demos: couple@gmail.com and soulmates@gmail.com / 123456.
  */
 export const COUPLE_DEMO_EMAIL = "couple@gmail.com";
 export const COUPLE_DEMO_PASSWORD = "123456";
+export const SOULMATES_DEMO_EMAIL = "soulmates@gmail.com";
+export const SOULMATES_DEMO_PASSWORD = "123456";
 
 const KEY = "wedoura:couple-session";
 const EVENT = "wedoura:couple-change";
@@ -55,6 +57,25 @@ function demoCouple(): CoupleAccount {
         text: "Welcome to Wedoura. Your shortlist and enquiries live here.",
         read: true,
         at: new Date(Date.now() - 3 * day).toISOString(),
+      },
+    ],
+  };
+}
+
+function demoSoulmatesAccount(): CoupleAccount {
+  return {
+    email: SOULMATES_DEMO_EMAIL,
+    password: SOULMATES_DEMO_PASSWORD,
+    names: "Meera Nair",
+    weddingMonth: "",
+    city: "Bengaluru",
+    onboarded: true,
+    notifications: [
+      {
+        id: "n-sm-1",
+        text: "You have a new introduction waiting in Soulmates.",
+        read: false,
+        at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       },
     ],
   };
@@ -141,6 +162,19 @@ export async function coupleLogin(emailRaw: string, password: string): Promise<C
       return { ok: true, value: existing };
     }
     const account = demoCouple();
+    write(account);
+    return { ok: true, value: account };
+  }
+
+  if (email === SOULMATES_DEMO_EMAIL && password === SOULMATES_DEMO_PASSWORD) {
+    const { ensureSoulmatesDemoSeed } = await import("@/lib/soulmates-api");
+    await ensureSoulmatesDemoSeed();
+    const existing = getSnapshot();
+    if (existing?.email === SOULMATES_DEMO_EMAIL) {
+      write(existing);
+      return { ok: true, value: existing };
+    }
+    const account = demoSoulmatesAccount();
     write(account);
     return { ok: true, value: account };
   }

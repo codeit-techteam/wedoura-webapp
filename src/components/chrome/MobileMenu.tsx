@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRef } from "react";
 import { NAV_LINKS, NAV_LIST } from "@/components/chrome/nav";
 import { Wordmark } from "@/components/chrome/Wordmark";
+import { useCoupleAccount } from "@/lib/couple-auth";
 import { useFocusTrap } from "@/lib/focus-trap";
+import { useMySoulmateProfile, useSoulmatesActivityDot } from "@/lib/soulmates-api";
 
 type Props = {
   open: boolean;
@@ -15,6 +17,9 @@ type Props = {
 export function MobileMenu({ open, onClose }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const account = useCoupleAccount();
+  const soulmatesProfile = useMySoulmateProfile();
+  const soulmatesDot = useSoulmatesActivityDot();
   useFocusTrap(rootRef, open, closeRef);
 
   if (!open) return null;
@@ -63,6 +68,24 @@ export function MobileMenu({ open, onClose }: Props) {
         ))}
       </nav>
       <div className="flex flex-col items-start gap-5 pt-6">
+        {account && soulmatesProfile ? (
+          <Link
+            href="/soulmates/me"
+            onClick={onClose}
+            className="flex min-h-11 w-full items-center justify-between border-b border-line pb-3 font-sans text-button font-medium tracking-[0.22em] uppercase"
+          >
+            <span>Soulmates</span>
+            {soulmatesDot ? <span className="size-2 rounded-full bg-gold-deep" aria-hidden="true" /> : null}
+          </Link>
+        ) : account ? (
+          <Link
+            href="/account"
+            onClick={onClose}
+            className="font-sans text-button font-medium tracking-[0.22em] uppercase border-b border-line pb-3"
+          >
+            Your account
+          </Link>
+        ) : null}
         <Link
           href="/contact"
           onClick={onClose}
