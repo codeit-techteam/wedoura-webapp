@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { CoupleLoginClient } from "@/components/auth/CoupleLoginClient";
 import { pageMeta } from "@/lib/seo";
 
@@ -10,5 +11,9 @@ export const metadata: Metadata = pageMeta({
 });
 
 export default function CoupleLoginPage() {
-  return <CoupleLoginClient />;
+  return (
+    <Suspense fallback={null}>
+      <CoupleLoginClient />
+    </Suspense>
+  );
 }

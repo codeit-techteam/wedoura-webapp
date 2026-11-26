@@ -14,6 +14,7 @@ import {
   useCoupleAccount,
   useCoupleHydrated,
 } from "@/lib/couple-auth";
+import { useMySoulmateProfile, useSoulmatesActivityDot } from "@/lib/soulmates-api";
 import { cn } from "@/lib/cn";
 import { formatPrice } from "@/lib/format";
 import { INQUIRY_STATUS_LABEL, inquiryWeddingLabel } from "@/lib/inquiry";
@@ -69,6 +70,8 @@ export function AccountSpace() {
   const [inquiries, setInquiries] = useState<CoupleInquiryView[]>([]);
   const [compare, setCompare] = useState<string[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
+  const soulmatesProfile = useMySoulmateProfile();
+  const soulmatesDot = useSoulmatesActivityDot();
 
   useEffect(() => {
     if (!hydrated) return;
@@ -202,6 +205,19 @@ export function AccountSpace() {
               <button type="button" role="menuitem" className="block w-full px-4 py-2 text-left text-small hover:bg-sand" onClick={() => { goTab("details"); setMenuOpen(false); }}>
                 Wedding details
               </button>
+              {soulmatesProfile ? (
+                <Link
+                  role="menuitem"
+                  href="/soulmates/me"
+                  className="flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-small hover:bg-sand"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span>Soulmates</span>
+                  {soulmatesDot ? (
+                    <span className="size-2 rounded-full bg-gold-deep" aria-label="New activity" />
+                  ) : null}
+                </Link>
+              ) : null}
               <button type="button" role="menuitem" className="block w-full px-4 py-2 text-left text-small hover:bg-sand" onClick={() => { goTab("notify"); setMenuOpen(false); }}>
                 Notifications
               </button>

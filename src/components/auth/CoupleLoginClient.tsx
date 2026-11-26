@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CoupleOnboarding, LoginCard } from "@/components/auth/LoginCard";
 import { LoginShell } from "@/components/auth/LoginShell";
@@ -13,10 +13,19 @@ import {
   useCoupleHydrated,
   COUPLE_DEMO_EMAIL,
   COUPLE_DEMO_PASSWORD,
+  SOULMATES_DEMO_EMAIL,
+  SOULMATES_DEMO_PASSWORD,
 } from "@/lib/couple-auth";
+
+function safeNext(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/account";
+  return raw;
+}
 
 export function CoupleLoginClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
   const hydrated = useCoupleHydrated();
   const account = useCoupleAccount();
   const [justLoggedInNeedsOnboard, setJustLoggedInNeedsOnboard] = useState(false);
@@ -26,8 +35,8 @@ export function CoupleLoginClient() {
 
   useEffect(() => {
     if (!hydrated || !account?.onboarded || showOnboard) return;
-    router.replace("/account");
-  }, [hydrated, account, showOnboard, router]);
+    router.replace(next);
+  }, [hydrated, account, showOnboard, router, next]);
 
   return (
     <LoginShell
@@ -42,7 +51,7 @@ export function CoupleLoginClient() {
             const result = await completeCoupleOnboarding(values);
             if (result.ok) {
               setJustLoggedInNeedsOnboard(false);
-              router.push("/account");
+              router.push(next);
             }
           }}
         />
@@ -55,9 +64,9 @@ export function CoupleLoginClient() {
             </>
           }
           lead="Keep your shortlist, vendor replies and bookings together — on your phone and your laptop."
-          demoHint={`Demo: ${COUPLE_DEMO_EMAIL} / ${COUPLE_DEMO_PASSWORD}`}
-          successMessage="Opening your wedding space…"
-          redirectTo="/account"
+          demoHint={`Demo: ${COUPLE_DEMO_EMAIL} / ${COUPLE_DEMO_PASSWORD} · Soulmates: ${SOULMATES_DEMO_EMAIL} / ${SOULMATES_DEMO_PASSWORD}`}
+          successMessage="Opening your space…"
+          redirectTo={next}
           onLogin={async (email, password) => {
             const result = await coupleLogin(email, password);
             if (!result.ok) return result;

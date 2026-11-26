@@ -15,6 +15,8 @@ export const DEMO_DOCUMENT_ID = "doc-demo-vendor";
 
 export const COUPLE_DEMO_EMAIL = "couple@gmail.com";
 export const COUPLE_DEMO_PASSWORD = "123456";
+export const SOULMATES_DEMO_EMAIL = "soulmates@gmail.com";
+export const SOULMATES_DEMO_PASSWORD = "123456";
 
 /** Slim account for the demo vendor. */
 export function demoAccount(): VendorAccount {

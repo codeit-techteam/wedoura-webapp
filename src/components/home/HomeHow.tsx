@@ -18,7 +18,7 @@ const STEPS = [
 
 export function HomeHow() {
   return (
-    <section id="how" aria-label="How Wedoura works" className="bg-white py-[clamp(5.5rem,12vw,13.75rem)]">
+    <section id="how" aria-label="How Wedoura works" className="bg-white py-[clamp(4rem,8vw,8rem)]">
       <div className="mx-auto max-w-[90rem] px-[clamp(1.25rem,5vw,5.5rem)]">
         <p className="label text-gold-deep">How Wedoura works</p>
         <h2 className="mt-4 font-serif text-[clamp(2.625rem,5vw,4.75rem)] leading-[1.02] text-ink">

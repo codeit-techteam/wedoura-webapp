@@ -38,15 +38,19 @@ export function HomeVendors({ vendors, tabs }: Props) {
 
         {/* Category tabs */}
         {tabs.length > 0 && (
-          <nav aria-label="Filter by category" className="mb-8 flex flex-wrap gap-3">
+          <nav
+            aria-label="Filter by category"
+            className="mb-10 flex flex-wrap gap-x-[clamp(1.25rem,3vw,2.5rem)] gap-y-2 border-b border-line"
+            role="tablist"
+          >
             <button
               type="button"
+              role="tab"
+              aria-selected={!active}
               onClick={() => setActive("")}
               className={cn(
-                "tap rounded-none border px-4 py-2 font-sans text-button font-medium tracking-button uppercase transition-colors",
-                !active
-                  ? "border-ink bg-ink text-ivory"
-                  : "border-line bg-white text-ink hover:border-ink"
+                "tap -mb-px min-h-11 border-b border-transparent pb-3.5 font-sans text-[0.78125rem] font-medium tracking-[0.24em] text-mute uppercase transition-colors hover:text-ink hover:border-gold",
+                !active && "border-gold text-ink",
               )}
             >
               All
@@ -55,12 +59,12 @@ export function HomeVendors({ vendors, tabs }: Props) {
               <button
                 key={tab.slug}
                 type="button"
+                role="tab"
+                aria-selected={active === tab.slug}
                 onClick={() => setActive(active === tab.slug ? "" : tab.slug)}
                 className={cn(
-                  "tap rounded-none border px-4 py-2 font-sans text-button font-medium tracking-button uppercase transition-colors",
-                  active === tab.slug
-                    ? "border-ink bg-ink text-ivory"
-                    : "border-line bg-white text-ink hover:border-ink"
+                  "tap -mb-px min-h-11 border-b border-transparent pb-3.5 font-sans text-[0.78125rem] font-medium tracking-[0.24em] text-mute uppercase transition-colors hover:text-ink hover:border-gold",
+                  active === tab.slug && "border-gold text-ink",
                 )}
               >
                 {tab.label}
