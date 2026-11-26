@@ -31,3 +31,17 @@ export function formatPrice(priceINR: number | undefined, unit: PriceUnit): stri
   // Per-plate prices are exact; the others are starting points.
   return unit === "per_plate" ? base : `From ${base}`;
 }
+
+/**
+ * Compact homepage card price: "From ₹1.5L", "From ₹85,000", or "On request".
+ * No unit — the Popular vendors reference shows lakhs only.
+ */
+export function formatPriceLakh(priceINR: number | undefined, unit: PriceUnit): string {
+  if (unit === "on_request" || priceINR === undefined) return "On request";
+  if (priceINR >= 100_000) {
+    const lakh = priceINR / 100_000;
+    const label = Number.parseFloat(lakh.toFixed(1)).toString();
+    return `From ₹${label}L`;
+  }
+  return `From ${formatINR(priceINR)}`;
+}

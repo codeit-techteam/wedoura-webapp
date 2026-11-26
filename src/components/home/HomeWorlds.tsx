@@ -42,10 +42,10 @@ export function HomeWorlds() {
         {WORLDS.map((world) => (
           <li key={world.href}>
             <Link href={world.href} className="group block">
-              <div className="relative aspect-3/4.2 overflow-hidden bg-sand">
+              <div className="relative aspect-[3/4] overflow-hidden bg-sand">
                 <Image
                   src={`/ref/home/${world.img}`}
-                  alt={world.title}
+                  alt=""
                   fill
                   className="object-cover transition-transform duration-1200 ease-wedoura group-hover:scale-104"
                   style={"position" in world ? { objectPosition: world.position } : undefined}
