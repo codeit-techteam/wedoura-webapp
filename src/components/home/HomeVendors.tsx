@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { VendorTile } from "@/components/cards/VendorTile";
 import { Container } from "@/components/ui/Container";
@@ -78,6 +79,15 @@ export function HomeVendors({ vendors, tabs }: Props) {
             </li>
           ))}
         </ul>
+
+        <div className="mt-14 flex justify-center md:mt-16">
+          <Link
+            href="/vendors"
+            className="tap inline-flex min-h-12 items-center justify-center bg-ink px-9 font-sans text-button font-medium tracking-button text-ivory uppercase transition-chrome hover:bg-gold-deep"
+          >
+            See all vendors
+          </Link>
+        </div>
       </Container>
     </section>
   );

@@ -19,7 +19,7 @@ export function HomeCategories() {
       <div className="mx-auto mb-[clamp(3.75rem,6.5vw,6.25rem)] flex max-w-[90rem] flex-col gap-4 px-[clamp(1.25rem,5vw,5.5rem)] md:flex-row md:items-end md:justify-between">
         <div>
           <p className="label text-gold-deep">Everything in one place</p>
-          <h2 className="mt-4 font-serif text-[clamp(2.625rem,5vw,4.75rem)] leading-[1.02] text-ink">
+          <h2 className="mt-4 whitespace-nowrap font-serif text-[clamp(2.25rem,4.4vw,4.75rem)] leading-[1.02] text-ink">
             Everything for your <em>wedding</em>
           </h2>
         </div>
