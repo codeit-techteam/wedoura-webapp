@@ -2,19 +2,33 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { BottomSheet } from "@/components/browse/BottomSheet";
-import { FilterSelect } from "@/components/browse/FilterBar";
-import { Icon } from "@/components/ui/Icon";
-import { cn } from "@/lib/cn";
 import { BUDGET_BANDS, STYLE_FILTERS, VENDOR_SORTS } from "@/lib/api";
-import { patchedHref, clearedHref, type ParamRecord } from "@/lib/url";
+import { clearedHref, patchedHref, type ParamRecord } from "@/lib/url";
+import { cn } from "@/lib/cn";
+
+type CategoryOpt = { slug: string; name: string; count: number };
 
 interface Props {
   pathname: string;
+  /** When set, Category filter/chips navigate here (bare `/vendors`) instead of a pinned route. */
+  categoryPathname?: string;
   params: ParamRecord;
   total: number;
   activeCount: number;
+  categories: CategoryOpt[];
+  /** Category fixed by the route — filter control still shows the name. */
+  pinnedCategory?: string;
 }
+
+const BUDGET_LABEL: Record<string, string> = {
+  "under-1l": "Under ₹1 lakh",
+  "1-3l": "₹1–3 lakh",
+  "3-8l": "₹3–8 lakh",
+  "8-plus": "₹8 lakh+",
+  b1: "Under ₹1 lakh",
+  b2: "₹1–5 lakh",
+  b3: "₹5 lakh+",
+};
 
 function toggleStyle(params: ParamRecord, style: string, pathname: string): string {
   const current = params.style ? params.style.split(",").filter(Boolean) : [];
@@ -24,56 +38,15 @@ function toggleStyle(params: ParamRecord, style: string, pathname: string): stri
   return patchedHref(pathname, params, { style: next.length ? next.join(",") : null, show: null });
 }
 
-const control =
-  "tap inline-flex min-h-11 items-center gap-2 border border-line bg-white px-4 font-sans text-[0.9375rem] text-ink transition-chrome hover:border-ink";
-
-const controlActive = "border-ink bg-ink text-ivory hover:border-ink";
-
-function ViewToggle({ params, pathname }: { params: ParamRecord; pathname: string }) {
-  const view = params.view ?? "list";
-  return (
-    <div className="flex border border-line" role="group" aria-label="View">
-      <Link
-        href={patchedHref(pathname, params, { view: "list" })}
-        scroll={false}
-        aria-label="List view"
-        aria-pressed={view === "list"}
-        className={cn(
-          "tap flex size-11 items-center justify-center transition-chrome",
-          view === "list" ? "bg-ink text-ivory" : "bg-white text-mute hover:text-ink",
-        )}
-      >
-        <Icon name="menu" size={18} />
-      </Link>
-      <Link
-        href={patchedHref(pathname, params, { view: "grid" })}
-        scroll={false}
-        aria-label="Grid view"
-        aria-pressed={view === "grid"}
-        className={cn(
-          "tap flex size-11 items-center justify-center border-l border-line transition-chrome",
-          view === "grid" ? "bg-ink text-ivory" : "bg-white text-mute hover:text-ink",
-        )}
-      >
-        <Icon name="grid" size={18} />
-      </Link>
-    </div>
-  );
-}
-
-/** Style filter as a popover of chips — keeps the strap one row tall. */
-function StyleMenu({ params, pathname }: { params: ParamRecord; pathname: string }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const active = params.style ? params.style.split(",").filter(Boolean) : [];
-
+function useOutsideClose(open: boolean, onClose: () => void) {
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") onClose();
     };
     const onPointer = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+      if (!ref.current?.contains(e.target as Node)) onClose();
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
@@ -81,394 +54,461 @@ function StyleMenu({ params, pathname }: { params: ParamRecord; pathname: string
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointer);
     };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        aria-haspopup="true"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className={cn(control, active.length > 0 && controlActive)}
-      >
-        Style
-        {active.length > 0 ? <em className="not-italic text-gold">{active.length}</em> : null}
-        <Icon name="chevron-down" size={12} className={cn("transition-chrome", open && "rotate-180")} />
-      </button>
-      {open ? (
-        <div
-          role="group"
-          aria-label="Style"
-          className="absolute top-[calc(100%+0.5rem)] left-0 z-40 min-w-[18rem] border border-line bg-white p-4"
-        >
-          <div className="flex flex-wrap gap-2">
-            {STYLE_FILTERS.map((s) => (
-              <Link
-                key={s}
-                href={toggleStyle(params, s, pathname)}
-                scroll={false}
-                className={cn(
-                  "tap inline-flex min-h-11 items-center border px-4 text-[0.9375rem] transition-chrome",
-                  active.includes(s)
-                    ? "border-ink bg-ink text-ivory"
-                    : "border-line bg-white text-ink hover:border-ink",
-                )}
-              >
-                {s}
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
+  }, [open, onClose]);
+  return ref;
 }
 
-function BudgetMenu({ params, pathname }: { params: ParamRecord; pathname: string }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const value = params.budget ?? "";
-  const label = BUDGET_BANDS.find((b) => b.value === value)?.label;
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const onPointer = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointer);
-    };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className={cn(control, value && controlActive)}
-      >
-        Starting price
-        {label ? <em className="not-italic text-gold">{label}</em> : null}
-        <Icon name="chevron-down" size={12} className={cn("transition-chrome", open && "rotate-180")} />
-      </button>
-      {open ? (
-        <ul
-          role="listbox"
-          className="absolute top-[calc(100%+0.5rem)] left-0 z-40 min-w-[14rem] border border-line bg-white py-1"
-        >
-          <li role="option" aria-selected={!value}>
-            <Link
-              href={patchedHref(pathname, params, { budget: null, show: null })}
-              scroll={false}
-              onClick={() => setOpen(false)}
-              className={cn(
-                "tap block px-4 py-2.5 text-[0.9375rem] hover:bg-ivory",
-                !value ? "font-medium text-ink" : "text-mute",
-              )}
-            >
-              Any budget
-            </Link>
-          </li>
-          {BUDGET_BANDS.map((b) => (
-            <li key={b.value} role="option" aria-selected={value === b.value}>
-              <Link
-                href={patchedHref(pathname, params, { budget: b.value, show: null })}
-                scroll={false}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "tap block border-t border-line px-4 py-2.5 text-[0.9375rem] hover:bg-ivory",
-                  value === b.value ? "font-medium text-ink" : "text-ink",
-                )}
-              >
-                {b.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-}
-
-function SortMenu({ params, pathname }: { params: ParamRecord; pathname: string }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const value = params.sort ?? "";
-  const label = VENDOR_SORTS.find((s) => s.value === value)?.label ?? "Recommended";
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    const onPointer = (e: PointerEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    document.addEventListener("pointerdown", onPointer);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.removeEventListener("pointerdown", onPointer);
-    };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className={control}
-      >
-        <span className="text-mute">Sort</span>
-        <b className="font-medium">{label}</b>
-        <Icon name="chevron-down" size={12} className={cn("transition-chrome", open && "rotate-180")} />
-      </button>
-      {open ? (
-        <ul
-          role="listbox"
-          className="absolute top-[calc(100%+0.5rem)] right-0 z-40 min-w-[14rem] border border-line bg-white py-1"
-        >
-          <li role="option" aria-selected={!value}>
-            <Link
-              href={patchedHref(pathname, params, { sort: null, show: null })}
-              scroll={false}
-              onClick={() => setOpen(false)}
-              className={cn("tap flex justify-between px-4 py-2.5 text-[0.9375rem] hover:bg-ivory", !value && "font-medium")}
-            >
-              Recommended
-              {!value ? <span className="text-gold-deep">✓</span> : null}
-            </Link>
-          </li>
-          {VENDOR_SORTS.map((s) => (
-            <li key={s.value} role="option" aria-selected={value === s.value}>
-              <Link
-                href={patchedHref(pathname, params, { sort: s.value, show: null })}
-                scroll={false}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "tap flex justify-between border-t border-line px-4 py-2.5 text-[0.9375rem] hover:bg-ivory",
-                  value === s.value && "font-medium",
-                )}
-              >
-                {s.label}
-                {value === s.value ? <span className="text-gold-deep">✓</span> : null}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-}
-
-function ActiveChips({ params, pathname }: { params: ParamRecord; pathname: string }) {
-  const chips: { label: string; clearKey: string }[] = [];
-
-  if (params.budget) {
-    const b = BUDGET_BANDS.find((x) => x.value === params.budget);
-    if (b) chips.push({ label: b.label, clearKey: "budget" });
-  }
-  if (params.style) {
-    for (const s of params.style.split(",").filter(Boolean)) {
-      chips.push({ label: s, clearKey: `style:${s}` });
-    }
-  }
-  if (params.travel === "1") chips.push({ label: "Travels anywhere", clearKey: "travel" });
-  if (params.picks === "1") chips.push({ label: "Wedoura picks", clearKey: "picks" });
-
-  if (chips.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap items-center gap-2 pt-3">
-      {chips.map((chip) => {
-        const href = chip.clearKey.startsWith("style:")
-          ? toggleStyle(params, chip.clearKey.slice(6), pathname)
-          : patchedHref(pathname, params, { [chip.clearKey]: null, show: null });
-        return (
-          <Link
-            key={chip.clearKey}
-            href={href}
-            scroll={false}
-            className="tap inline-flex min-h-9 items-center gap-2 bg-sand px-3.5 py-1 text-small text-ink"
-          >
-            {chip.label}
-            <span aria-hidden="true" className="text-[0.6875rem] text-mute">
-              ✕
-            </span>
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
-export function VendorFilters({ pathname, params, total, activeCount }: Props) {
+export function VendorFilters({
+  pathname,
+  categoryPathname,
+  params,
+  activeCount,
+  categories,
+  pinnedCategory,
+}: Props) {
+  const catPath = categoryPathname ?? pathname;
   const [sheetOpen, setSheetOpen] = useState(false);
-  const count = `${total} vendor${total !== 1 ? "s" : ""}`;
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [sortOpen, setSortOpen] = useState(false);
+
+  const activeCategory = pinnedCategory ?? params.category ?? "";
+  const catName = categories.find((c) => c.slug === activeCategory)?.name;
+  const budget = params.budget ?? "";
+  const budgetLabel = budget ? BUDGET_LABEL[budget] ?? BUDGET_BANDS.find((b) => b.value === budget)?.label : "";
+  const styles = params.style ? params.style.split(",").filter(Boolean) : [];
+  const styleLabel =
+    styles.length === 0 ? "" : styles.length === 1 ? styles[0] : `${styles.length} styles`;
   const travelActive = params.travel === "1";
   const picksActive = params.picks === "1";
+  const moreCount = (travelActive ? 1 : 0) + (picksActive ? 1 : 0);
+  const sortValue = params.sort ?? "";
+  const sortLabel = VENDOR_SORTS.find((s) => s.value === sortValue)?.label ?? "Recommended";
+  const view = params.view === "grid" ? "grid" : "list";
 
-  const clearHref =
-    activeCount > 0
-      ? clearedHref(pathname, params, ["q", "category", "city", "budget", "style", "travel", "picks", "sort", "show"])
-      : undefined;
+  const clearHref = clearedHref(pathname, params, [
+    "q",
+    "category",
+    "city",
+    "budget",
+    "style",
+    "travel",
+    "picks",
+    "sort",
+    "show",
+  ]);
+
+  const chips: { label: string; href: string; key: string }[] = [];
+  if (params.category && !pinnedCategory && catName) {
+    chips.push({
+      label: catName,
+      key: "cat",
+      href: patchedHref(pathname, params, { category: null, show: null }),
+    });
+  }
+  if (params.city) {
+    chips.push({
+      label: params.city,
+      key: "city",
+      href: patchedHref(pathname, params, { city: null, show: null }),
+    });
+  }
+  if (params.q) {
+    chips.push({
+      label: `“${params.q}”`,
+      key: "q",
+      href: patchedHref(pathname, params, { q: null, show: null }),
+    });
+  }
+  if (budget && budgetLabel) {
+    chips.push({
+      label: budgetLabel,
+      key: "budget",
+      href: patchedHref(pathname, params, { budget: null, show: null }),
+    });
+  }
+  for (const s of styles) {
+    chips.push({ label: s, key: `style:${s}`, href: toggleStyle(params, s, pathname) });
+  }
+  if (travelActive) {
+    chips.push({
+      label: "Travels for destination weddings",
+      key: "travel",
+      href: patchedHref(pathname, params, { travel: null, show: null }),
+    });
+  }
+  if (picksActive) {
+    chips.push({
+      label: "Wedoura picks",
+      key: "picks",
+      href: patchedHref(pathname, params, { picks: null, show: null }),
+    });
+  }
+
+  function toggleGroup(id: string) {
+    setOpenGroup((prev) => (prev === id ? null : id));
+    setSortOpen(false);
+  }
+
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSheetOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [sheetOpen]);
+
+  const sortRef = useOutsideClose(sortOpen, () => setSortOpen(false));
 
   return (
-    <div className="sticky top-[var(--nav-h)] z-30 border-b border-line bg-ivory/95 backdrop-blur-md">
-      {/* Mobile strip */}
-      <div className="flex items-center justify-between gap-4 px-gutter py-2.5 md:hidden">
-        <button
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          className="tap inline-flex min-h-11 items-center gap-2 text-label-lg font-medium text-ink"
-          aria-haspopup="dialog"
-        >
-          <Icon name="menu" size={18} />
-          Filters{activeCount > 0 ? ` (${activeCount})` : ""}
-        </button>
-        <p className="text-small text-mute" aria-live="polite">
-          {count}
-        </p>
-      </div>
-
-      {/* Desktop: one-row control bar matching the reference */}
-      <div className="container-site hidden py-3 md:block">
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <BudgetMenu params={params} pathname={pathname} />
-            <StyleMenu params={params} pathname={pathname} />
-            <Link
-              href={patchedHref(pathname, params, { travel: travelActive ? null : "1", show: null })}
-              scroll={false}
-              className={cn(control, travelActive && controlActive)}
-              aria-pressed={travelActive}
+    <>
+      <div className="fbar" id="fbar">
+        <aside className={cn("side", sheetOpen && "on")} id="side" aria-label="Filters">
+          {/* Category */}
+          <div className={cn("fgrp", openGroup === "fCat" && "open")} data-g="fCat">
+            <button
+              type="button"
+              className={cn("fh", activeCategory && "act")}
+              aria-expanded={openGroup === "fCat"}
+              onClick={() => toggleGroup("fCat")}
             >
-              Travels anywhere
-            </Link>
-            <Link
-              href={patchedHref(pathname, params, { picks: picksActive ? null : "1", show: null })}
-              scroll={false}
-              className={cn(control, picksActive && controlActive)}
-              aria-pressed={picksActive}
-            >
-              ✦ Wedoura picks
-            </Link>
+              <span>Category</span>
+              <em>{catName && !pinnedCategory ? catName : ""}</em>
+            </button>
+            <div className="fpop">
+              <div id="fCat">
+                <Link
+                  href={patchedHref(catPath, params, { category: null, show: null })}
+                  scroll={false}
+                  className="fl"
+                  onClick={() => setOpenGroup(null)}
+                  aria-current={!activeCategory ? "true" : undefined}
+                >
+                  All vendors
+                  <small>{categories.reduce((n, c) => n + c.count, 0)}</small>
+                </Link>
+                {categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={patchedHref(catPath, params, { category: c.slug, show: null })}
+                    scroll={false}
+                    className={cn("fl", c.count === 0 && "dim")}
+                    onClick={() => setOpenGroup(null)}
+                    aria-current={activeCategory === c.slug ? "true" : undefined}
+                  >
+                    {c.name}
+                    <small>{c.count}</small>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <SortMenu params={params} pathname={pathname} />
-            <p className="whitespace-nowrap text-small text-mute" aria-live="polite">
-              {count}
-            </p>
-            {clearHref ? (
-              <Link
-                href={clearHref}
-                scroll={false}
-                className="border-b border-gold pb-0.5 font-sans text-[0.6875rem] font-medium tracking-[0.2em] uppercase"
-              >
-                Clear
-              </Link>
-            ) : null}
-            <ViewToggle params={params} pathname={pathname} />
+          {/* Starting price */}
+          <div className={cn("fgrp", openGroup === "fBud" && "open")} data-g="fBud">
+            <button
+              type="button"
+              className={cn("fh", budget && "act")}
+              aria-expanded={openGroup === "fBud"}
+              onClick={() => toggleGroup("fBud")}
+            >
+              <span>Starting price</span>
+              <em>{budgetLabel}</em>
+            </button>
+            <div className="fpop">
+              <div className="pills" id="fBud">
+                <Link
+                  href={patchedHref(pathname, params, { budget: null, show: null })}
+                  scroll={false}
+                  className="pill"
+                  aria-pressed={!budget}
+                  onClick={() => setOpenGroup(null)}
+                >
+                  Any
+                </Link>
+                {BUDGET_BANDS.map((b) => (
+                  <Link
+                    key={b.value}
+                    href={patchedHref(pathname, params, { budget: b.value, show: null })}
+                    scroll={false}
+                    className="pill"
+                    aria-pressed={budget === b.value}
+                    onClick={() => setOpenGroup(null)}
+                  >
+                    {BUDGET_LABEL[b.value] ?? b.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-        <ActiveChips params={params} pathname={pathname} />
-      </div>
 
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Filters">
-        <div className="flex flex-col gap-5">
-          <FilterSelect
-            param="budget"
-            label="Starting price"
-            options={BUDGET_BANDS.map((b) => ({ value: b.value, label: b.label }))}
-            allLabel="Any budget"
-            pathname={pathname}
-            params={params}
-          />
-          <div className="border-b border-line pb-5">
-            <p className="label text-mute">Style</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {STYLE_FILTERS.map((s) => {
-                const active = (params.style ?? "").split(",").filter(Boolean).includes(s);
-                return (
+          {/* Style */}
+          <div className={cn("fgrp", openGroup === "fStyle" && "open")} data-g="fStyle">
+            <button
+              type="button"
+              className={cn("fh", styles.length > 0 && "act")}
+              aria-expanded={openGroup === "fStyle"}
+              onClick={() => toggleGroup("fStyle")}
+            >
+              <span>Style</span>
+              <em>{styleLabel}</em>
+            </button>
+            <div className="fpop">
+              <div className="pills" id="fStyle">
+                {STYLE_FILTERS.map((s) => (
                   <Link
                     key={s}
                     href={toggleStyle(params, s, pathname)}
                     scroll={false}
-                    className={cn(
-                      "tap inline-flex min-h-11 items-center border px-3 text-small transition-chrome",
-                      active ? "border-ink bg-ink text-ivory" : "border-line text-mute",
-                    )}
+                    className="pill"
+                    aria-pressed={styles.includes(s)}
                   >
                     {s}
                   </Link>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
-          <div className="border-b border-line pb-5">
-            <p className="label text-mute mb-3">More filters</p>
-            <div className="flex flex-col gap-2">
+
+          {/* More */}
+          <div className={cn("fgrp", openGroup === "fMore" && "open")} data-g="fMore">
+            <button
+              type="button"
+              className={cn("fh", moreCount > 0 && "act")}
+              aria-expanded={openGroup === "fMore"}
+              onClick={() => toggleGroup("fMore")}
+            >
+              <span>More</span>
+              <em>{moreCount > 0 ? String(moreCount) : ""}</em>
+            </button>
+            <div className="fpop">
               <Link
-                href={patchedHref(pathname, params, { travel: travelActive ? null : "1", show: null })}
+                href={patchedHref(pathname, params, {
+                  travel: travelActive ? null : "1",
+                  show: null,
+                })}
                 scroll={false}
-                className={cn(
-                  "tap inline-flex min-h-11 items-center border px-4 text-small",
-                  travelActive ? "border-ink bg-ink text-ivory" : "border-line text-mute",
-                )}
+                className="tgl"
+                aria-pressed={travelActive}
               >
-                Travels anywhere
+                Travels for destination weddings
+                <i />
               </Link>
               <Link
-                href={patchedHref(pathname, params, { picks: picksActive ? null : "1", show: null })}
+                href={patchedHref(pathname, params, {
+                  picks: picksActive ? null : "1",
+                  show: null,
+                })}
                 scroll={false}
-                className={cn(
-                  "tap inline-flex min-h-11 items-center border px-4 text-small",
-                  picksActive ? "border-ink bg-ink text-ivory" : "border-line text-mute",
-                )}
+                className="tgl"
+                aria-pressed={picksActive}
               >
-                ✦ Wedoura picks only
+                Wedoura picks only
+                <i />
               </Link>
             </div>
           </div>
-          <FilterSelect
-            param="sort"
-            label="Sort"
-            options={VENDOR_SORTS.map((s) => ({ value: s.value, label: s.label }))}
-            allLabel="Recommended"
-            pathname={pathname}
-            params={params}
-          />
+
+          <div className="sidefoot">
+            <Link href={clearHref} scroll={false} className="clr" onClick={() => setSheetOpen(false)}>
+              Clear all
+            </Link>
+            <button type="button" className="btn" onClick={() => setSheetOpen(false)}>
+              Show vendors
+            </button>
+          </div>
+        </aside>
+
+        <div className="tools">
+          <button type="button" className="fbtn" id="fOpen" onClick={() => setSheetOpen(true)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
+              <circle cx="16" cy="6" r="2" />
+              <circle cx="10" cy="12" r="2" />
+              <circle cx="18" cy="18" r="2" />
+            </svg>
+            Filters
+            <i>{activeCount > 0 ? activeCount : ""}</i>
+          </button>
+
+          <div className="sortw" ref={sortRef}>
+            <button
+              type="button"
+              className="sortb"
+              aria-haspopup="menu"
+              aria-expanded={sortOpen}
+              onClick={() => {
+                setSortOpen((v) => !v);
+                setOpenGroup(null);
+              }}
+            >
+              Sort: <b>{sortLabel}</b>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {sortOpen ? (
+              <div className="sortm" role="menu">
+                <Link
+                  href={patchedHref(pathname, params, { sort: null, show: null })}
+                  scroll={false}
+                  role="menuitem"
+                  data-active={!sortValue ? "true" : undefined}
+                  onClick={() => setSortOpen(false)}
+                >
+                  Recommended
+                </Link>
+                {VENDOR_SORTS.filter((s) => s.value !== "featured").map((s) => (
+                  <Link
+                    key={s.value}
+                    href={patchedHref(pathname, params, { sort: s.value, show: null })}
+                    scroll={false}
+                    role="menuitem"
+                    data-active={sortValue === s.value ? "true" : undefined}
+                    onClick={() => setSortOpen(false)}
+                  >
+                    {s.label}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <div className="view" role="group" aria-label="Layout">
+            <Link
+              href={patchedHref(pathname, params, { view: "list" })}
+              scroll={false}
+              aria-label="List view"
+              aria-pressed={view === "list"}
+            >
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="7" />
+                <rect x="3" y="13" width="18" height="7" />
+              </svg>
+            </Link>
+            <Link
+              href={patchedHref(pathname, params, { view: "grid" })}
+              scroll={false}
+              aria-label="Grid view"
+              aria-pressed={view === "grid"}
+            >
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="8" height="8" />
+                <rect x="13" y="3" width="8" height="8" />
+                <rect x="3" y="13" width="8" height="8" />
+                <rect x="13" y="13" width="8" height="8" />
+              </svg>
+            </Link>
+          </div>
         </div>
-        {clearHref ? (
-          <Link
-            href={clearHref}
-            scroll={false}
-            onClick={() => setSheetOpen(false)}
-            className="link-draw mt-6 inline-block text-small text-ink"
-          >
-            Clear all filters
-          </Link>
-        ) : null}
-        <button
-          type="button"
-          onClick={() => setSheetOpen(false)}
-          className="tap mt-5 w-full min-h-12 bg-ink font-sans text-button font-medium tracking-button text-ivory uppercase"
-        >
-          Show vendors
-        </button>
-      </BottomSheet>
+      </div>
+
+      <div
+        className="fbg"
+        id="fbg"
+        hidden={!sheetOpen}
+        onClick={() => setSheetOpen(false)}
+        aria-hidden
+      />
+
+      {/* Results line + chips live in VendorBrowse; chips helper exported via props render below when used inline */}
+      {chips.length > 0 ? (
+        <div className="vh" aria-hidden>
+          {/* chips rendered in results cline by VendorBrowse using same params */}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/** Removable filter chips for the results line. */
+export function VendorFilterChips({
+  pathname,
+  params,
+  cityName,
+  categoryName,
+  pinnedCategory,
+}: {
+  pathname: string;
+  params: ParamRecord;
+  cityName?: string;
+  categoryName?: string;
+  pinnedCategory?: string;
+}) {
+  const chips: { label: string; href: string; key: string }[] = [];
+
+  if (params.category && !pinnedCategory && categoryName) {
+    chips.push({
+      label: categoryName,
+      key: "cat",
+      href: patchedHref(pathname, params, { category: null, show: null }),
+    });
+  }
+  if (params.city && cityName) {
+    chips.push({
+      label: cityName,
+      key: "city",
+      href: patchedHref(pathname, params, { city: null, show: null }),
+    });
+  }
+  if (params.q) {
+    chips.push({
+      label: `“${params.q}”`,
+      key: "q",
+      href: patchedHref(pathname, params, { q: null, show: null }),
+    });
+  }
+  if (params.budget) {
+    const label = BUDGET_LABEL[params.budget] ?? params.budget;
+    chips.push({
+      label,
+      key: "budget",
+      href: patchedHref(pathname, params, { budget: null, show: null }),
+    });
+  }
+  if (params.style) {
+    for (const s of params.style.split(",").filter(Boolean)) {
+      chips.push({ label: s, key: `style:${s}`, href: toggleStyle(params, s, pathname) });
+    }
+  }
+  if (params.travel === "1") {
+    chips.push({
+      label: "Travels for destination weddings",
+      key: "travel",
+      href: patchedHref(pathname, params, { travel: null, show: null }),
+    });
+  }
+  if (params.picks === "1") {
+    chips.push({
+      label: "Wedoura picks",
+      key: "picks",
+      href: patchedHref(pathname, params, { picks: null, show: null }),
+    });
+  }
+
+  if (chips.length === 0) return null;
+
+  const clearHref = clearedHref(pathname, params, [
+    "q",
+    "category",
+    "city",
+    "budget",
+    "style",
+    "travel",
+    "picks",
+    "show",
+  ]);
+
+  return (
+    <div className="chips">
+      {chips.map((c) => (
+        <Link key={c.key} href={c.href} scroll={false} className="chip">
+          {c.label}
+        </Link>
+      ))}
+      <Link href={clearHref} scroll={false} className="clr">
+        Clear all
+      </Link>
     </div>
   );
 }

@@ -1,15 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { VendorFilters } from "@/components/browse/VendorFilters";
-import { VendorListCard } from "@/components/browse/VendorListCard";
+import { VendorFilterChips, VendorFilters } from "@/components/browse/VendorFilters";
 import { VendorsChrome } from "@/components/browse/VendorsChrome";
-import { LoadMore } from "@/components/browse/LoadMore";
-import { SearchPill } from "@/components/browse/SearchPill";
-import { VendorTile } from "@/components/cards/VendorTile";
+import { VendorsFindBar } from "@/components/browse/vendors/VendorsFindBar";
+import { VendorsGridCard } from "@/components/browse/vendors/VendorsGridCard";
+import { VendorsHelpCard } from "@/components/browse/vendors/VendorsHelpCard";
+import { VendorsJoinBand } from "@/components/browse/vendors/VendorsJoinBand";
+import { VendorsListEntry } from "@/components/browse/vendors/VendorsListEntry";
+import { VendorsReveal } from "@/components/browse/vendors/VendorsReveal";
 import { DemoVendorCards } from "@/components/profile/DemoVendorCards";
-import { Container } from "@/components/ui/Container";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { JoinBand } from "@/components/ui/JoinBand";
 import {
   budgetToRange,
   listAllCategories,
@@ -25,16 +24,11 @@ import { patchedHref, type ParamRecord } from "@/lib/url";
 const PAGE = 6;
 
 export type VendorBrowseProps = {
-  /** The route rendering the directory; hrefs are patched onto it. */
   pathname: string;
-  /** The picked query params. */
   params: ParamRecord;
-  /** Filters fixed by the route (category-in-city pages); they are applied
-   *  but not shown as removable filter controls. */
   pinned?: { category?: string; city?: string };
   heading?: ReactNode[];
   intro?: string;
-  /** Clear-filters target (bare route). */
   clearPathname?: string;
 };
 
@@ -90,41 +84,37 @@ export async function VendorBrowse({
     ["q", "category", "city", "budget", "style", "travel", "picks"].filter((k) => params[k]).length +
     fieldKeys.filter((k) => params[k]).length;
 
-  // Determine H1 heading copy (React nodes so <em> works with MaskedHeading)
   let headingLines: React.ReactNode[];
-  let lede: string;
+  const lede =
+    intro ??
+    "Hand-picked photographers, planners, venues and more — with real work and open prices.";
+
   if (heading) {
     headingLines = heading;
-    lede = intro ?? "Hand-picked photographers, planners, venues and more — with real work and open prices.";
   } else if (!activeCategorySlug) {
     headingLines = [
       <span key="headline">
         Find your <em>vendors</em>
       </span>,
     ];
-    lede = "Hand-picked photographers, planners, venues and more — with real work and open prices.";
   } else {
     const catName = activeCategory?.name ?? activeCategorySlug;
-    const allCitiesData = await listAllCities();
-    const cityObj = allCitiesData.find((c) => c.slug === activeCitySlug);
+    const cityObj = allCities.find((c) => c.slug === activeCitySlug);
     if (activeCitySlug && cityObj) {
       headingLines = [
         <span key="headline">
           {catName} in <em>{cityObj.name}</em>
         </span>,
       ];
-      lede = `Based in or serving ${cityObj.name}.`;
     } else {
       headingLines = [
         <span key="headline">
           {catName} <em>across India</em>
         </span>,
       ];
-      lede = activeCategory?.description ?? "Hand-picked vendors with real work and open prices.";
     }
   }
 
-  // Category × city combo links
   let comboLinks: Awaited<ReturnType<typeof listCategoryCityPairs>> = [];
   let comboLabel = "";
   if (pinned.category && pinned.city) {
@@ -139,99 +129,94 @@ export async function VendorBrowse({
     comboLabel = params.category ? "This category by city" : "This city by category";
   }
 
-  // Breadcrumb city name (pinned category-in-city pages)
-  const crumbCityName = activeCitySlug ? allCities.find((c) => c.slug === activeCitySlug)?.name : undefined;
-
-  // Count line copy
+  const crumbCityName = activeCitySlug
+    ? allCities.find((c) => c.slug === activeCitySlug)?.name
+    : undefined;
   const locationTag = activeCitySlug
-    ? cities.find((c) => c.slug === activeCitySlug)?.name ?? ""
+    ? (cities.find((c) => c.slug === activeCitySlug)?.name ?? crumbCityName ?? "")
     : null;
+
+  const noun = activeCategory
+    ? activeCategory.name.toLowerCase()
+    : result.total === 1
+      ? "vendor"
+      : "vendors";
+  const whereEm = locationTag ? `in ${locationTag}` : "across India";
+
+  const clearHref = clearPathname ?? pathname;
+  const progress = result.total > 0 ? Math.min(100, (result.items.length / result.total) * 100) : 0;
 
   return (
     <VendorsChrome>
-      <main>
-        {/* ---------------------------------------------------------------- hero (ivory, matches reference) */}
-        <div className="bg-ivory">
-          <Container className="pb-8 pt-10 md:pt-14 md:pb-10 xl:pt-16">
-            <nav aria-label="Breadcrumb" className="mb-6">
-              <ol className="flex items-center gap-2 font-sans text-[0.8125rem] text-mute">
-                <li>
-                  <Link href="/" className="transition-chrome hover:text-ink">
-                    Home
-                  </Link>
-                </li>
-                <li aria-hidden="true">/</li>
-                {activeCategorySlug ? (
+      <main className="vendors-dir">
+        <section className="vhead">
+          <nav className="crumb" aria-label="Breadcrumb">
+            <Link href="/">Home</Link>
+            <span aria-hidden="true">/</span>
+            {activeCategorySlug ? (
+              <>
+                <Link href="/vendors">Vendors</Link>
+                <span aria-hidden="true">/</span>
+                {pinned.city && crumbCityName ? (
                   <>
-                    <li>
-                      <Link href="/vendors" className="transition-chrome hover:text-ink">
-                        Vendors
-                      </Link>
-                    </li>
-                    <li aria-hidden="true">/</li>
-                    {pinned.city && crumbCityName ? (
-                      <>
-                        <li>
-                          <Link
-                            href={`/vendors?category=${activeCategorySlug}`}
-                            className="transition-chrome hover:text-ink"
-                          >
-                            {activeCategory?.name ?? activeCategorySlug}
-                          </Link>
-                        </li>
-                        <li aria-hidden="true">/</li>
-                        <li aria-current="page" className="text-ink">
-                          {crumbCityName}
-                        </li>
-                      </>
-                    ) : (
-                      <li aria-current="page" className="text-ink">
-                        {activeCategory?.name ?? activeCategorySlug}
-                      </li>
-                    )}
+                    <Link href={`/vendors?category=${activeCategorySlug}`}>
+                      {activeCategory?.name ?? activeCategorySlug}
+                    </Link>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">{crumbCityName}</span>
                   </>
                 ) : (
-                  <li aria-current="page" className="text-ink">
-                    Vendors
-                  </li>
+                  <span aria-current="page">{activeCategory?.name ?? activeCategorySlug}</span>
                 )}
-              </ol>
-            </nav>
+              </>
+            ) : (
+              <span aria-current="page">Vendors</span>
+            )}
+          </nav>
 
-            <h1 className="max-w-3xl font-serif text-[clamp(2.75rem,5.2vw,4.75rem)] leading-[1.02] text-ink">
-              {headingLines.map((line, i) => (
-                <span key={i} className="block">
-                  {line}
-                </span>
-              ))}
-            </h1>
-            <p className="mt-5 max-w-[36em] text-[1.1875rem] leading-relaxed text-mute">{lede}</p>
-          </Container>
+          <h1>
+            {headingLines.map((line, i) => (
+              <span key={i}>{line}</span>
+            ))}
+          </h1>
+          <p className="lead">{lede}</p>
+        </section>
 
-          <div className="container-site pb-6">
-            <SearchPill
-              cities={allCities}
-              categoryGroups={categoryGroups}
-              city={activeCitySlug}
-              category={activeCategorySlug}
-              nameSearch
-              q={params.q}
-            />
-          </div>
-        </div>
-
-        {/* ---------------------------------------------------------------- filter bar */}
-        <VendorFilters
-          pathname={pathname}
-          params={params}
-          total={result.total}
-          activeCount={activeCount}
+        <VendorsFindBar
+          pathname="/vendors"
+          params={{
+            ...params,
+            ...(activeCategorySlug ? { category: activeCategorySlug } : {}),
+            ...(activeCitySlug ? { city: activeCitySlug } : {}),
+          }}
+          cities={allCities.map((c) => ({ slug: c.slug, name: c.name }))}
+          categoryGroups={categoryGroups.map((g) => ({
+            group: g.group,
+            categories: g.categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon })),
+          }))}
+          categories={categories}
+          city={activeCitySlug}
+          category={activeCategorySlug}
+          q={params.q}
         />
 
-        {/* ---------------------------------------------------------------- category × city combo links */}
-        {comboLinks.length > 0 && (
-          <Container className="pt-6 pb-2">
-            <ul className="flex flex-wrap gap-x-6 gap-y-2" aria-label={comboLabel}>
+        <div className="vbody">
+          <VendorFilters
+            pathname={pathname}
+            categoryPathname="/vendors"
+            params={{
+              ...params,
+              ...(activeCategorySlug ? { category: activeCategorySlug } : {}),
+              ...(activeCitySlug ? { city: activeCitySlug } : {}),
+            }}
+            total={result.total}
+            activeCount={activeCount}
+            categories={categories.map((c) => ({ slug: c.slug, name: c.name, count: c.count }))}
+            pinnedCategory={pinned.category}
+          />
+
+          {comboLinks.length > 0 ? (
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 px-[var(--vd-side)] pt-6" aria-label={comboLabel}>
               {comboLinks.map((pair) => (
                 <li key={`${pair.category}-${pair.city}`}>
                   <Link
@@ -244,13 +229,10 @@ export async function VendorBrowse({
                 </li>
               ))}
             </ul>
-          </Container>
-        )}
+          ) : null}
 
-        {/* ---------------------------------------------------------------- category field filters */}
-        {fieldDefs.length > 0 && (
-          <Container className="pt-4 pb-2">
-            <div className="flex flex-wrap gap-3">
+          {fieldDefs.length > 0 ? (
+            <div className="flex flex-wrap gap-3 px-[var(--vd-side)] pt-4">
               {fieldDefs.map((def) => {
                 const value = params[def.key] ?? "";
                 return (
@@ -259,7 +241,10 @@ export async function VendorBrowse({
                     {(def.options ?? []).map((o) => (
                       <Link
                         key={o}
-                        href={patchedHref(pathname, params, { [def.key]: value === o ? null : o, show: null })}
+                        href={patchedHref(pathname, params, {
+                          [def.key]: value === o ? null : o,
+                          show: null,
+                        })}
                         scroll={false}
                         className={`tap inline-flex items-center border px-3 py-1 text-small transition-chrome ${
                           value === o
@@ -274,112 +259,110 @@ export async function VendorBrowse({
                 );
               })}
             </div>
-          </Container>
-        )}
+          ) : null}
 
-        {/* ---------------------------------------------------------------- results */}
-        <div className="container-site py-10 md:py-14">
-          {/* Count line */}
-          {result.total > 0 && (
-            <p className="mb-8 text-body text-mute" aria-live="polite">
-              <span className="font-medium text-ink">
-                {`${result.total} vendor${result.total === 1 ? "" : "s"}`}
-              </span>
-              {locationTag ? (
-                <> in <em className="not-italic font-medium text-ink">{locationTag}</em></>
+          <div className="main">
+            <div className="cline">
+              {result.total > 0 ? (
+                <p className="cnt" aria-live="polite">
+                  {result.total} {noun} <em>{whereEm}</em>
+                </p>
+              ) : null}
+              <VendorFilterChips
+                pathname="/vendors"
+                params={{
+                  ...params,
+                  ...(activeCategorySlug ? { category: activeCategorySlug } : {}),
+                  ...(activeCitySlug ? { city: activeCitySlug } : {}),
+                }}
+                cityName={locationTag ?? undefined}
+                categoryName={activeCategory?.name}
+                pinnedCategory={pinned.category}
+              />
+            </div>
+
+            <VendorsReveal className={view === "grid" ? "res grid" : "res"}>
+              {result.items.length === 0 ? (
+                <div className="none">
+                  <h3>
+                    No vendors match <em>yet</em>
+                  </h3>
+                  <p>
+                    Try removing a filter, or ask our planners — we know more vendors than we list.
+                  </p>
+                  <Link href={clearHref} className="btn">
+                    Clear all filters
+                  </Link>
+                </div>
+              ) : view === "grid" ? (
+                <>
+                  {result.items.flatMap((vendor, i) => {
+                    const card = (
+                      <VendorsGridCard
+                        key={vendor.slug}
+                        vendor={vendor}
+                        index={i}
+                        priority={i < 3}
+                      />
+                    );
+                    if (i === 2 && result.total >= 4) {
+                      return [card, <VendorsHelpCard key="help" />];
+                    }
+                    return [card];
+                  })}
+                </>
               ) : (
-                <> across <em className="not-italic font-medium text-ink">India</em></>
+                <>
+                  {result.items.flatMap((vendor, i) => {
+                    const card = (
+                      <VendorsListEntry
+                        key={vendor.slug}
+                        vendor={vendor}
+                        index={i}
+                        priority={i < 3}
+                      />
+                    );
+                    if (i === 2 && result.total >= 4) {
+                      return [card, <VendorsHelpCard key="help" />];
+                    }
+                    return [card];
+                  })}
+                </>
               )}
-              {params.q && (
-                <> matching <em className="not-italic">&ldquo;{params.q}&rdquo;</em></>
-              )}
-            </p>
-          )}
+            </VendorsReveal>
 
-          {result.items.length === 0 ? (
-            <EmptyState
-              title="No vendors match yet"
-              text="Try removing a filter…"
-              action={{
-                label: "Clear all filters",
-                href: clearPathname ?? pathname,
-              }}
+            <DemoListings
+              category={activeCategorySlug}
+              city={activeCitySlug}
+              excludeSlugs={result.items.map((v) => v.slug)}
             />
-          ) : view === "grid" ? (
-            /* ---- Grid view ---- */
-            <ul className="grid grid-cols-2 gap-card-gap lg:grid-cols-3">
-              {result.items.map((vendor, i) => (
-                <li key={vendor.slug}>
-                  <VendorTile
-                    vendor={vendor}
-                    sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 50vw"
-                    priority={i < 3}
-                  />
-                </li>
-              ))}
-            </ul>
-          ) : (
-            /* ---- List view ---- */
-            <ul className="flex flex-col divide-y divide-line">
-              {result.items.map((vendor, i) => (
-                <li key={vendor.slug} className="py-9 first:pt-0">
-                  <VendorListCard vendor={vendor} index={i} priority={i < 3} />
-                  {/* Editorial interrupter after item 3 (if ≥4 results) */}
-                  {i === 2 && result.total >= 4 ? (
-                    <div className="mt-10 border border-line bg-ivory px-8 py-10 text-center">
-                      <p className="label text-gold-deep uppercase tracking-widest">Free planning help</p>
-                      <p className="mt-3 font-serif text-h3 text-ink">
-                        Not sure where to <em>start?</em>
-                      </p>
-                      <p className="mt-3 mx-auto max-w-xs text-body text-mute">
-                        Tell us about your wedding and we&rsquo;ll put together a free shortlist just for you.
-                      </p>
-                      <Link
-                        href="/#plan"
-                        className="mt-6 inline-flex min-h-11 items-center justify-center border border-ink px-7 font-sans text-button font-medium tracking-button uppercase text-ink transition-chrome hover:bg-ink hover:text-ivory tap"
-                      >
-                        Get my free shortlist
-                      </Link>
-                    </div>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
 
-          {/* Demo overlay listings */}
-          <DemoListings
-            category={activeCategorySlug}
-            city={activeCitySlug}
-            excludeSlugs={result.items.map((v) => v.slug)}
-          />
-
-          {/* Show more */}
-          {result.total > result.items.length && (
-            <>
-              <p className="mt-8 text-center text-small text-mute">
-                Showing {result.items.length} of {result.total}
-              </p>
-              <div className="mt-4 text-center">
-                <LoadMore
-                  shown={result.items.length}
-                  total={result.total}
-                  moreHref={patchedHref(pathname, params, { show: String(shown + PAGE) })}
-                  noun="vendors"
-                />
+            {result.total > result.items.length ? (
+              <div className="morew">
+                <div className="bar2">
+                  <i style={{ width: `${progress}%` }} />
+                </div>
+                <p>
+                  Showing {result.items.length} of {result.total}
+                </p>
+                <Link
+                  href={patchedHref(pathname, params, { show: String(shown + PAGE) })}
+                  scroll={false}
+                  className="btn ghostb"
+                >
+                  Show more vendors
+                </Link>
               </div>
-            </>
-          )}
+            ) : null}
+          </div>
         </div>
 
-        {/* ---------------------------------------------------------------- join band */}
-        <JoinBand />
+        <VendorsJoinBand />
       </main>
     </VendorsChrome>
   );
 }
 
-/** Browser-local demo listings overlay. Gone with the backend. */
 async function DemoListings({
   category,
   city,

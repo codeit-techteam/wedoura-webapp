@@ -580,6 +580,15 @@ export interface VendorSummary {
   startingPriceINR?: number;
   priceUnit: PriceUnit;
   cardPhotos: Photo[];
+  /**
+   * Up to 7 photos for the vendors-list film strip: card highlights first,
+   * then portfolio. Public pages never invent photos beyond these.
+   */
+  stripPhotos: Photo[];
+  /** Total visible portfolio photos for “See all N photos”; 0 when empty. */
+  photoCount: number;
+  /** Years active when the vendor filled it in; hidden when absent. */
+  yearsActive?: number;
   /** Round mark on the card; UI falls back to the first card photo. */
   avatar?: Photo;
   featured: boolean;

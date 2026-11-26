@@ -22,6 +22,20 @@ function visiblePhotos(photos: Photo[], pending: Set<string>): Photo[] {
   return photos.filter((p) => !pending.has(p.id));
 }
 
+function stripPhotosFor(listing: VendorListing, pending: Set<string>): Photo[] {
+  const cards = visiblePhotos(listing.cardPhotos, pending);
+  const portfolio = visiblePhotos(listing.portfolio, pending);
+  const seen = new Set<string>();
+  const out: Photo[] = [];
+  for (const photo of [...cards, ...portfolio]) {
+    if (seen.has(photo.id)) continue;
+    seen.add(photo.id);
+    out.push(photo);
+    if (out.length >= 7) break;
+  }
+  return out;
+}
+
 export function listingToSummary(
   listing: VendorListing,
   categories: NamedRef[],
@@ -43,6 +57,12 @@ export function listingToSummary(
     startingPriceINR: listing.startingPriceINR,
     priceUnit: listing.priceUnit,
     cardPhotos: visiblePhotos(listing.cardPhotos, pending),
+    stripPhotos: stripPhotosFor(listing, pending),
+    photoCount: Math.max(
+      visiblePhotos(listing.portfolio, pending).length,
+      visiblePhotos(listing.cardPhotos, pending).length,
+    ),
+    yearsActive: listing.yearsActive,
     avatar: listing.avatar && !pending.has(listing.avatar.id) ? listing.avatar : undefined,
     featured: listing.featured,
     verified: listing.verified,
