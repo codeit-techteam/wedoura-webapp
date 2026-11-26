@@ -41,13 +41,14 @@ export default async function HomePage() {
       listAllCities(),
       listCitiesWithCounts(),
       listFeatured(undefined, 6),
-      listWeddings({ page: 1, limit: 2 }),
+      listWeddings({ page: 1, limit: 8 }),
       listArticles({ limit: 3 }),
       listPartners("home"),
       listCategoriesWithCounts(),
     ]);
 
-  const weddings = weddingsPage.items;
+  const weddings = weddingsPage.items.slice(0, 2);
+  const weddingStrip = weddingsPage.items.slice(2, 8);
   const articles = articlesPage.items;
   const partner = partners[0];
 
@@ -87,7 +88,7 @@ export default async function HomePage() {
       <HomeHow />
 
       {/* 7 · Real weddings (hidden when empty) */}
-      <HomeWeddings weddings={weddings} />
+      <HomeWeddings weddings={weddings} strip={weddingStrip} />
 
       {/* 8 · Featured vendors */}
       <HomeVendors vendors={featured} tabs={vendorTabs} />

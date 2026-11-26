@@ -34,6 +34,20 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-26 · Homepage: Real weddings + Popular vendors save
+
+Done:
+- Real weddings section rebuilt from home reference: two 4:5 story cards (eyebrow, couple heading, excerpt, credit line, Read the story) plus a 6-up cover strip.
+- Popular vendor tiles: corner Save control (shortlist store), gold From ₹…L row, underline category tabs, See all vendors.
+- Announcement strip removed from the public header.
+- Typecheck passes.
+
+Routes to check:
+- `/` Real weddings + Popular vendors
+
+Next up:
+- Visual QA vs home reference; vendors-list film-strip polish if needed.
+
 ### 2026-11-26 · Find Vendors final design (`vendors-final`)
 
 Done:

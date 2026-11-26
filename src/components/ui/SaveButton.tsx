@@ -22,7 +22,11 @@ export function SaveButton({ slug, name, kind = "vendor", tone = "white", classN
   return (
     <button
       type="button"
-      onClick={() => toggleSaved(slug, kind)}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleSaved(slug, kind);
+      }}
       aria-label={isSaved ? `Remove ${name} from saved` : `Save ${name}`}
       aria-pressed={isSaved}
       className={cn(

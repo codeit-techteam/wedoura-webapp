@@ -27,7 +27,7 @@ export function HomeJournal({ articles }: Props) {
           {articles.map((post, i) => (
             <li key={post.slug}>
               <Link href={`/blogs/${post.slug}`} className="group block">
-                <div className="relative aspect-[4/3] overflow-hidden bg-ivory">
+                <div className="relative aspect-[4/5] overflow-hidden bg-ivory">
                   <Image
                     src={post.cover.src}
                     alt={post.cover.alt}
