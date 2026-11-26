@@ -34,6 +34,21 @@ Update this file at the end of every session. Build order follows `docs/referenc
 
 ## Session log
 
+### 2026-11-26 · Find Vendors final design (`vendors-final`)
+
+Done:
+- Extracted `docs/reference/client-v2/vendors-final.html` → `extracted/vendors-final/` + `public/ref/vendors-final/`.
+- Rebuilt `/vendors` (and category/city listing variants) to match the reference: head/breadcrumb, What/Where/name search, category tiles with published counts, sticky filters (no Rating), results line + chips, list film-strip cards, 3-col grid, planning help after 3rd, show more (6), empty state, enquiry/shortlist drawers + tray, join band.
+- Page-only components under `src/components/browse/vendors/`; shared homepage cards/SearchPill/JoinBand untouched. Data via `api.ts`; `VendorSummary` gains `stripPhotos`, `photoCount`, `yearsActive`.
+- Verification: lint, typecheck, 90 tests, production build.
+
+Routes to check:
+- `/vendors` at 1440px and 390px (filters, sort, view, show more, enquire, shortlist)
+- `/vendors?category=photography-films&city=jaipur` and a pinned `/vendors/.../...` pair
+
+Next up:
+- Visual QA against the reference; backend.
+
 ### 2026-11-25 · Vendor identity document at signup + Settings
 
 Done:
